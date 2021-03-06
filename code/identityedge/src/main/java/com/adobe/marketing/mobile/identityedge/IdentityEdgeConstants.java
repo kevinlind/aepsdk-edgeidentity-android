@@ -22,14 +22,43 @@ class IdentityEdgeConstants {
         static final String REQUEST_IDENTITY = "com.adobe.eventSource.requestIdentity";
         static final String REQUEST_CONTENT = "com.adobe.eventSource.requestContent";
         static final String RESPONSE_CONTENT = "com.adobe.eventSource.responseContent";
+        static final String RESPONSE_IDENTITY = "com.adobe.eventSource.responseIdentity";
         private EventSource() { }
     }
 
     final class EventType {
         static final String GENERIC_IDENTITY = "com.adobe.eventType.generic.identity";
-        static final String CONFIGURATION = "com.adobe.eventType.configuration";
+        static final String IDENTITY_EDGE = "com.adobe.eventType.identityEdge";
         static final String IDENTITY = "com.adobe.eventType.identity";
         private EventType() { }
+    }
+
+    final class EventNames {
+        static final String IDENTITY_REQUEST_IDENTITY_ECID = "Identity Edge Request ECID";
+        static final String IDENTITY_RESPONSE_CONTENT_ONE_TIME = "Identity Edge Response Content One Time";
+        private EventNames() { }
+    }
+
+    final class EventDataKeys {
+        static final String VISITOR_ID_ECID = "mid";
+        private EventDataKeys() { }
+    }
+
+    final class Namespaces {
+        static final String ECID = "ECID";
+        private Namespaces() { }
+    }
+
+    final class XDMKeys {
+        static final String IDENTITY_MAP = "identityMap";
+        static final String ID = "id";
+        private XDMKeys() { }
+    }
+
+    final class DataStoreKey {
+        static final String DATASTORE_NAME = EXTENSION_NAME;
+        static final String IDENTITY_PROPERTIES = "identity.properties";
+        private DataStoreKey() { }
     }
 
     private IdentityEdgeConstants() {}
