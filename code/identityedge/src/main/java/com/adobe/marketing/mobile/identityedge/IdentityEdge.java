@@ -11,6 +11,10 @@
 
 package com.adobe.marketing.mobile.identityedge;
 
+import com.adobe.marketing.mobile.AdobeCallback;
+import com.adobe.marketing.mobile.AdobeCallbackWithError;
+import com.adobe.marketing.mobile.AdobeError;
+import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.ExtensionError;
 import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.LoggingMode;
@@ -40,5 +44,74 @@ public class IdentityEdge {
                         "There was an error registering the Identity Edge extension: " + extensionError.getErrorName());
             }
         });
+    }
+
+    /**
+     * Returns the Experience Cloud ID. An empty string is returned if the Experience Cloud ID was previously cleared.
+     * @param callback  {@link AdobeCallback} of {@link String} invoked with the Experience Cloud ID
+     *  If an {@link AdobeCallbackWithError} is provided, an {@link AdobeError} can be returned in the
+     *  eventuality of any error that occurred while getting the Experience Cloud ID
+     */
+    public static void getExperienceCloudId(final AdobeCallback<String> callback) {
+        if (callback == null) {
+            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unexpected null callback, provide a callback to retrieve current ECID.");
+            return;
+        }
+
+        final Event event = new Event.Builder(IdentityEdgeConstants.EventNames.IDENTITY_REQUEST_IDENTITY_ECID,
+                IdentityEdgeConstants.EventType.IDENTITY_EDGE,
+                IdentityEdgeConstants.EventSource.REQUEST_IDENTITY).build();
+
+        final ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
+            @Override
+            public void error(final ExtensionError extensionError) {
+                returnError(callback, extensionError);
+                MobileCore.log(LoggingMode.DEBUG, LOG_TAG, String.format("Failed to dispatch %s event: Error : %s.", IdentityEdgeConstants.EventNames.IDENTITY_REQUEST_IDENTITY_ECID,
+                        extensionError.getErrorName()));
+            }
+        };
+
+        MobileCore.dispatchEventWithResponseCallback(event, new AdobeCallback<Event>() {
+            @Override
+            public void call(Event responseEvent) {
+                if (responseEvent == null || responseEvent.getEventData() == null) {
+                    returnError(callback, AdobeError.UNEXPECTED_ERROR);
+                    return;
+                }
+
+                final IdentityMap identityMap = IdentityMap.fromData(responseEvent.getEventData());
+                if (identityMap == null) {
+                    MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Failed to read IdentityMap from response event, invoking error callback with AdobeError.UNEXPECTED_ERROR");
+                    returnError(callback, AdobeError.UNEXPECTED_ERROR);
+                    return;
+                }
+
+                final ECID ecid = identityMap.getFirstECID();
+                if (ecid != null) {
+                    callback.call(ecid.toString());
+                } else {
+                    callback.call("");
+                }
+
+            }
+        }, errorCallback);
+    }
+
+    /**
+     * When an {@link AdobeCallbackWithError} is provided, the fail method will be called with provided {@link AdobeError}.
+     * @param callback should not be null, should be instance of {@code AdobeCallbackWithError}
+     * @param error the {@code AdobeError} returned back in the callback
+     */
+    private static void returnError (final AdobeCallback<String> callback, final AdobeError error) {
+        if (callback == null) {
+            return;
+        }
+
+        final AdobeCallbackWithError<String> adobeCallbackWithError = callback instanceof AdobeCallbackWithError ?
+                (AdobeCallbackWithError<String>) callback : null;
+
+        if (adobeCallbackWithError != null) {
+            adobeCallbackWithError.fail(error);
+        }
     }
 }
