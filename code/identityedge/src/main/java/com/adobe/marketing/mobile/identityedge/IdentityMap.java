@@ -28,7 +28,7 @@ import java.util.Map;
  * @see <a href="https://github.com/adobe/xdm/blob/master/docs/reference/context/identitymap.schema.md">IdentityMap Schema</a>
  */
 @SuppressWarnings("unused")
-class IdentityMap {
+public class IdentityMap {
     private static final String LOG_TAG = "IdentityMap";
 
     private static final String JSON_KEY_ID = "id";
@@ -69,10 +69,11 @@ class IdentityMap {
 
     /**
      * Gets the IdentityItem for the namespace
+     *
      * @param namespace namespace for the id
      * @return IdentityItem for the namespace, null if not found
      */
-    List<Map<String, Object>> getIdentityItemForNamespace(final String namespace) {
+    List<Map<String, Object>> getIdentityItemsForNamespace(final String namespace) {
         return identityItems.get(namespace);
     }
 
@@ -81,12 +82,11 @@ class IdentityMap {
      * with digital experiences.
      *
      * @param namespace the namespace integration code or namespace ID of the identity
-     * @param id identity of the consumer in the related namespace
-     * @param state the state this identity is authenticated as for this observed ExperienceEvent.
-     *              Default is {@link AuthenticationState.AMBIGUOUS}.
-     * @param primary Indicates this identity is the preferred identity. Is used as a hint to help
-     *                systems better organize how identities are queried. Default is false.
-     *
+     * @param id        identity of the consumer in the related namespace
+     * @param state     the state this identity is authenticated as for this observed ExperienceEvent.
+     *                  Default is {@link AuthenticationState#AMBIGUOUS}.
+     * @param primary   Indicates this identity is the preferred identity. Is used as a hint to help
+     *                  systems better organize how identities are queried. Default is false.
      * @see <a href="https://github.com/adobe/xdm/blob/master/docs/reference/context/identityitem.schema.md">IdentityItem Schema</a>
      */
     void addItem(final String namespace, final String id, final AuthenticationState state, final boolean primary) {
@@ -117,8 +117,7 @@ class IdentityMap {
      * with digital experiences. Uses default authentication state and primary as defined by the Experience Platform.
      *
      * @param namespace the namespace integration code or namespace ID of the identity
-     * @param id identity of the consumer in the related namespace
-     *
+     * @param id        identity of the consumer in the related namespace
      * @see <a href="https://github.com/adobe/xdm/blob/master/docs/reference/context/identityitem.schema.md">IdentityItem Schema</a>
      */
     void addItem(final String namespace, final String id) {
@@ -157,17 +156,30 @@ class IdentityMap {
         return identityItems;
     }
 
+    /**
+     * Use this method to cast the {@code IdentityMap} as eventData for an SDK Event.
+     *
+     * @return {@link Map<String,Object>} representation of IdentityMap
+     */
+    Map<String, Object> asEventData() {
+        return new HashMap<String, Object>(identityItems);
+    }
+
     static IdentityMap fromData(Map<String, Object> data) {
-        if (data == null) { return null; }
+        if (data == null) {
+            return null;
+        }
         final Map<String, Object> identityMapDict = (HashMap<String, Object>) data.get(IdentityEdgeConstants.XDMKeys.IDENTITY_MAP);
-        if (identityMapDict == null) { return null; }
+        if (identityMapDict == null) {
+            return null;
+        }
 
         final IdentityMap identityMap = new IdentityMap();
 
         for (String namespace : identityMapDict.keySet()) {
             try {
                 final ArrayList<HashMap<String, Object>> idArr = (ArrayList<HashMap<String, Object>>) identityMapDict.get(namespace);
-                for (Object idMap: idArr) {
+                for (Object idMap : idArr) {
                     identityMap.addItemToMap(namespace, (Map<String, Object>) idMap);
                 }
             } catch (ClassCastException e) {
@@ -180,13 +192,18 @@ class IdentityMap {
 
     /**
      * Reads the ECID from an IdentityMap
+     *
      * @return ECID stored in the IdentityMap or null if not found
      */
     ECID getFirstECID() {
-        final List<Map<String, Object>> ecidArr = getIdentityItemForNamespace(IdentityEdgeConstants.Namespaces.ECID);
-        if (ecidArr == null) { return null; }
+        final List<Map<String, Object>> ecidArr = getIdentityItemsForNamespace(IdentityEdgeConstants.Namespaces.ECID);
+        if (ecidArr == null) {
+            return null;
+        }
         final Map<String, Object> ecidDict = ecidArr.get(0);
-        if (ecidDict == null) { return null; }
+        if (ecidDict == null) {
+            return null;
+        }
         String ecidStr = null;
         try {
             ecidStr = (String) ecidDict.get(IdentityEdgeConstants.XDMKeys.ID);
@@ -194,7 +211,9 @@ class IdentityMap {
             MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Failed to create read ECID from IdentityMap");
         }
 
-        if (ecidStr == null) { return null; }
+        if (ecidStr == null) {
+            return null;
+        }
         return new ECID(ecidStr);
     }
 }
