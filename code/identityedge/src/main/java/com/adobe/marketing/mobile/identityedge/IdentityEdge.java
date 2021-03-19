@@ -109,7 +109,7 @@ public class IdentityEdge {
      * @param identityMap The identifiers to add or update.
      */
     public static void updateIdentities(final IdentityMap identityMap) {
-        if (identityMap == null || identityMap.toObjectMap().isEmpty()) {
+        if (identityMap == null || identityMap.isEmpty()) {
             MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unable to updateIdentities, IdentityMap is null or empty");
             return;
         }
@@ -130,7 +130,45 @@ public class IdentityEdge {
     }
 
     /**
+     * Removes the identity from the stored client-side {@link IdentityMap} and XDM shared state. The IdentityEdge extension will stop sending this identifier.
+     * This does not clear the identifier from the User Profile Graph.
+     * Identifiers which have an empty `id` or empty `namespace` are not allowed and are ignored.
+     *
+     * @param item {@link IdentityItem} representing the identity to remove.
+     * @param namespace The namespace the identity to remove is under.
+     */
+    public static void removeIdentity(final IdentityItem item, final String namespace) {
+        if (Utils.isNullOrEmpty(namespace)) {
+            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unable to removeIdentity, namespace is null or empty");
+            return;
+        }
+
+        if (item == null) {
+            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unable to removeIdentity, IdentityItem is null");
+            return;
+        }
+
+        IdentityMap identityMap = new IdentityMap();
+        identityMap.addItem(item, namespace);
+
+        final ExtensionErrorCallback<ExtensionError> errorCallback = new ExtensionErrorCallback<ExtensionError>() {
+            @Override
+            public void error(final ExtensionError extensionError) {
+                MobileCore.log(LoggingMode.DEBUG, LOG_TAG, String.format("removeIdentity API. Failed to dispatch %s event: Error : %s.", IdentityEdgeConstants.EventNames.REMOVE_IDENTITIES,
+                        extensionError.getErrorName()));
+            }
+        };
+
+
+        final Event removeIdentitiesEvent = new Event.Builder(IdentityEdgeConstants.EventNames.REMOVE_IDENTITIES,
+                IdentityEdgeConstants.EventType.EDGE_IDENTITY,
+                IdentityEdgeConstants.EventSource.REMOVE_IDENTITY).setEventData(identityMap.asEventData()).build();
+        MobileCore.dispatchEvent(removeIdentitiesEvent, errorCallback);
+    }
+
+    /**
      * Returns all identifiers, including customer identifiers which were previously added.
+     *
      * @param callback {@link AdobeCallback} invoked with the current {@link IdentityMap}
      *                 If an {@link AdobeCallbackWithError} is provided, an {@link AdobeError} can be returned in the
      *                 eventuality of any error that occurred while getting the stored identities.

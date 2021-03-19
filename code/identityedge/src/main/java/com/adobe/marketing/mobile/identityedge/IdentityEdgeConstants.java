@@ -61,12 +61,16 @@ class IdentityEdgeConstants {
 
     final class Namespaces {
         static final String ECID = "ECID";
+        static final String IDFA = "IDFA";
+        static final String GAID = "GAID";
         private Namespaces() { }
     }
 
     final class XDMKeys {
         static final String IDENTITY_MAP = "identityMap";
         static final String ID = "id";
+        static final String AUTHENTICATED_STATE = "authenticatedState";
+        static final String PRIMARY = "primary";
         private XDMKeys() { }
     }
 

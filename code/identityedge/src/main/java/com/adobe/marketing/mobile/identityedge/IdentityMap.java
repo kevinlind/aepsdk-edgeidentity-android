@@ -30,34 +30,90 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class IdentityMap {
     private static final String LOG_TAG = "IdentityMap";
-
     private final Map<String, List<IdentityItem>> identityItems = new HashMap<>();
 
     /**
      * Gets the {@link IdentityItem}s for the namespace
+     * returns an empty list if no {@link IdentityItem}s were found for the namespace
      *
      * @param namespace namespace for the id
-     * @return IdentityItem for the namespace, null if not found
+     * @return IdentityItem for the namespace,
      */
-    public List<IdentityItem> getIdentityItemsForNamespace(final String namespace) {
-        final List<IdentityItem> items = new ArrayList<>();
-        for (IdentityItem item : identityItems.get(namespace)) {
-            items.add(new IdentityItem((item)));
+    public List<IdentityItem>  getIdentityItemsForNamespace(final String namespace) {
+        final List<IdentityItem> copyItems = new ArrayList<>();
+        if(Utils.isNullOrEmpty(namespace)) {
+            return copyItems;
         }
 
-        return identityItems.get(namespace);
+        final List<IdentityItem> items = identityItems.get(namespace);
+        if (items == null) {
+            return copyItems;
+        }
+
+        for (IdentityItem item : items) {
+            copyItems.add(new IdentityItem(item));
+        }
+
+        return copyItems;
     }
+
 
     /**
      * Add an identity item which is used to clearly distinguish entities that are interacting
      * with digital experiences.
      *
+     * @param item      {@link IdentityItem} to be added to the namespace
      * @param namespace the namespace integration code or namespace ID of the identity
-     * @param item {@link IdentityItem} to be added to the namespace
-     *
      * @see <a href="https://github.com/adobe/xdm/blob/master/docs/reference/context/identityitem.schema.md">IdentityItem Schema</a>
      */
-    public void addItem(final String namespace, final IdentityItem item) {
+    public void addItem(final IdentityItem item, final String namespace) {
+        addItem(item, namespace, false);
+    }
+
+    /**
+     * Remove a single {@link IdentityItem} from this map.
+     *
+     * @param item      {@link IdentityItem} to be added to the namespace
+     * @param namespace The {@code IdentityItem} to remove from the given namespace
+     */
+    public void removeItem(final IdentityItem item, final String namespace) {
+        if (item == null) {
+            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityMap remove item ignored as must contain a non-null IdentityItem.");
+            return;
+        }
+
+        if (Utils.isNullOrEmpty(namespace)) {
+            MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
+                    "IdentityMap remove item ignored as must contain a non-null/non-empty namespace.");
+            return;
+        }
+
+        removeItemFromMap(item, namespace);
+    }
+
+    /**
+     * Determines if this {@link IdentityMap} has no identities.
+     *
+     * @return {@code true} if this {@code IdentityMap} contains no identifiers
+     */
+    public boolean isEmpty() {
+        return identityItems.isEmpty();
+    }
+
+    // ========================================================================================
+    // protected methods
+    // ========================================================================================
+
+    /**
+     * Add an identity item which is used to clearly distinguish entities that are interacting
+     * with digital experiences.
+     *
+     * @param item      {@link IdentityItem} to be added to the namespace
+     * @param namespace the namespace integration code or namespace ID of the identity
+     * @param isFirstItem on {@code true} keeps the provided {@code IdentityItem} as the first element of the identity list for this namespace
+     * @see <a href="https://github.com/adobe/xdm/blob/master/docs/reference/context/identityitem.schema.md">IdentityItem Schema</a>
+     */
+    void addItem(final IdentityItem item, final String namespace, final boolean isFirstItem) {
         if (item == null) {
             MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityMap add item ignored as must contain a non-null IdentityItem.");
             return;
@@ -69,30 +125,20 @@ public class IdentityMap {
             return;
         }
 
-        addItemToMap(namespace, item);
+        addItemToMap(item, namespace, isFirstItem);
     }
 
-    private void addItemToMap(final String namespace, final IdentityItem item) {
-        // check if namespace exists
-        final List<IdentityItem> itemList;
 
-        if (identityItems.containsKey(namespace)) {
-            itemList = identityItems.get(namespace);
-        } else {
-            itemList = new ArrayList<>();
-        }
-
-        itemList.add(item);
-        this.identityItems.put(namespace, itemList);
-    }
-
+    /**
+     * @return a {@link Map} representing this {@link IdentityMap} object
+     */
     Map<String, List<Map<String, Object>>> toObjectMap() {
-        final Map<String, List<Map<String, Object>>> map = new HashMap<String, List<Map<String, Object>>>();
+        final Map<String, List<Map<String, Object>>> map = new HashMap<>();
 
         for (String namespace : identityItems.keySet()) {
             final List<Map<String, Object>> namespaceIds = new ArrayList<>();
 
-            for(IdentityItem identityItem: identityItems.get(namespace)) {
+            for (IdentityItem identityItem : identityItems.get(namespace)) {
                 namespaceIds.add(identityItem.toObjectMap());
             }
 
@@ -100,6 +146,68 @@ public class IdentityMap {
         }
 
         return map;
+    }
+
+    /**
+     * Merge the given map on to this {@link IdentityMap}. Any {@link IdentityItem} in map which shares the same
+     * namespace and id as an item in this {@code IdentityMap} will replace that {@code IdentityItem}.
+     *
+     * @param map {@link IdentityMap} to be merged into this object
+     */
+    void merge(final IdentityMap map) {
+        if (map == null) {
+            return;
+        }
+
+        for (final String namespace : map.identityItems.keySet()) {
+            for (IdentityItem identityItem : map.identityItems.get(namespace)) {
+                addItem(identityItem, namespace);
+            }
+        }
+    }
+
+    /**
+     * Remove identities present in passed in map from this {@link IdentityMap}.
+     * Identities are removed which match the same namespace and id.
+     *
+     * @param map Identities to remove from this {@code IdentityMap}
+     */
+    void remove(final IdentityMap map) {
+        if (map == null) {
+            return;
+        }
+
+        for (final String namespace : map.identityItems.keySet()) {
+            for (IdentityItem identityItem : map.identityItems.get(namespace)) {
+                removeItem(identityItem, namespace);
+            }
+        }
+    }
+
+    /**
+     * Removes all the {@link IdentityItem} on this {@link IdentityMap} linked to the specified namespace (case insensitive)
+     *
+     * @return a {@code boolean} representing a successful removal of all {@code IdentityItem} in a provided namespace
+     */
+    boolean clearItemsForNamespace(final String namespace) {
+        if(namespace == null){
+            return false;
+        }
+
+        boolean isRemoved = false;
+        final List<String> filteredNamespaces = new ArrayList<>();
+        for(final String eachNamespace : identityItems.keySet()) {
+            if (namespace.equalsIgnoreCase(eachNamespace)) {
+                isRemoved = true;
+                filteredNamespaces.add(eachNamespace);
+            }
+        }
+
+        for (final String eachNamespace : filteredNamespaces) {
+            identityItems.remove(eachNamespace);
+        }
+
+        return isRemoved;
     }
 
     /**
@@ -111,6 +219,12 @@ public class IdentityMap {
         return new HashMap<String, Object>(identityItems);
     }
 
+
+    /**
+     * Creates an {@link IdentityMap} from the
+     *
+     * @return {@link Map<String,Object>} representation of IdentityMap
+     */
     static IdentityMap fromData(Map<String, Object> data) {
         if (data == null) {
             return null;
@@ -122,13 +236,13 @@ public class IdentityMap {
 
         final IdentityMap identityMap = new IdentityMap();
 
-        for (String namespace : identityMapDict.keySet()) {
+        for (final String namespace : identityMapDict.keySet()) {
             try {
                 final ArrayList<HashMap<String, Object>> idArr = (ArrayList<HashMap<String, Object>>) identityMapDict.get(namespace);
-                for (Object idMap: idArr) {
+                for (Object idMap : idArr) {
                     final IdentityItem item = IdentityItem.fromData((Map<String, Object>) idMap);
                     if (item != null) {
-                        identityMap.addItemToMap(namespace, item);
+                        identityMap.addItemToMap(item, namespace, false);
                     }
                 }
             } catch (ClassCastException e) {
@@ -137,5 +251,41 @@ public class IdentityMap {
         }
 
         return identityMap;
+    }
+
+    // ========================================================================================
+    // private methods
+    // ========================================================================================
+    private void addItemToMap(final IdentityItem item, final String namespace, final boolean isFirstItem) {
+        // check if namespace exists
+        final List<IdentityItem> itemList;
+
+        if (identityItems.containsKey(namespace)) {
+            itemList = identityItems.get(namespace);
+        } else {
+            itemList = new ArrayList<>();
+        }
+
+        if (isFirstItem) {
+            itemList.add(0, item);
+        } else {
+            itemList.add(item);
+        }
+
+        identityItems.put(namespace, itemList);
+    }
+
+    private void removeItemFromMap(final IdentityItem item, final String namespace) {
+        // check if namespace exists
+        if (!identityItems.containsKey(namespace)) {
+            return;
+        }
+
+        final List<IdentityItem> itemList = identityItems.get(namespace);
+        itemList.remove(item);
+
+        if(itemList.isEmpty()) {
+            identityItems.remove(namespace);
+        }
     }
 }
