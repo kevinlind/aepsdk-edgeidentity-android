@@ -31,15 +31,11 @@ class IdentityEdgeProperties {
         add(IdentityEdgeConstants.Namespaces.IDFA);
     }};
 
-    // The current Experience Cloud ID
-    private ECID ecid;
+    private final IdentityMap identityMap;
 
-    // A secondary (non-primary) Experience Cloud ID
-    private ECID ecidSecondary;
-
-    private IdentityMap identityMap = new IdentityMap();
-
-    IdentityEdgeProperties() { }
+    IdentityEdgeProperties() {
+        this.identityMap = new IdentityMap();
+    }
 
     /**
      * Creates a identity edge properties instance based on the map
@@ -47,22 +43,8 @@ class IdentityEdgeProperties {
      * @param xdmData a map representing an identity edge properties instance
      */
     IdentityEdgeProperties(final Map<String, Object> xdmData) {
-        if (Utils.isNullOrEmpty(xdmData)) {
-            return;
-        }
-
-        identityMap = IdentityMap.fromData(xdmData);
-        if (identityMap != null) {
-            final List<IdentityItem> ecidItems = identityMap.getIdentityItemsForNamespace(IdentityEdgeConstants.Namespaces.ECID);
-            if (ecidItems != null) {
-                if (ecidItems.size() > 0 && ecidItems.get(0) != null && ecidItems.get(0).getId() != null) {
-                    ecid = new ECID(ecidItems.get(0).getId());
-                }
-                if (ecidItems.size() > 1 && ecidItems.get(1) != null && ecidItems.get(1).getId() != null) {
-                    ecidSecondary = new ECID(ecidItems.get(1).getId());
-                }
-            }
-        }
+        IdentityMap map = IdentityMap.fromData(xdmData);
+        this.identityMap = map == null ? new IdentityMap() : map; // always keep an empty identity map so there is no need for null check
     }
 
     /**
@@ -72,8 +54,9 @@ class IdentityEdgeProperties {
      */
     void setECID(final ECID newEcid) {
         // delete the previous ECID from the identity map if exist
-        if (ecid != null) {
-            final IdentityItem previousECIDItem = new IdentityItem(ecid.toString());
+        final ECID currentECID = getECID();
+        if (currentECID != null) {
+            final IdentityItem previousECIDItem = new IdentityItem(currentECID.toString());
             identityMap.removeItem(previousECIDItem, IdentityEdgeConstants.Namespaces.ECID);
         }
 
@@ -83,11 +66,9 @@ class IdentityEdgeProperties {
             identityMap.clearItemsForNamespace(IdentityEdgeConstants.Namespaces.ECID);
         } else {
             // And add the new primary Ecid as a first element of Identity map
-            final IdentityItem newECIDItem = new IdentityItem(newEcid.toString(), AuthenticationState.AMBIGUOUS, false);
+            final IdentityItem newECIDItem = new IdentityItem(newEcid.toString(), AuthenticatedState.AMBIGUOUS, false);
             identityMap.addItem(newECIDItem, IdentityEdgeConstants.Namespaces.ECID, true);
         }
-
-        this.ecid = newEcid; // keep the local variable up to date
     }
 
     /**
@@ -96,7 +77,11 @@ class IdentityEdgeProperties {
      * @return current {@code ECID}
      */
     ECID getECID() {
-        return ecid;
+        final List<IdentityItem> ecidItems = identityMap.getIdentityItemsForNamespace(IdentityEdgeConstants.Namespaces.ECID);
+        if (ecidItems != null && !ecidItems.isEmpty() && ecidItems.get(0) != null && !Utils.isNullOrEmpty(ecidItems.get(0).getId())) {
+            return new ECID(ecidItems.get(0).getId());
+        }
+        return null;
     }
 
     /**
@@ -106,25 +91,23 @@ class IdentityEdgeProperties {
      */
     void setECIDSecondary(final ECID newSecondaryEcid) {
         // delete the previous secondary ECID from the identity map if exist
+        final ECID ecidSecondary = getECIDSecondary();
         if (ecidSecondary != null) {
             final IdentityItem previousECIDItem = new IdentityItem(ecidSecondary.toString());
             identityMap.removeItem(previousECIDItem, IdentityEdgeConstants.Namespaces.ECID);
         }
 
         // do not set secondary ECID if primary ECID is not set
-        if (ecid == null) {
+        if (getECID() == null) {
             MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Cannot set secondary ECID value as no primary ECID exists.");
-            this.ecidSecondary = null;
             return;
         }
 
         // add the new secondary ECID to Identity map
         if (newSecondaryEcid != null) {
-            final IdentityItem newSecondaryECIDItem = new IdentityItem(newSecondaryEcid.toString(), AuthenticationState.AMBIGUOUS, false);
+            final IdentityItem newSecondaryECIDItem = new IdentityItem(newSecondaryEcid.toString(), AuthenticatedState.AMBIGUOUS, false);
             identityMap.addItem(newSecondaryECIDItem, IdentityEdgeConstants.Namespaces.ECID);
         }
-
-        this.ecidSecondary = newSecondaryEcid; // keep the local variable up to date
     }
 
     /**
@@ -133,7 +116,11 @@ class IdentityEdgeProperties {
      * @return secondary {@code ECID}
      */
     ECID getECIDSecondary() {
-        return ecidSecondary;
+        final List<IdentityItem> ecidItems = identityMap.getIdentityItemsForNamespace(IdentityEdgeConstants.Namespaces.ECID);
+        if (ecidItems != null && ecidItems.size() > 1 && ecidItems.get(1) != null && !Utils.isNullOrEmpty(ecidItems.get(1).getId())) {
+            return new ECID(ecidItems.get(1).getId());
+        }
+        return null;
     }
 
     /**
