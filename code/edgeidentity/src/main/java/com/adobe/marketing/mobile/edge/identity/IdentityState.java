@@ -20,7 +20,6 @@ import com.adobe.marketing.mobile.MobileCore;
  */
 class IdentityState {
     private static String LOG_TAG = "IdentityState";
-    private boolean hasBooted = false;
     private IdentityProperties identityProperties;
 
     /**
@@ -39,22 +38,11 @@ class IdentityState {
         return identityProperties;
     }
 
-    /**
-     * @return Returns true if this extension has booted, false otherwise
-     */
-    boolean hasBooted() {
-        return hasBooted;
-    }
 
     /**
      * Completes init for the Identity extension.
-     *
-     * @return True if we should share state after bootup, false otherwise
      */
-    boolean bootupIfReady() {
-        if (hasBooted) {
-            return true;
-        }
+    void bootUp() {
         // Load properties from local storage
         identityProperties = IdentityStorageService.loadPropertiesFromPersistence();
 
@@ -75,9 +63,7 @@ class IdentityState {
             IdentityStorageService.savePropertiesToPersistence(identityProperties);
         }
 
-        hasBooted = true;
         MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Edge Identity has successfully booted up");
-        return true;
     }
 
     /**

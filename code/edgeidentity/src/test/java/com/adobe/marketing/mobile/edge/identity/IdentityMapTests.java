@@ -138,7 +138,7 @@ public class IdentityMapTests {
 
 
     @Test
-    public void test_merge_sameItemDoesNotRepeat() {
+    public void test_merge_sameItem_GetsReplaced() {
         // setup
         IdentityMap baseMap = new IdentityMap();
         baseMap.addItem(new IdentityItem("California", AuthenticatedState.LOGGED_OUT, false),"location");

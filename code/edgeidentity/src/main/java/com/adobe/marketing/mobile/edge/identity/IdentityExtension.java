@@ -72,6 +72,7 @@ class IdentityExtension extends Extension {
         extensionApi.registerEventListener(IdentityConstants.EventType.EDGE_IDENTITY, IdentityConstants.EventSource.REMOVE_IDENTITY, ListenerEdgeIdentityRemoveIdentity.class, listenerErrorCallback);
         extensionApi.registerEventListener(IdentityConstants.EventType.HUB, IdentityConstants.EventSource.SHARED_STATE, ListenerHubSharedState.class, listenerErrorCallback);
         extensionApi.registerEventListener(IdentityConstants.EventType.GENERIC_IDENTITY, IdentityConstants.EventSource.REQUEST_RESET, ListenerIdentityRequestReset.class, listenerErrorCallback);
+        state.bootUp();
     }
 
     /**
@@ -103,10 +104,6 @@ class IdentityExtension extends Extension {
      * @param event the boot {@link Event}
      */
     void handleEventHubBoot(final Event event) {
-        if (!canProcessEvents()) {
-            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unable to process boot event. canProcessEvents returned false.");
-            return;
-        }
 
         // share the initial XDMSharedState on bootUp
         final Map currentIdentities = state.getIdentityProperties().toXDMData(false);
@@ -124,10 +121,6 @@ class IdentityExtension extends Extension {
      * @param event the edge update identity {@link Event}
      */
     void handleUpdateIdentities(final Event event) {
-        if (!canProcessEvents()) {
-            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unable to process update identity event. canProcessEvents returned false.");
-            return;
-        }
         final Map<String, Object> eventData = event.getEventData(); // do not need to null check on eventData, as they are done on listeners
         final IdentityMap map = IdentityMap.fromData(eventData);
         if (map == null) {
@@ -145,10 +138,6 @@ class IdentityExtension extends Extension {
      * @param event the edge remove identity request {@link Event}
      */
     void handleRemoveIdentity(final Event event) {
-        if (!canProcessEvents()) {
-            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unable to process remove identity event. canProcessEvents returned false.");
-            return;
-        }
         final Map<String, Object> eventData = event.getEventData(); // do not need to null check on eventData, as they are done on listeners
         final IdentityMap map = IdentityMap.fromData(eventData);
         if (map == null) {
@@ -172,11 +161,6 @@ class IdentityExtension extends Extension {
      * @param event an event of type {@code com.adobe.eventType.hub} and source {@code com.adobe.eventSource.sharedState}
      */
     void handleHubSharedState(final Event event) {
-        if (!canProcessEvents()) {
-            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unable to process direct Identity shared state change event. canProcessEvents returned false.");
-            return;
-        }
-
         if (event == null || event.getEventData() == null) {
             return;
         }
@@ -217,10 +201,6 @@ class IdentityExtension extends Extension {
      * @param event the identity request {@link Event}
      */
     void handleIdentityRequest(final Event event) {
-        if (!canProcessEvents()) {
-            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unable to process request identities event. canProcessEvents returned false.");
-            return;
-        }
 
         Map<String, Object> xdmData = state.getIdentityProperties().toXDMData(true);
         Event responseEvent = new Event.Builder(IdentityConstants.EventNames.IDENTITY_RESPONSE_CONTENT_ONE_TIME,
@@ -246,10 +226,6 @@ class IdentityExtension extends Extension {
      * @param event the identity request reset {@link Event}
      */
     void handleRequestReset(final Event event) {
-        if (!canProcessEvents()) {
-            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unable to process request reset event. canProcessEvents returned false.");
-            return;
-        }
         state.resetIdentifiers();
         shareIdentityXDMSharedState(event);
 
@@ -313,27 +289,4 @@ class IdentityExtension extends Extension {
         extensionApi.setXDMSharedEventState(state.getIdentityProperties().toXDMData(false), event, errorCallback);
     }
 
-    /**
-     * Determines if this Identity is ready to handle events, this is determined by if the extension has booted up
-     *
-     * @return True if we can process events, false otherwise
-     */
-    private boolean canProcessEvents() {
-        if (state.hasBooted()) {
-            return true;
-        } // we have booted, return true
-
-        final ExtensionApi extensionApi = super.getApi();
-        if (extensionApi == null) {
-            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "ExtensionApi is null, unable to process events");
-            return false;
-        }
-
-        if (state.bootupIfReady()) {
-            extensionApi.setXDMSharedEventState(state.getIdentityProperties().toXDMData(false), null, null);
-            return true;
-        }
-
-        return false; // cannot handle any events until we have booted
-    }
 }
