@@ -133,6 +133,7 @@ public class IdentityMap {
      * @return a {@link Map} representing this {@link IdentityMap} object
      */
     Map<String, List<Map<String, Object>>> toObjectMap() {
+
         final Map<String, List<Map<String, Object>>> map = new HashMap<>();
 
         for (String namespace : identityItems.keySet()) {
@@ -215,8 +216,15 @@ public class IdentityMap {
      *
      * @return {@link Map<String,Object>} representation of IdentityMap
      */
-    Map<String, Object> asEventData() {
-        return new HashMap<String, Object>(identityItems);
+    Map<String, Object> asXDMMap() {
+        final Map<String, Object> xdmData = new HashMap<>();
+
+        final Map<String, List<Map<String, Object>>> identityMap = this.toObjectMap();
+        if (identityMap != null || !identityMap.isEmpty() ) {
+            xdmData.put(IdentityConstants.XDMKeys.IDENTITY_MAP, identityMap);
+        }
+
+        return xdmData;
     }
 
 
@@ -256,7 +264,7 @@ public class IdentityMap {
     // ========================================================================================
     // private methods
     // ========================================================================================
-    private void addItemToMap(final IdentityItem item, final String namespace, final boolean isFirstItem) {
+    private void addItemToMap(final IdentityItem newItem, final String namespace, final boolean isFirstItem) {
         // check if namespace exists
         final List<IdentityItem> itemList;
 
@@ -266,10 +274,16 @@ public class IdentityMap {
             itemList = new ArrayList<>();
         }
 
+        // Check if the item already exist in the current ItemList
+        int index = itemList.indexOf(newItem);
+        if (index >= 0){
+            itemList.add(index,newItem);
+        }
+
         if (isFirstItem) {
-            itemList.add(0, item);
+            itemList.add(0, newItem);
         } else {
-            itemList.add(item);
+            itemList.add(newItem);
         }
 
         identityItems.put(namespace, itemList);

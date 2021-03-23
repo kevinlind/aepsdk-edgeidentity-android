@@ -278,7 +278,7 @@ public class IdentityMapTests {
         IdentityMap map = IdentityMap.fromData(xdmData);
 
         // verify
-        Map<String, String> flattenedMap = IdentityTestUtil.flattenMap(map.asEventData());
+        Map<String, String> flattenedMap = IdentityTestUtil.flattenMap(map.asXDMMap());
         assertEquals("randomECID", flattenedMap.get("ECID[0].id"));
         assertEquals("AMBIGUOUS", flattenedMap.get("ECID[0].authenticatedState"));
         assertEquals("true", flattenedMap.get("ECID[0].primary"));

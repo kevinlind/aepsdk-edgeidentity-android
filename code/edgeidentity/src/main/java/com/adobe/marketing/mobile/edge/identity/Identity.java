@@ -125,7 +125,7 @@ public class Identity {
 
         final Event updateIdentitiesEvent = new Event.Builder(IdentityConstants.EventNames.UPDATE_IDENTITIES,
                 IdentityConstants.EventType.EDGE_IDENTITY,
-                IdentityConstants.EventSource.UPDATE_IDENTITY).setEventData(identityMap.asEventData()).build();
+                IdentityConstants.EventSource.UPDATE_IDENTITY).setEventData(identityMap.asXDMMap()).build();
         MobileCore.dispatchEvent(updateIdentitiesEvent, errorCallback);
     }
 
@@ -162,7 +162,7 @@ public class Identity {
 
         final Event removeIdentitiesEvent = new Event.Builder(IdentityConstants.EventNames.REMOVE_IDENTITIES,
                 IdentityConstants.EventType.EDGE_IDENTITY,
-                IdentityConstants.EventSource.REMOVE_IDENTITY).setEventData(identityMap.asEventData()).build();
+                IdentityConstants.EventSource.REMOVE_IDENTITY).setEventData(identityMap.asXDMMap()).build();
         MobileCore.dispatchEvent(removeIdentitiesEvent, errorCallback);
     }
 

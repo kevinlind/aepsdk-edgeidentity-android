@@ -33,6 +33,8 @@ class IdentityExtension extends Extension {
      * Called during the Identity extension's registration.
      * The following listeners are registered during this extension's registration.
      * <ul>
+     *     <li> Listener {@link ListenerEventHubBoot} to listen for event with eventType {@link IdentityConstants.EventType#HUB}
+     *      and EventSource {@link IdentityConstants.EventSource#BOOTED}</li>
      *     <li> Listener {@link ListenerEdgeIdentityRequestIdentity} to listen for event with eventType {@link IdentityConstants.EventType#EDGE_IDENTITY}
      *     and EventSource {@link IdentityConstants.EventSource#REQUEST_IDENTITY}</li>
      *     <li> Listener {@link ListenerGenericIdentityRequestContent} to listen for event with eventType {@link IdentityConstants.EventType#GENERIC_IDENTITY}
@@ -63,6 +65,7 @@ class IdentityExtension extends Extension {
             }
         };
 
+        extensionApi.registerEventListener(IdentityConstants.EventType.HUB, IdentityConstants.EventSource.BOOTED, ListenerEventHubBoot.class, listenerErrorCallback);
         extensionApi.registerEventListener(IdentityConstants.EventType.EDGE_IDENTITY, IdentityConstants.EventSource.REQUEST_IDENTITY, ListenerEdgeIdentityRequestIdentity.class, listenerErrorCallback);
         extensionApi.registerEventListener(IdentityConstants.EventType.GENERIC_IDENTITY, IdentityConstants.EventSource.REQUEST_CONTENT, ListenerGenericIdentityRequestContent.class, listenerErrorCallback);
         extensionApi.registerEventListener(IdentityConstants.EventType.EDGE_IDENTITY, IdentityConstants.EventSource.UPDATE_IDENTITY, ListenerEdgeIdentityUpdateIdentity.class, listenerErrorCallback);
@@ -89,6 +92,30 @@ class IdentityExtension extends Extension {
     @Override
     protected String getVersion() {
         return IdentityConstants.EXTENSION_VERSION;
+    }
+
+
+    /**
+     * Call this method with the EventHub's Boot event to handle the boot operation of the {@code Identity} Extension.
+     * <p>
+     * On boot share the initial identities loaded from persistence to XDM shared state.
+     *
+     * @param event the boot {@link Event}
+     */
+    void handleEventHubBoot(final Event event) {
+        if (!canProcessEvents()) {
+            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unable to process boot event. canProcessEvents returned false.");
+            return;
+        }
+
+        // share the initial XDMSharedState on bootUp
+        final Map currentIdentities = state.getIdentityProperties().toXDMData(false);
+        if (currentIdentities == null || currentIdentities.isEmpty()) {
+            MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Nothing loaded from persistence for initial Identity XDM shared state on boot");
+            return;
+        }
+
+        shareIdentityXDMSharedState(event);
     }
 
     /**
