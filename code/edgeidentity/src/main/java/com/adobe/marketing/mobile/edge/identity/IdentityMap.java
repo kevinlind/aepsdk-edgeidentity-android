@@ -276,11 +276,9 @@ public class IdentityMap {
 
         // Check if the item already exist in the current ItemList
         int index = itemList.indexOf(newItem);
-        if (index >= 0){
-            itemList.add(index,newItem);
-        }
-
-        if (isFirstItem) {
+        if (index >= 0) {
+            itemList.set(index,newItem);
+        } else if (isFirstItem) {
             itemList.add(0, newItem);
         } else {
             itemList.add(newItem);

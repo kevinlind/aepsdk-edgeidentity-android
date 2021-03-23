@@ -93,7 +93,7 @@ public class IdentityExtensionTests {
         // constructor is called in the setup step()
 
         // verify 2 listeners are registered
-        verify(mockExtensionApi, times(6)).registerEventListener(anyString(),
+        verify(mockExtensionApi, times(7)).registerEventListener(anyString(),
                 anyString(), any(Class.class), any(ExtensionErrorCallback.class));
 
         // verify listeners are registered with correct event source and type
@@ -109,6 +109,8 @@ public class IdentityExtensionTests {
                 eq(IdentityConstants.EventSource.REQUEST_RESET), eq(ListenerIdentityRequestReset.class), callbackCaptor.capture());
         verify(mockExtensionApi, times(1)).registerEventListener(eq(IdentityConstants.EventType.HUB),
                                                                  eq(IdentityConstants.EventSource.SHARED_STATE), eq(ListenerHubSharedState.class), callbackCaptor.capture());
+        verify(mockExtensionApi, times(1)).registerEventListener(eq(IdentityConstants.EventType.HUB),
+                eq(IdentityConstants.EventSource.BOOTED), eq(ListenerEventHubBoot.class), callbackCaptor.capture());
 
         // verify the callback
         ExtensionErrorCallback extensionErrorCallback = callbackCaptor.getValue();

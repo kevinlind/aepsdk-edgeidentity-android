@@ -138,6 +138,26 @@ public class IdentityMapTests {
 
 
     @Test
+    public void test_merge_sameItemDoesNotRepeat() {
+        // setup
+        IdentityMap baseMap = new IdentityMap();
+        baseMap.addItem(new IdentityItem("California", AuthenticatedState.LOGGED_OUT, false),"location");
+
+        // test
+        IdentityMap newMap = new IdentityMap();
+        newMap.addItem(new IdentityItem("California", AuthenticatedState.AUTHENTICATED, true),"location");
+        baseMap.merge(newMap);
+
+        // verify the existing identityMap is unchanged
+        Map<String, String> flattenedMap = IdentityTestUtil.flattenMap(baseMap.asXDMMap());
+        assertEquals(3, flattenedMap.size());
+        assertEquals("California", flattenedMap.get("identityMap.location[0].id"));
+        assertEquals("authenticated", flattenedMap.get("identityMap.location[0].authenticatedState"));
+        assertEquals("true", flattenedMap.get("identityMap.location[0].primary"));
+    }
+
+
+    @Test
     public void test_merge_EmptyIdentityMap() {
         // setup
         IdentityMap sampleUserMap = buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with namespace "Login"
@@ -279,12 +299,12 @@ public class IdentityMapTests {
 
         // verify
         Map<String, String> flattenedMap = IdentityTestUtil.flattenMap(map.asXDMMap());
-        assertEquals("randomECID", flattenedMap.get("ECID[0].id"));
-        assertEquals("AMBIGUOUS", flattenedMap.get("ECID[0].authenticatedState"));
-        assertEquals("true", flattenedMap.get("ECID[0].primary"));
-        assertEquals("someUserID", flattenedMap.get("USERID[0].id"));
-        assertEquals("AUTHENTICATED", flattenedMap.get("USERID[0].authenticatedState"));
-        assertEquals("false", flattenedMap.get("USERID[0].primary"));
+        assertEquals("randomECID", flattenedMap.get("identityMap.ECID[0].id"));
+        assertEquals("ambiguous", flattenedMap.get("identityMap.ECID[0].authenticatedState"));
+        assertEquals("true", flattenedMap.get("identityMap.ECID[0].primary"));
+        assertEquals("someUserID", flattenedMap.get("identityMap.USERID[0].id"));
+        assertEquals("authenticated", flattenedMap.get("identityMap.USERID[0].authenticatedState"));
+        assertEquals("false", flattenedMap.get("identityMap.USERID[0].primary"));
     }
 
 
