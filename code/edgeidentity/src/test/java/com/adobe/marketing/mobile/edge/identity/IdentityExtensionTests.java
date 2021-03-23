@@ -185,6 +185,7 @@ public class IdentityExtensionTests {
         final ArgumentCaptor<Event> requestEventCaptor = ArgumentCaptor.forClass(Event.class);
 
         // test
+        extension = new IdentityExtension(mockExtensionApi);
         extension.handleIdentityRequest(event);
 
         // verify
@@ -515,8 +516,8 @@ public class IdentityExtensionTests {
         assertTrue(eventCaptor.getAllValues().isEmpty());
 
         // verify persistence
-        verify(mockSharedPreferenceEditor, times(2)).putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), persistenceValueCaptor.capture());
-        Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(1));
+        verify(mockSharedPreferenceEditor, times(3)).putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), persistenceValueCaptor.capture());
+        Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(2));
         assertNull(persistedData.get("identityMap.UserId[0].id"));
         assertEquals("token", persistedData.get("identityMap.PushId[0].id"));
     }
@@ -554,8 +555,8 @@ public class IdentityExtensionTests {
 
 
         // verify persistence
-        verify(mockSharedPreferenceEditor, times(1)).putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), persistenceValueCaptor.capture());
-        Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getValue());
+        verify(mockSharedPreferenceEditor, times(2)).putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), persistenceValueCaptor.capture());
+        Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(1));
         assertEquals("someGAID", persistedData.get("identityMap.GAID[0].id"));
         assertEquals("someECID", persistedData.get("identityMap.ECID[0].id"));
         assertEquals("someIDFA", persistedData.get("identityMap.IDFA[0].id"));
@@ -580,7 +581,7 @@ public class IdentityExtensionTests {
         verify(mockExtensionApi, times(0)).setXDMSharedEventState(any(Map.class), eq(removeIdentityEvent), any(ExtensionErrorCallback.class));
 
         // verify persistence
-        verify(mockSharedPreferenceEditor, times(1)).putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), anyString());
+        verify(mockSharedPreferenceEditor, times(2)).putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), anyString());// once during constructor and other during remove IdentityEvent
     }
 
 

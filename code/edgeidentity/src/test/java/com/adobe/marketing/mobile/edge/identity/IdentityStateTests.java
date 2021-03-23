@@ -70,11 +70,10 @@ public class IdentityStateTests {
         assertNull(state.getIdentityProperties().getECID());
 
         // test
-        boolean result = state.bootupIfReady();
+        state.bootUp();
         verify(mockSharedPreferenceEditor, Mockito.times(1)).apply(); // saves to data store
 
         // verify
-        assertTrue(result);
         assertNotNull(state.getIdentityProperties().getECID());
     }
 
@@ -89,11 +88,10 @@ public class IdentityStateTests {
         assertNull(state.getIdentityProperties().getECID());
 
         // test
-        boolean result = state.bootupIfReady();
+        state.bootUp();
         verify(mockSharedPreferenceEditor, Mockito.times(1)).apply(); // saves to data store
 
         // verify
-        assertTrue(result);
         assertEquals(ecid, state.getIdentityProperties().getECID());
     }
 
@@ -107,11 +105,10 @@ public class IdentityStateTests {
         assertNull(state.getIdentityProperties().getECID());
 
         // test
-        boolean result = state.bootupIfReady();
+        state.bootUp();
         verify(mockSharedPreferenceEditor, Mockito.times(1)).apply(); // saves to data store
 
         // verify
-        assertTrue(result);
         assertNotNull(state.getIdentityProperties().getECID());
     }
 
@@ -127,11 +124,10 @@ public class IdentityStateTests {
         Mockito.when(mockSharedPreference.getString(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null)).thenReturn(propsJSON);
 
         // test
-        boolean result = state.bootupIfReady();
+        state.bootUp();
         verify(mockSharedPreferenceEditor, never()).apply();
 
         // verify
-        assertTrue(result);
         assertEquals(persistedProps.getECID().toString(), state.getIdentityProperties().getECID().toString());
     }
 
@@ -151,11 +147,10 @@ public class IdentityStateTests {
         Mockito.when(mockSharedPreference.getString(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null)).thenReturn(propsJSON);
 
         // test
-        boolean result = state.bootupIfReady();
+        state. bootUp();
         verify(mockSharedPreferenceEditor, never()).apply();
 
         // verify
-        assertTrue(result);
         assertEquals(persistedProps.getECID(), state.getIdentityProperties().getECID());
     }
 
