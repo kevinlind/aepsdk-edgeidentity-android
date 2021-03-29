@@ -57,6 +57,14 @@ public class IdentityMap {
         return copyItems;
     }
 
+    /**
+     * Returns a list of all the namespaces contained in this {@code IdentityMap}.
+     *
+     * @return a list of all the namespaces for this {@link IdentityMap}, or an empty string if this {@code IdentityMap} is empty
+     */
+    public List<String> getNamespaces() {
+        return new ArrayList(identityItems.keySet());
+    }
 
     /**
      * Add an identity item which is used to clearly distinguish entities that are interacting
