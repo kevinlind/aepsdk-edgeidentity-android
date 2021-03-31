@@ -27,56 +27,57 @@ import static org.mockito.Mockito.verify;
 
 public class ListenerEdgeIdentityUpdateIdentityTests {
 
-    @Mock
-    private IdentityExtension mockIdentityExtension;
+	@Mock
+	private IdentityExtension mockIdentityExtension;
 
-    private ListenerEdgeIdentityUpdateIdentity listener;
+	private ListenerEdgeIdentityUpdateIdentity listener;
 
-    @Before
-    public void setup() {
-        mockIdentityExtension = Mockito.mock(IdentityExtension.class);
-        MobileCore.start(null);
-        listener = spy(new ListenerEdgeIdentityUpdateIdentity(null, IdentityConstants.EventType.EDGE_IDENTITY, IdentityConstants.EventSource.UPDATE_IDENTITY));
-    }
+	@Before
+	public void setup() {
+		mockIdentityExtension = Mockito.mock(IdentityExtension.class);
+		MobileCore.start(null);
+		listener = spy(new ListenerEdgeIdentityUpdateIdentity(null, IdentityConstants.EventType.EDGE_IDENTITY,
+					   IdentityConstants.EventSource.UPDATE_IDENTITY));
+	}
 
-    @Test
-    public void testHear() {
-        // setup
-        Event event = new Event.Builder("Update Identities", IdentityConstants.EventType.EDGE_IDENTITY,
-                IdentityConstants.EventSource.UPDATE_IDENTITY).build();
-        doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
+	@Test
+	public void testHear() {
+		// setup
+		Event event = new Event.Builder("Update Identities", IdentityConstants.EventType.EDGE_IDENTITY,
+										IdentityConstants.EventSource.UPDATE_IDENTITY).build();
+		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
-        // test
-        listener.hear(event);
+		// test
+		listener.hear(event);
 
-        // verify
-        verify(mockIdentityExtension, times(1)).handleUpdateIdentities(event);
-    }
+		// verify
+		verify(mockIdentityExtension, times(1)).handleUpdateIdentities(event);
+	}
 
-    @Test
-    public void testHear_WhenParentExtensionNull() {
-        // setup
-        Event event = new Event.Builder("Update Identities", IdentityConstants.EventType.EDGE_IDENTITY,
-                IdentityConstants.EventSource.UPDATE_IDENTITY).build();
-        doReturn(null).when(listener).getIdentityExtension();
+	@Test
+	public void testHear_WhenParentExtensionNull() {
+		// setup
+		Event event = new Event.Builder("Update Identities", IdentityConstants.EventType.EDGE_IDENTITY,
+										IdentityConstants.EventSource.UPDATE_IDENTITY).build();
+		doReturn(null).when(listener).getIdentityExtension();
 
-        // test
-        listener.hear(event);
+		// test
+		listener.hear(event);
 
-        // verify
-        verify(mockIdentityExtension, times(0)).handleUpdateIdentities(any(Event.class));
-    }
+		// verify
+		verify(mockIdentityExtension, times(0)).handleUpdateIdentities(any(Event.class));
+	}
 
-    @Test
-    public void testHear_WhenEventNull() {
-        // setup
-        doReturn(null).when(listener).getIdentityExtension();
-        doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
+	@Test
+	public void testHear_WhenEventNull() {
+		// setup
+		doReturn(null).when(listener).getIdentityExtension();
+		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
-        // test
-        listener.hear(null);
+		// test
+		listener.hear(null);
 
-        // verify
-        verify(mockIdentityExtension, times(0)).handleUpdateIdentities(any(Event.class));
-    }
+		// verify
+		verify(mockIdentityExtension, times(0)).handleUpdateIdentities(any(Event.class));
+	}
 }

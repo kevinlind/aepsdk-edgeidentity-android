@@ -20,112 +20,117 @@ import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG
  * Manages the business logic of this Identity extension
  */
 class IdentityState {
-    private IdentityProperties identityProperties;
+	private IdentityProperties identityProperties;
 
-    /**
-     * Creates a new {@link IdentityState} with the given {@link IdentityProperties}
-     *
-     * @param identityProperties identity properties
-     */
-    IdentityState(final IdentityProperties identityProperties) {
-        this.identityProperties = identityProperties;
-    }
+	/**
+	 * Creates a new {@link IdentityState} with the given {@link IdentityProperties}
+	 *
+	 * @param identityProperties identity properties
+	 */
+	IdentityState(final IdentityProperties identityProperties) {
+		this.identityProperties = identityProperties;
+	}
 
-    /**
-     * @return The current {@link IdentityProperties} for this identity state
-     */
-    IdentityProperties getIdentityProperties() {
-        return identityProperties;
-    }
+	/**
+	 * @return The current {@link IdentityProperties} for this identity state
+	 */
+	IdentityProperties getIdentityProperties() {
+		return identityProperties;
+	}
 
-    /**
-     * Completes init for the Identity extension.
-     * Attempts to load the already persisted identities from persistence into {@link #identityProperties}
-     * If no ECID is loaded from persistence (ideally meaning first launch), then we attempt to read ECID for the direct Identity Extension.
-     * If there is no ECID loaded from the persistence of direct Identity Extension, then and new ECID is generated and persisted finishing the bootUp sequence.
-     */
-    void bootUp() {
-        // Load properties from local storage
-        identityProperties = IdentityStorageService.loadPropertiesFromPersistence();
+	/**
+	 * Completes init for the Identity extension.
+	 * Attempts to load the already persisted identities from persistence into {@link #identityProperties}
+	 * If no ECID is loaded from persistence (ideally meaning first launch), then we attempt to read ECID for the direct Identity Extension.
+	 * If there is no ECID loaded from the persistence of direct Identity Extension, then and new ECID is generated and persisted finishing the bootUp sequence.
+	 */
+	void bootUp() {
+		// Load properties from local storage
+		identityProperties = IdentityStorageService.loadPropertiesFromPersistence();
 
-        if (identityProperties == null) {
-            identityProperties = new IdentityProperties();
-        }
+		if (identityProperties == null) {
+			identityProperties = new IdentityProperties();
+		}
 
-        // Generate new ECID on first launch
-        if (identityProperties.getECID() == null) {
-            final ECID directIdentityEcid = IdentityStorageService.loadEcidFromDirectIdentityPersistence();
-            if (directIdentityEcid == null) {
-                identityProperties.setECID(new ECID());
-                MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityState - Generating new ECID on bootup '" + identityProperties.getECID().toString() + "'");
-            } else {
-                identityProperties.setECID(directIdentityEcid);
-                MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityState -  On bootup Loading ECID from direct Identity extension '" + directIdentityEcid + "'");
-            }
-            IdentityStorageService.savePropertiesToPersistence(identityProperties);
-        }
+		// Generate new ECID on first launch
+		if (identityProperties.getECID() == null) {
+			final ECID directIdentityEcid = IdentityStorageService.loadEcidFromDirectIdentityPersistence();
 
-        MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityState - Edge Identity has successfully booted up");
-    }
+			if (directIdentityEcid == null) {
+				identityProperties.setECID(new ECID());
+				MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
+							   "IdentityState - Generating new ECID on bootup '" + identityProperties.getECID().toString() + "'");
+			} else {
+				identityProperties.setECID(directIdentityEcid);
+				MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
+							   "IdentityState -  On bootup Loading ECID from direct Identity extension '" + directIdentityEcid + "'");
+			}
 
-    /**
-     * Clears all identities and regenerates a new ECID value, then saves the new identities to persistence.
-     */
-    void resetIdentifiers() {
-        // TODO: AMSDK-11208 Determine if we should dispatch consent event
+			IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		}
 
-        identityProperties = new IdentityProperties();
-        identityProperties.setECID(new ECID());
-        identityProperties.setECIDSecondary(null);
-        IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityState - Edge Identity has successfully booted up");
+	}
 
-        // TODO: AMSDK-11208 Use return value to tell Identity to dispatch consent ad id update
-    }
+	/**
+	 * Clears all identities and regenerates a new ECID value, then saves the new identities to persistence.
+	 */
+	void resetIdentifiers() {
+		// TODO: AMSDK-11208 Determine if we should dispatch consent event
 
-    /**
-     * Update the customer identifiers by merging the passed in {@link IdentityMap} with the current identifiers present in {@link #identityProperties}.
-     *
-     * @param map the {@code IdentityMap} containing customer identifiers to add or update with the current customer identifiers
-     */
-    void updateCustomerIdentifiers(final IdentityMap map) {
-        identityProperties.updateCustomerIdentifiers(map);
-        IdentityStorageService.savePropertiesToPersistence(identityProperties);
-    }
+		identityProperties = new IdentityProperties();
+		identityProperties.setECID(new ECID());
+		identityProperties.setECIDSecondary(null);
+		IdentityStorageService.savePropertiesToPersistence(identityProperties);
 
-    /**
-     * Remove customer identifiers specified in passed in {@link IdentityMap} from the current identifiers present in {@link #identityProperties}.
-     *
-     * @param map the {@code IdentityMap} with items to remove from current identifiers
-     */
-    void removeCustomerIdentifiers(final IdentityMap map) {
-        identityProperties.removeCustomerIdentifiers(map);
-        IdentityStorageService.savePropertiesToPersistence(identityProperties);
-    }
+		// TODO: AMSDK-11208 Use return value to tell Identity to dispatch consent ad id update
+	}
 
-    /**
-     * Update the legacy ECID property with {@code legacyEcid} provided it does not equal the primary or secondary ECIDs
-     * currently in {@code IdentityProperties}.
-     *
-     * @param legacyEcid the current ECID from the direct Identity extension
-     * @return true if the legacy ECID was updated in {@code IdentityProperties}
-     */
-    boolean updateLegacyExperienceCloudId(final ECID legacyEcid) {
-        final ECID ecid = identityProperties.getECID();
-        final ECID ecidSecondary = identityProperties.getECIDSecondary();
+	/**
+	 * Update the customer identifiers by merging the passed in {@link IdentityMap} with the current identifiers present in {@link #identityProperties}.
+	 *
+	 * @param map the {@code IdentityMap} containing customer identifiers to add or update with the current customer identifiers
+	 */
+	void updateCustomerIdentifiers(final IdentityMap map) {
+		identityProperties.updateCustomerIdentifiers(map);
+		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+	}
 
-        if ((legacyEcid != null) && (legacyEcid.equals(ecid) || legacyEcid.equals(ecidSecondary))) {
-            return false;
-        }
+	/**
+	 * Remove customer identifiers specified in passed in {@link IdentityMap} from the current identifiers present in {@link #identityProperties}.
+	 *
+	 * @param map the {@code IdentityMap} with items to remove from current identifiers
+	 */
+	void removeCustomerIdentifiers(final IdentityMap map) {
+		identityProperties.removeCustomerIdentifiers(map);
+		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+	}
 
-        // no need to clear secondaryECID if its already null
-         if (legacyEcid == null && ecidSecondary == null){
-            return false;
-        }
+	/**
+	 * Update the legacy ECID property with {@code legacyEcid} provided it does not equal the primary or secondary ECIDs
+	 * currently in {@code IdentityProperties}.
+	 *
+	 * @param legacyEcid the current ECID from the direct Identity extension
+	 * @return true if the legacy ECID was updated in {@code IdentityProperties}
+	 */
+	boolean updateLegacyExperienceCloudId(final ECID legacyEcid) {
+		final ECID ecid = identityProperties.getECID();
+		final ECID ecidSecondary = identityProperties.getECIDSecondary();
 
-        identityProperties.setECIDSecondary(legacyEcid);
-        IdentityStorageService.savePropertiesToPersistence(identityProperties);
-        MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityState - Identity direct ECID updated to '" + legacyEcid + "', updating the IdentityMap");
-        return true;
-    }
+		if ((legacyEcid != null) && (legacyEcid.equals(ecid) || legacyEcid.equals(ecidSecondary))) {
+			return false;
+		}
+
+		// no need to clear secondaryECID if its already null
+		if (legacyEcid == null && ecidSecondary == null) {
+			return false;
+		}
+
+		identityProperties.setECIDSecondary(legacyEcid);
+		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
+					   "IdentityState - Identity direct ECID updated to '" + legacyEcid + "', updating the IdentityMap");
+		return true;
+	}
 
 }
