@@ -117,10 +117,11 @@ public class IdentityECIDHandlingTest {
 	public void testECID_AreDifferentAfterPrivacyChange() throws Exception {
 		/// Test Edge Identity and IdentityDirect have same ECID on bootup, and after privacy change ECIDs are different
 		registerIdentityDirectExtension();
+		TestHelper.waitForThreads(1000);
 
 		// register EdgeIdentity extension
 		Identity.registerExtension();
-		TestHelper.waitForThreads(2000);
+		TestHelper.waitForThreads(1000);
 
 		// verify ECID for both extensions are same
 		String directECID = getIdentityDirectECIDSync();
@@ -143,6 +144,7 @@ public class IdentityECIDHandlingTest {
 
 		// 1) Register Identity then Edge Identity and verify both have same ECID
 		registerIdentityDirectExtension();
+		TestHelper.waitForThreads(1000);
 
 		// register EdgeIdentity extension
 		Identity.registerExtension();
