@@ -26,56 +26,57 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class ListenerHubSharedStateTests {
-    @Mock
-    private IdentityExtension mockIdentityExtension;
+	@Mock
+	private IdentityExtension mockIdentityExtension;
 
-    private ListenerHubSharedState listener;
+	private ListenerHubSharedState listener;
 
-    @Before
-    public void setup() {
-        mockIdentityExtension = Mockito.mock(IdentityExtension.class);
-        MobileCore.start(null);
-        listener = spy(new ListenerHubSharedState(null, IdentityConstants.EventType.HUB, IdentityConstants.EventSource.SHARED_STATE));
-    }
+	@Before
+	public void setup() {
+		mockIdentityExtension = Mockito.mock(IdentityExtension.class);
+		MobileCore.start(null);
+		listener = spy(new ListenerHubSharedState(null, IdentityConstants.EventType.HUB,
+					   IdentityConstants.EventSource.SHARED_STATE));
+	}
 
-    @Test
-    public void testHear() {
-        // setup
-        Event event = new Event.Builder("Shared State Change", IdentityConstants.EventType.HUB,
-                                        IdentityConstants.EventSource.SHARED_STATE).build();
-        doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
+	@Test
+	public void testHear() {
+		// setup
+		Event event = new Event.Builder("Shared State Change", IdentityConstants.EventType.HUB,
+										IdentityConstants.EventSource.SHARED_STATE).build();
+		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
-        // test
-        listener.hear(event);
+		// test
+		listener.hear(event);
 
-        // verify
-        verify(mockIdentityExtension, times(1)).handleHubSharedState(event);
-    }
+		// verify
+		verify(mockIdentityExtension, times(1)).handleHubSharedState(event);
+	}
 
-    @Test
-    public void testHear_WhenParentExtensionNull() {
-        // setup
-        Event event = new Event.Builder("Shared State Change", IdentityConstants.EventType.HUB,
-                                        IdentityConstants.EventSource.SHARED_STATE).build();
-        doReturn(null).when(listener).getIdentityExtension();
+	@Test
+	public void testHear_WhenParentExtensionNull() {
+		// setup
+		Event event = new Event.Builder("Shared State Change", IdentityConstants.EventType.HUB,
+										IdentityConstants.EventSource.SHARED_STATE).build();
+		doReturn(null).when(listener).getIdentityExtension();
 
-        // test
-        listener.hear(event);
+		// test
+		listener.hear(event);
 
-        // verify
-        verify(mockIdentityExtension, times(0)).handleHubSharedState(any(Event.class));
-    }
+		// verify
+		verify(mockIdentityExtension, times(0)).handleHubSharedState(any(Event.class));
+	}
 
-    @Test
-    public void testHear_WhenEventNull() {
-        // setup
-        doReturn(null).when(listener).getIdentityExtension();
-        doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
+	@Test
+	public void testHear_WhenEventNull() {
+		// setup
+		doReturn(null).when(listener).getIdentityExtension();
+		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
-        // test
-        listener.hear(null);
+		// test
+		listener.hear(null);
 
-        // verify
-        verify(mockIdentityExtension, times(0)).handleHubSharedState(any(Event.class));
-    }
+		// verify
+		verify(mockIdentityExtension, times(0)).handleHubSharedState(any(Event.class));
+	}
 }
