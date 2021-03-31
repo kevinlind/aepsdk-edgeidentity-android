@@ -159,11 +159,11 @@ public class IdentityFunctionalTestUtil {
 	 */
 	static void verifyPrimaryECIDNotNull() throws InterruptedException {
 		String ecid = getExperienceCloudIdSync();
-		assertNotNull(ecid);
+		assertNotNull("verifyPrimaryECIDNotNull failed verifying getExperienceCloudId.", ecid);
 
 		// verify xdm shared state is has ECID
 		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertNotNull(xdmSharedState.get("identityMap.ECID[0].id"));
+		assertNotNull("verifyPrimaryECIDNotNull failed verifying ECID from XDM shared state.", xdmSharedState.get("identityMap.ECID[0].id"));
 	}
 
 	/**
@@ -172,17 +172,17 @@ public class IdentityFunctionalTestUtil {
 	 */
 	static void verifyPrimaryECID(final String primaryECID) throws Exception {
 		String ecid = getExperienceCloudIdSync();
-		assertEquals(primaryECID, ecid);
+		assertEquals("verifyPrimaryECID failed at getExperienceCloudId.", primaryECID, ecid);
 
 		// verify xdm shared state is has correct primary ECID
 		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(primaryECID, xdmSharedState.get("identityMap.ECID[0].id"));
+		assertEquals("verifyPrimaryECID failed while comparing ECID in XDM shared state.", primaryECID, xdmSharedState.get("identityMap.ECID[0].id"));
 
 		// verify primary ECID in persistence
 		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
 									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
 		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(primaryECID, persistedMap.get("identityMap.ECID[0].id"));
+		assertEquals("verifyPrimaryECID failed while comparing ECID in persistence.", primaryECID, persistedMap.get("identityMap.ECID[0].id"));
 	}
 
 	/**
@@ -192,12 +192,12 @@ public class IdentityFunctionalTestUtil {
 	static void verifySecondaryECID(final String secondaryECID) throws Exception {
 		// verify xdm shared state is has correct secondary ECID
 		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(secondaryECID, xdmSharedState.get("identityMap.ECID[1].id"));
+		assertEquals("verifySecondaryECID failed while comparing ECID in XDM shared state.", secondaryECID, xdmSharedState.get("identityMap.ECID[1].id"));
 
 		// verify secondary ECID in persistence
 		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
 									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
 		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(secondaryECID, persistedMap.get("identityMap.ECID[1].id"));
+		assertEquals("verifySecondaryECID failed while comparing ECID in persistence.", secondaryECID, persistedMap.get("identityMap.ECID[1].id"));
 	}
 }
