@@ -25,7 +25,7 @@ import java.util.List;
 import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
 /**
- * Defines the public interface for the AEP Edge Identity extension.
+ * Defines the public APIs for the AEP Edge Identity extension.
  */
 public class Identity {
 

@@ -22,7 +22,7 @@ import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG
 
 /**
  * Identity is used to clearly distinguish people that are interacting with digital experiences.
- * An {@code IdentityItem} is intended to be included in an instancd of {@link IdentityMap}.
+ * An {@code IdentityItem} is intended to be included in an instance of {@link IdentityMap}.
  *
  * @see <a href="https://github.com/adobe/xdm/blob/master/docs/reference/datatypes/identityitem.schema.md">Identity Item Schema</a>
  */
@@ -83,7 +83,7 @@ public final class IdentityItem {
 	}
 
 	/**
-	 * Indicates this identity is the preferred identity.
+	 * Indicates if this identity is the preferred identity.
 	 * Is used as a hint to help systems better organize how identities are queried.
 	 * @return true if this item is primary, false otherwise
 	 */
