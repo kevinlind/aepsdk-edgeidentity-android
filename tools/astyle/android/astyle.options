@@ -1,0 +1,11 @@
+--style=attach
+--indent=force-tab
+--unpad-paren
+--pad-header
+--pad-oper
+--indent-col1-comments
+--indent-switches
+--break-blocks
+--suffix=none
+--add-brackets
+--max-code-length=120
