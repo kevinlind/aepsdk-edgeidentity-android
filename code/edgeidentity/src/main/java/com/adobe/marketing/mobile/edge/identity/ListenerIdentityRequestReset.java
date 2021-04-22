@@ -18,54 +18,54 @@ import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
 
 class ListenerIdentityRequestReset extends ExtensionListener {
-	/**
-	* Constructor.
-	*
-	* @param extensionApi an instance of {@link ExtensionApi}
-	* @param type the {@link String} eventType this listener is registered to handle
-	* @param source the {@link String} eventSource this listener is registered to handle
-	*/
-	ListenerIdentityRequestReset(
-		final ExtensionApi extensionApi, final String type, final String source) {
-		super(extensionApi, type, source);
+/**
+* Constructor.
+*
+* @param extensionApi an instance of {@link ExtensionApi}
+* @param type the {@link String} eventType this listener is registered to handle
+* @param source the {@link String} eventSource this listener is registered to handle
+*/
+ListenerIdentityRequestReset(
+	final ExtensionApi extensionApi, final String type, final String source) {
+	super(extensionApi, type, source);
+}
+
+/**
+* Method that gets called when event with event type {@link
+* IdentityConstants.EventType#GENERIC_IDENTITY} and with event source {@link
+* IdentityConstants.EventSource#REQUEST_RESET} is dispatched through eventHub.
+*
+* @param event the identity reset request {@link Event} to be processed
+*/
+@Override
+public void hear(final Event event) {
+	if (event == null || event.getEventData() == null) {
+	MobileCore.log(
+		LoggingMode.DEBUG,
+		IdentityConstants.LOG_TAG,
+		"ListenerIdentityRequestReset - Event or Event data is null. Ignoring the event.");
+	return;
 	}
 
-	/**
-	* Method that gets called when event with event type {@link
-	* IdentityConstants.EventType#GENERIC_IDENTITY} and with event source {@link
-	* IdentityConstants.EventSource#REQUEST_RESET} is dispatched through eventHub.
-	*
-	* @param event the identity reset request {@link Event} to be processed
-	*/
-	@Override
-	public void hear(final Event event) {
-		if (event == null || event.getEventData() == null) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				IdentityConstants.LOG_TAG,
-				"ListenerIdentityRequestReset - Event or Event data is null. Ignoring the event.");
-			return;
-		}
+	final IdentityExtension parentExtension = getIdentityExtension();
 
-		final IdentityExtension parentExtension = getIdentityExtension();
-
-		if (parentExtension == null) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				IdentityConstants.LOG_TAG,
-				"ListenerIdentityRequestReset - The parent extension, associated with this listener is null, ignoring event.");
-			return;
-		}
-
-		parentExtension.handleRequestReset(event);
+	if (parentExtension == null) {
+	MobileCore.log(
+		LoggingMode.DEBUG,
+		IdentityConstants.LOG_TAG,
+		"ListenerIdentityRequestReset - The parent extension, associated with this listener is null, ignoring event.");
+	return;
 	}
 
-	/**
-	* Returns the parent extension associated with the listener.
-	*
-	* @return a {@link IdentityExtension} object registered with the eventHub
-	*/
-	IdentityExtension getIdentityExtension() {
-		return (IdentityExtension) getParentExtension();
-	}
+	parentExtension.handleRequestReset(event);
+}
+
+/**
+* Returns the parent extension associated with the listener.
+*
+* @return a {@link IdentityExtension} object registered with the eventHub
+*/
+IdentityExtension getIdentityExtension() {
+	return (IdentityExtension) getParentExtension();
+}
 }

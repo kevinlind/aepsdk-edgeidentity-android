@@ -26,68 +26,68 @@ import org.mockito.Mockito;
 
 public class ListenerGenericIdentityRequestContentTests {
 
-	@Mock private IdentityExtension mockIdentityExtension;
+@Mock private IdentityExtension mockIdentityExtension;
 
-	private ListenerGenericIdentityRequestContent listener;
+private ListenerGenericIdentityRequestContent listener;
 
-	@Before
-	public void setup() {
-		mockIdentityExtension = Mockito.mock(IdentityExtension.class);
-		MobileCore.start(null);
-		listener =
-			spy(
-				new ListenerGenericIdentityRequestContent(
-					null,
-					IdentityConstants.EventType.GENERIC_IDENTITY,
-					IdentityConstants.EventSource.REQUEST_CONTENT));
-	}
+@Before
+public void setup() {
+	mockIdentityExtension = Mockito.mock(IdentityExtension.class);
+	MobileCore.start(null);
+	listener =
+		spy(
+			new ListenerGenericIdentityRequestContent(
+				null,
+				IdentityConstants.EventType.GENERIC_IDENTITY,
+				IdentityConstants.EventSource.REQUEST_CONTENT));
+}
 
-	@Test
-	public void testHear() {
-		// setup
-		Event event =
-			new Event.Builder(
-			"Generic Identity Request event",
-			IdentityConstants.EventType.GENERIC_IDENTITY,
-			IdentityConstants.EventSource.REQUEST_CONTENT)
-		.build();
-		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
+@Test
+public void testHear() {
+	// setup
+	Event event =
+		new Event.Builder(
+				"Generic Identity Request event",
+				IdentityConstants.EventType.GENERIC_IDENTITY,
+				IdentityConstants.EventSource.REQUEST_CONTENT)
+			.build();
+	doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
-		// test
-		listener.hear(event);
+	// test
+	listener.hear(event);
 
-		// verify
-		verify(mockIdentityExtension, times(1)).handleGenericIdentityRequest(event);
-	}
+	// verify
+	verify(mockIdentityExtension, times(1)).handleGenericIdentityRequest(event);
+}
 
-	@Test
-	public void testHear_WhenParentExtensionNull() {
-		// setup
-		Event event =
-			new Event.Builder(
-			"Generic Identity Request event",
-			IdentityConstants.EventType.GENERIC_IDENTITY,
-			IdentityConstants.EventSource.REQUEST_CONTENT)
-		.build();
-		doReturn(null).when(listener).getIdentityExtension();
+@Test
+public void testHear_WhenParentExtensionNull() {
+	// setup
+	Event event =
+		new Event.Builder(
+				"Generic Identity Request event",
+				IdentityConstants.EventType.GENERIC_IDENTITY,
+				IdentityConstants.EventSource.REQUEST_CONTENT)
+			.build();
+	doReturn(null).when(listener).getIdentityExtension();
 
-		// test
-		listener.hear(event);
+	// test
+	listener.hear(event);
 
-		// verify
-		verify(mockIdentityExtension, times(0)).handleGenericIdentityRequest(any(Event.class));
-	}
+	// verify
+	verify(mockIdentityExtension, times(0)).handleGenericIdentityRequest(any(Event.class));
+}
 
-	@Test
-	public void testHear_WhenEventNull() {
-		// setup
-		doReturn(null).when(listener).getIdentityExtension();
-		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
+@Test
+public void testHear_WhenEventNull() {
+	// setup
+	doReturn(null).when(listener).getIdentityExtension();
+	doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
-		// test
-		listener.hear(null);
+	// test
+	listener.hear(null);
 
-		// verify
-		verify(mockIdentityExtension, times(0)).handleGenericIdentityRequest(any(Event.class));
-	}
+	// verify
+	verify(mockIdentityExtension, times(0)).handleGenericIdentityRequest(any(Event.class));
+}
 }

@@ -67,7 +67,7 @@ spotless {
     java {
         target "src/*/java/**/*.java"
         removeUnusedImports()
-        googleJavaFormat('1.7').aosp() // Java 1.7, Android Open Source Project style
+        googleJavaFormat('1.7') // Java 1.7, Android Open Source Project style
         indentWithTabs()
         //importOrder('android', 'androidx', 'java', 'javax', 'org', 'com.adobe', '', '\\#')
         //endWithNewline()

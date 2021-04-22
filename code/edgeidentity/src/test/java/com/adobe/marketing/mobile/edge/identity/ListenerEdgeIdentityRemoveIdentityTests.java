@@ -26,68 +26,68 @@ import org.mockito.Mockito;
 
 public class ListenerEdgeIdentityRemoveIdentityTests {
 
-	@Mock private IdentityExtension mockIdentityExtension;
+@Mock private IdentityExtension mockIdentityExtension;
 
-	private ListenerEdgeIdentityRemoveIdentity listener;
+private ListenerEdgeIdentityRemoveIdentity listener;
 
-	@Before
-	public void setup() {
-		mockIdentityExtension = Mockito.mock(IdentityExtension.class);
-		MobileCore.start(null);
-		listener =
-			spy(
-				new ListenerEdgeIdentityRemoveIdentity(
-					null,
-					IdentityConstants.EventType.EDGE_IDENTITY,
-					IdentityConstants.EventSource.REMOVE_IDENTITY));
-	}
+@Before
+public void setup() {
+	mockIdentityExtension = Mockito.mock(IdentityExtension.class);
+	MobileCore.start(null);
+	listener =
+		spy(
+			new ListenerEdgeIdentityRemoveIdentity(
+				null,
+				IdentityConstants.EventType.EDGE_IDENTITY,
+				IdentityConstants.EventSource.REMOVE_IDENTITY));
+}
 
-	@Test
-	public void testHear() {
-		// setup
-		Event event =
-			new Event.Builder(
-			"Remove Identity",
-			IdentityConstants.EventType.EDGE_IDENTITY,
-			IdentityConstants.EventSource.REMOVE_IDENTITY)
-		.build();
-		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
+@Test
+public void testHear() {
+	// setup
+	Event event =
+		new Event.Builder(
+				"Remove Identity",
+				IdentityConstants.EventType.EDGE_IDENTITY,
+				IdentityConstants.EventSource.REMOVE_IDENTITY)
+			.build();
+	doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
-		// test
-		listener.hear(event);
+	// test
+	listener.hear(event);
 
-		// verify
-		verify(mockIdentityExtension, times(1)).handleRemoveIdentity(event);
-	}
+	// verify
+	verify(mockIdentityExtension, times(1)).handleRemoveIdentity(event);
+}
 
-	@Test
-	public void testHear_WhenParentExtensionNull() {
-		// setup
-		Event event =
-			new Event.Builder(
-			"Remove Identity",
-			IdentityConstants.EventType.EDGE_IDENTITY,
-			IdentityConstants.EventSource.REMOVE_IDENTITY)
-		.build();
-		doReturn(null).when(listener).getIdentityExtension();
+@Test
+public void testHear_WhenParentExtensionNull() {
+	// setup
+	Event event =
+		new Event.Builder(
+				"Remove Identity",
+				IdentityConstants.EventType.EDGE_IDENTITY,
+				IdentityConstants.EventSource.REMOVE_IDENTITY)
+			.build();
+	doReturn(null).when(listener).getIdentityExtension();
 
-		// test
-		listener.hear(event);
+	// test
+	listener.hear(event);
 
-		// verify
-		verify(mockIdentityExtension, times(0)).handleRemoveIdentity(any(Event.class));
-	}
+	// verify
+	verify(mockIdentityExtension, times(0)).handleRemoveIdentity(any(Event.class));
+}
 
-	@Test
-	public void testHear_WhenEventNull() {
-		// setup
-		doReturn(null).when(listener).getIdentityExtension();
-		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
+@Test
+public void testHear_WhenEventNull() {
+	// setup
+	doReturn(null).when(listener).getIdentityExtension();
+	doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
-		// test
-		listener.hear(null);
+	// test
+	listener.hear(null);
 
-		// verify
-		verify(mockIdentityExtension, times(0)).handleRemoveIdentity(any(Event.class));
-	}
+	// verify
+	verify(mockIdentityExtension, times(0)).handleRemoveIdentity(any(Event.class));
+}
 }
