@@ -1,22 +1,15 @@
 /*
-  Copyright 2021 Adobe. All rights reserved.
-  This file is licensed to you under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License. You may obtain a copy
-  of the License at http://www.apache.org/licenses/LICENSE-2.0
-  Unless required by applicable law or agreed to in writing, software distributed under
-  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-  OF ANY KIND, either express or implied. See the License for the specific language
-  governing permissions and limitations under the License.
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
 */
 
 package com.adobe.marketing.mobile.edge.identity;
-
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
@@ -24,12 +17,18 @@ import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.junit.Test;
+
 @SuppressWarnings("unchecked")
 public class UtilsTests {
 
 	@Test
 	public void testUtils_deepCopyNull() {
-		assertNull(Utils.deepCopy((Map)null));
+		assertNull(Utils.deepCopy((Map) null));
 	}
 
 	@Test
@@ -107,7 +106,7 @@ public class UtilsTests {
 
 	@Test
 	public void testUtils_deepCopyListOfMaps_Null() {
-		assertNull(Utils.deepCopy((List)null));
+		assertNull(Utils.deepCopy((List) null));
 	}
 
 	@Test
@@ -150,13 +149,12 @@ public class UtilsTests {
 		Map<String, Object> deepCopy = Utils.deepCopy(map);
 		List<Map<String, Object>> nestedDeepCopy = Utils.deepCopy(list);
 		nestedDeepCopy.get(0).put("newKey", "newValue");
-		((Map<String, Object>)nestedDeepCopy.get(0).get("nestedMap")).put("nestedKey2", 2222);
+		((Map<String, Object>) nestedDeepCopy.get(0).get("nestedMap")).put("nestedKey2", 2222);
 
 		assertEquals(3, nestedDeepCopy.get(0).size());
 		assertEquals(2, list.get(0).size());
 		assertTrue(list.get(0).containsKey("key1"));
-		assertEquals(1, ((Map<String, Object>)list.get(0).get("nestedMap")).size());
-		assertEquals(2, ((Map<String, Object>)nestedDeepCopy.get(0).get("nestedMap")).size());
+		assertEquals(1, ((Map<String, Object>) list.get(0).get("nestedMap")).size());
+		assertEquals(2, ((Map<String, Object>) nestedDeepCopy.get(0).get("nestedMap")).size());
 	}
-
 }

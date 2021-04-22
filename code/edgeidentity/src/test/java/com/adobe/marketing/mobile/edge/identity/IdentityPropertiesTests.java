@@ -1,23 +1,22 @@
 /*
-  Copyright 2021 Adobe. All rights reserved.
-  This file is licensed to you under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License. You may obtain a copy
-  of the License at http://www.apache.org/licenses/LICENSE-2.0
-  Unless required by applicable law or agreed to in writing, software distributed under
-  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-  OF ANY KIND, either express or implied. See the License for the specific language
-  governing permissions and limitations under the License.
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
 */
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import org.junit.Test;
-
-import java.util.Map;
-
 import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import java.util.Map;
+import org.junit.Test;
 
 public class IdentityPropertiesTests {
 
@@ -36,7 +35,6 @@ public class IdentityPropertiesTests {
 		// verify
 		assertNull(xdmMap.get(IdentityConstants.XDMKeys.IDENTITY_MAP));
 	}
-
 
 	@Test
 	public void test_toXDMData_Full() {
@@ -84,7 +82,6 @@ public class IdentityPropertiesTests {
 		assertEquals(0, flattenMap(props.toXDMData(false)).size());
 	}
 
-
 	// ======================================================================================================================
 	// Tests for constructor : IdentityProperties(final Map<String, Object> xdmData)
 	// ======================================================================================================================
@@ -92,12 +89,12 @@ public class IdentityPropertiesTests {
 	@Test
 	public void testConstruct_FromXDMData_LoadingDataFromPersistence() {
 		// setup
-		Map<String, Object> persistedIdentifiers = createXDMIdentityMap(
-					new TestItem("UserId", "secretID"),
-					new TestItem("PushId", "token"),
-					new TestECIDItem("primaryECID"),
-					new TestECIDItem("secondaryECID")
-				);
+		Map<String, Object> persistedIdentifiers =
+				createXDMIdentityMap(
+						new TestItem("UserId", "secretID"),
+						new TestItem("PushId", "token"),
+						new TestECIDItem("primaryECID"),
+						new TestECIDItem("secondaryECID"));
 
 		// test
 		IdentityProperties props = new IdentityProperties(persistedIdentifiers);
@@ -119,7 +116,6 @@ public class IdentityPropertiesTests {
 		// verify
 		assertEquals(0, flattenMap(props.toXDMData(false)).size());
 	}
-
 
 	// ======================================================================================================================
 	// Tests for method : setECID(final ECID newEcid)
@@ -165,7 +161,6 @@ public class IdentityPropertiesTests {
 		assertNull(props.getECID());
 	}
 
-
 	// ======================================================================================================================
 	// Tests for method : setECIDSecondary(final ECID newEcid)
 	// ======================================================================================================================
@@ -200,10 +195,10 @@ public class IdentityPropertiesTests {
 	@Test
 	public void test_setECIDSecondary_NullRemovesFromIdentityMap() {
 		// setup
-		IdentityProperties props = new IdentityProperties(createXDMIdentityMap(
-					new TestECIDItem("primary"),
-					new TestECIDItem("secondary")
-				));
+		IdentityProperties props =
+				new IdentityProperties(
+						createXDMIdentityMap(
+								new TestECIDItem("primary"), new TestECIDItem("secondary")));
 		assertEquals(6, flattenMap(props.toXDMData(false)).size());
 
 		// test
@@ -214,14 +209,13 @@ public class IdentityPropertiesTests {
 		assertNull(props.getECIDSecondary());
 	}
 
-
 	@Test
 	public void test_clearPrimaryECID_alsoClearsSecondaryECID() {
 		// setup
-		IdentityProperties props = new IdentityProperties(createXDMIdentityMap(
-					new TestECIDItem("primary"),
-					new TestECIDItem("secondary")
-				));
+		IdentityProperties props =
+				new IdentityProperties(
+						createXDMIdentityMap(
+								new TestECIDItem("primary"), new TestECIDItem("secondary")));
 
 		// test
 		props.setECID(null);
@@ -232,14 +226,13 @@ public class IdentityPropertiesTests {
 		assertNull(props.getECID());
 	}
 
-
 	@Test
 	public void test_setPrimaryECIDPreservesSecondaryECID() {
 		// setup
-		IdentityProperties props = new IdentityProperties(createXDMIdentityMap(
-					new TestECIDItem("primary"),
-					new TestECIDItem("secondary")
-				));
+		IdentityProperties props =
+				new IdentityProperties(
+						createXDMIdentityMap(
+								new TestECIDItem("primary"), new TestECIDItem("secondary")));
 
 		// test
 		props.setECID(new ECID("primaryAgain"));
@@ -265,18 +258,16 @@ public class IdentityPropertiesTests {
 		assertEquals(6, flatMap.size());
 		assertEquals("primaryAgain", flatMap.get("identityMap.ECID[0].id"));
 		assertEquals("secondary", flatMap.get("identityMap.ECID[1].id"));
-
 	}
 
-
 	// ======================================================================================================================
-	// Tests for "updateCustomerIdentifiers" is already covered in "handleUpdateRequest" tests in IdentityExtensionTests
-	// ======================================================================================================================
-
-
-	// ======================================================================================================================
-	// Tests for "removeCustomerIdentifiers" is already covered in handleRemoveRequest tests in IdentityExtensionTests
+	// Tests for "updateCustomerIdentifiers" is already covered in "handleUpdateRequest" tests in
+	// IdentityExtensionTests
 	// ======================================================================================================================
 
+	// ======================================================================================================================
+	// Tests for "removeCustomerIdentifiers" is already covered in handleRemoveRequest tests in
+	// IdentityExtensionTests
+	// ======================================================================================================================
 
 }

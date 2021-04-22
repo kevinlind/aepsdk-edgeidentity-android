@@ -1,26 +1,25 @@
 /*
-  Copyright 2021 Adobe. All rights reserved.
-  This file is licensed to you under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License. You may obtain a copy
-  of the License at http://www.apache.org/licenses/LICENSE-2.0
-  Unless required by applicable law or agreed to in writing, software distributed under
-  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-  OF ANY KIND, either express or implied. See the License for the specific language
-  governing permissions and limitations under the License.
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
 */
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 
 public class IdentityExtensionVersionTest {
 	private static String GRADLE_PROPERTIES_PATH = "../gradle.properties";
@@ -37,11 +36,13 @@ public class IdentityExtensionVersionTest {
 		assertNotNull(moduleVersion);
 		assertFalse(moduleVersion.isEmpty());
 
-		assertEquals(String.format("Expected version to match in gradle.properties (%s) and extensionVersion API (%s)",
-								   moduleVersion, Identity.extensionVersion()),
-					 moduleVersion, Identity.extensionVersion());
+		assertEquals(
+				String.format(
+						"Expected version to match in gradle.properties (%s) and extensionVersion API (%s)",
+						moduleVersion, Identity.extensionVersion()),
+				moduleVersion,
+				Identity.extensionVersion());
 	}
-
 
 	private Properties loadProperties(final String filepath) {
 		Properties properties = new Properties();
@@ -65,5 +66,4 @@ public class IdentityExtensionVersionTest {
 
 		return properties;
 	}
-
 }

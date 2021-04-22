@@ -1,22 +1,27 @@
 /*
-  Copyright 2021 Adobe. All rights reserved.
-  This file is licensed to you under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License. You may obtain a copy
-  of the License at http://www.apache.org/licenses/LICENSE-2.0
-  Unless required by applicable law or agreed to in writing, software distributed under
-  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-  OF ANY KIND, either express or implied. See the License for the specific language
-  governing permissions and limitations under the License.
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
 */
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import static com.adobe.marketing.mobile.TestHelper.*;
+import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.registerEdgeIdentityExtension;
+import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.*;
+import static org.junit.Assert.*;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.TestHelper;
 import com.adobe.marketing.mobile.TestPersistenceHelper;
-
+import java.util.List;
+import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,20 +29,13 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.runner.RunWith;
 
-import java.util.List;
-import java.util.Map;
-
-import static com.adobe.marketing.mobile.TestHelper.*;
-import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.*;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.registerEdgeIdentityExtension;
-import static org.junit.Assert.*;
-
 @RunWith(AndroidJUnit4.class)
 public class IdentityPublicAPITest {
 
 	@Rule
-	public RuleChain rule = RuleChain.outerRule(new TestHelper.SetupCoreRule())
-							.around(new TestHelper.RegisterMonitorExtensionRule());
+	public RuleChain rule =
+			RuleChain.outerRule(new TestHelper.SetupCoreRule())
+					.around(new TestHelper.RegisterMonitorExtensionRule());
 
 	// --------------------------------------------------------------------------------------------
 	// Setup
@@ -67,9 +65,12 @@ public class IdentityPublicAPITest {
 		// Consent.registerExtension() is called in the setup method
 
 		// verify that the extension is registered with the correct version details
-		Map<String, String> sharedStateMap = flattenMap(getSharedStateFor(IdentityTestConstants.SharedStateName.EVENT_HUB,
-											 1000));
-		assertEquals(IdentityConstants.EXTENSION_VERSION, sharedStateMap.get("extensions.com.adobe.edge.identity.version"));
+		Map<String, String> sharedStateMap =
+				flattenMap(
+						getSharedStateFor(IdentityTestConstants.SharedStateName.EVENT_HUB, 1000));
+		assertEquals(
+				IdentityConstants.EXTENSION_VERSION,
+				sharedStateMap.get("extensions.com.adobe.edge.identity.version"));
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -79,21 +80,27 @@ public class IdentityPublicAPITest {
 	@Test
 	public void testUpdateIdentitiesAPI() throws Exception {
 		// test
-		Identity.updateIdentities(CreateIdentityMap("Email", "example@email.com", AuthenticatedState.AUTHENTICATED, true));
+		Identity.updateIdentities(
+				CreateIdentityMap(
+						"Email", "example@email.com", AuthenticatedState.AUTHENTICATED, true));
 		TestHelper.waitForThreads(2000);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(6, xdmSharedState.size());  // 3 for ECID and 3 for Email
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(6, xdmSharedState.size()); // 3 for ECID and 3 for Email
 		assertEquals("example@email.com", xdmSharedState.get("identityMap.Email[0].id"));
 		assertEquals("true", xdmSharedState.get("identityMap.Email[0].primary"));
 		assertEquals("ambiguous", xdmSharedState.get("identityMap.ECID[0].authenticatedState"));
 
 		// verify persisted data
-		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
-									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(6, persistedMap.size());  // 3 for ECID and 3 for Email
+		final String persistedJson =
+				TestPersistenceHelper.readPersistedData(
+						IdentityConstants.DataStoreKey.DATASTORE_NAME,
+						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+		Map<String, String> persistedMap =
+				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		assertEquals(6, persistedMap.size()); // 3 for ECID and 3 for Email
 		assertEquals("example@email.com", persistedMap.get("identityMap.Email[0].id"));
 		assertEquals("true", persistedMap.get("identityMap.Email[0].primary"));
 		assertEquals("ambiguous", persistedMap.get("identityMap.ECID[0].authenticatedState"));
@@ -106,13 +113,16 @@ public class IdentityPublicAPITest {
 		TestHelper.waitForThreads(2000);
 
 		// verify no shares state change event dispatched
-		List<Event> dispatchedEvents = getDispatchedEventsWith(IdentityConstants.EventType.HUB,
-									   IdentityConstants.EventSource.SHARED_STATE);
+		List<Event> dispatchedEvents =
+				getDispatchedEventsWith(
+						IdentityConstants.EventType.HUB,
+						IdentityConstants.EventSource.SHARED_STATE);
 		assertEquals(0, dispatchedEvents.size());
 
 		// verify xdm shared state is not disturbed
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(3, xdmSharedState.size());  // 3 for ECID still exists
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(3, xdmSharedState.size()); // 3 for ECID still exists
 		assertNotNull(xdmSharedState.get("identityMap.ECID[0].id"));
 	}
 
@@ -123,13 +133,16 @@ public class IdentityPublicAPITest {
 		TestHelper.waitForThreads(2000);
 
 		// verify no shares state change event dispatched
-		List<Event> dispatchedEvents = getDispatchedEventsWith(IdentityConstants.EventType.HUB,
-									   IdentityConstants.EventSource.SHARED_STATE);
+		List<Event> dispatchedEvents =
+				getDispatchedEventsWith(
+						IdentityConstants.EventType.HUB,
+						IdentityConstants.EventSource.SHARED_STATE);
 		assertEquals(0, dispatchedEvents.size());
 
 		// verify xdm shared state is not disturbed
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(3, xdmSharedState.size());  // 3 for ECID still exists
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(3, xdmSharedState.size()); // 3 for ECID still exists
 		assertNotNull(xdmSharedState.get("identityMap.ECID[0].id"));
 	}
 
@@ -137,22 +150,30 @@ public class IdentityPublicAPITest {
 	public void testUpdateAPI_shouldReplaceExistingIdentities() throws Exception {
 		// test
 		Identity.updateIdentities(CreateIdentityMap("Email", "example@email.com"));
-		Identity.updateIdentities(CreateIdentityMap("Email", "example@email.com", AuthenticatedState.AUTHENTICATED, true));
-		Identity.updateIdentities(CreateIdentityMap("Email", "example@email.com", AuthenticatedState.LOGGED_OUT, false));
+		Identity.updateIdentities(
+				CreateIdentityMap(
+						"Email", "example@email.com", AuthenticatedState.AUTHENTICATED, true));
+		Identity.updateIdentities(
+				CreateIdentityMap(
+						"Email", "example@email.com", AuthenticatedState.LOGGED_OUT, false));
 		TestHelper.waitForThreads(2000);
 
 		// verify the final xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(6, xdmSharedState.size());  // 3 for ECID and 3 for Email
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(6, xdmSharedState.size()); // 3 for ECID and 3 for Email
 		assertEquals("example@email.com", xdmSharedState.get("identityMap.Email[0].id"));
 		assertEquals("false", xdmSharedState.get("identityMap.Email[0].primary"));
 		assertEquals("loggedOut", xdmSharedState.get("identityMap.Email[0].authenticatedState"));
 
 		// verify persisted data
-		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
-									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(6, persistedMap.size());  // 3 for ECID and 3 for Email
+		final String persistedJson =
+				TestPersistenceHelper.readPersistedData(
+						IdentityConstants.DataStoreKey.DATASTORE_NAME,
+						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+		Map<String, String> persistedMap =
+				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		assertEquals(6, persistedMap.size()); // 3 for ECID and 3 for Email
 		assertEquals("example@email.com", persistedMap.get("identityMap.Email[0].id"));
 		assertEquals("false", persistedMap.get("identityMap.Email[0].primary"));
 		assertEquals("loggedOut", persistedMap.get("identityMap.Email[0].authenticatedState"));
@@ -171,16 +192,24 @@ public class IdentityPublicAPITest {
 		TestHelper.waitForThreads(2000);
 
 		// verify xdm shared state does not get updated
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(3, xdmSharedState.size());  // 3 for ECID
-		assertNotEquals("newECID", xdmSharedState.get("identityMap.ECID[0].id")); // ECID doesn't get replaced by API
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(3, xdmSharedState.size()); // 3 for ECID
+		assertNotEquals(
+				"newECID",
+				xdmSharedState.get("identityMap.ECID[0].id")); // ECID doesn't get replaced by API
 
 		// verify persisted data doesn't change
-		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
-									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(3, persistedMap.size());  // 3 for ECID
-		assertNotEquals("newECID", persistedMap.get("identityMap.ECID[0].id")); // ECID doesn't get replaced by API
+		final String persistedJson =
+				TestPersistenceHelper.readPersistedData(
+						IdentityConstants.DataStoreKey.DATASTORE_NAME,
+						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+		Map<String, String> persistedMap =
+				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		assertEquals(3, persistedMap.size()); // 3 for ECID
+		assertNotEquals(
+				"newECID",
+				persistedMap.get("identityMap.ECID[0].id")); // ECID doesn't get replaced by API
 	}
 
 	@Test
@@ -195,18 +224,22 @@ public class IdentityPublicAPITest {
 		TestHelper.waitForThreads(2000);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(15, xdmSharedState.size());  // 3 for ECID + 12 for new identities
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(15, xdmSharedState.size()); // 3 for ECID + 12 for new identities
 		assertEquals("primary@email.com", xdmSharedState.get("identityMap.Email[0].id"));
 		assertEquals("secondary@email.com", xdmSharedState.get("identityMap.Email[1].id"));
 		assertEquals("zzzyyyxxx", xdmSharedState.get("identityMap.UserId[0].id"));
 		assertEquals("John Doe", xdmSharedState.get("identityMap.UserName[0].id"));
 
 		// verify persisted data
-		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
-									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(15, persistedMap.size());  // 3 for ECID + 12 for new identities
+		final String persistedJson =
+				TestPersistenceHelper.readPersistedData(
+						IdentityConstants.DataStoreKey.DATASTORE_NAME,
+						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+		Map<String, String> persistedMap =
+				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		assertEquals(15, persistedMap.size()); // 3 for ECID + 12 for new identities
 		assertEquals("primary@email.com", persistedMap.get("identityMap.Email[0].id"));
 		assertEquals("secondary@email.com", persistedMap.get("identityMap.Email[1].id"));
 		assertEquals("zzzyyyxxx", persistedMap.get("identityMap.UserId[0].id"));
@@ -223,16 +256,20 @@ public class IdentityPublicAPITest {
 		TestHelper.waitForThreads(2000);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(9, xdmSharedState.size());  // 3 for ECID + 6 for new identities
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(9, xdmSharedState.size()); // 3 for ECID + 6 for new identities
 		assertEquals("primary@email.com", xdmSharedState.get("identityMap.Email[0].id"));
 		assertEquals("secondary@email.com", xdmSharedState.get("identityMap.email[0].id"));
 
 		// verify persisted data
-		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
-									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(9, persistedMap.size());  // 3 for ECID + 6 for new identities
+		final String persistedJson =
+				TestPersistenceHelper.readPersistedData(
+						IdentityConstants.DataStoreKey.DATASTORE_NAME,
+						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+		Map<String, String> persistedMap =
+				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		assertEquals(9, persistedMap.size()); // 3 for ECID + 6 for new identities
 		assertEquals("primary@email.com", persistedMap.get("identityMap.Email[0].id"));
 		assertEquals("secondary@email.com", persistedMap.get("identityMap.email[0].id"));
 	}
@@ -280,7 +317,9 @@ public class IdentityPublicAPITest {
 		TestHelper.waitForThreads(2000);
 
 		// verify
-		IdentityMap responseMap = (IdentityMap) getIdentitiesResponse.get(IdentityTestConstants.GetIdentitiesHelper.VALUE);
+		IdentityMap responseMap =
+				(IdentityMap)
+						getIdentitiesResponse.get(IdentityTestConstants.GetIdentitiesHelper.VALUE);
 		assertEquals(4, responseMap.getNamespaces().size());
 		assertEquals(2, responseMap.getIdentityItemsForNamespace("Email").size());
 		assertEquals(1, responseMap.getIdentityItemsForNamespace("UserId").size());
@@ -316,10 +355,10 @@ public class IdentityPublicAPITest {
 		TestHelper.waitForThreads(2000);
 
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(6, xdmSharedState.size());  // 3 for ECID + 3 for Email secondary
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(6, xdmSharedState.size()); // 3 for ECID + 3 for Email secondary
 		assertEquals("secondary@email.com", xdmSharedState.get("identityMap.Email[0].id"));
-
 
 		// test again
 		Identity.removeIdentity(new IdentityItem("secondary@email.com"), "Email");
@@ -327,13 +366,16 @@ public class IdentityPublicAPITest {
 
 		// verify xdm shared state
 		xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(3, xdmSharedState.size());  // 3 for ECID
+		assertEquals(3, xdmSharedState.size()); // 3 for ECID
 
 		// verify persisted data
-		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
-									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(3, persistedMap.size());  // 3 for ECID
+		final String persistedJson =
+				TestPersistenceHelper.readPersistedData(
+						IdentityConstants.DataStoreKey.DATASTORE_NAME,
+						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+		Map<String, String> persistedMap =
+				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		assertEquals(3, persistedMap.size()); // 3 for ECID
 	}
 
 	@Test
@@ -344,14 +386,18 @@ public class IdentityPublicAPITest {
 
 		// verify item is not removed
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(3, xdmSharedState.size());  // 3 for ECID
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(3, xdmSharedState.size()); // 3 for ECID
 
 		// verify persisted data
-		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
-									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(3, persistedMap.size());  // 3 for ECID
+		final String persistedJson =
+				TestPersistenceHelper.readPersistedData(
+						IdentityConstants.DataStoreKey.DATASTORE_NAME,
+						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+		Map<String, String> persistedMap =
+				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		assertEquals(3, persistedMap.size()); // 3 for ECID
 	}
 
 	@Test
@@ -366,14 +412,18 @@ public class IdentityPublicAPITest {
 
 		// verify item is not removed
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(6, xdmSharedState.size());  // 3 for ECID +  3 for  Email
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(6, xdmSharedState.size()); // 3 for ECID +  3 for  Email
 
 		// verify persisted data
-		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
-									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(6, persistedMap.size());  // 3 for ECID +  3 for  Email
+		final String persistedJson =
+				TestPersistenceHelper.readPersistedData(
+						IdentityConstants.DataStoreKey.DATASTORE_NAME,
+						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+		Map<String, String> persistedMap =
+				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		assertEquals(6, persistedMap.size()); // 3 for ECID +  3 for  Email
 	}
 
 	@Test
@@ -388,14 +438,18 @@ public class IdentityPublicAPITest {
 
 		// verify item is not removed
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(6, xdmSharedState.size());  // 3 for ECID +  3 for  Email
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(6, xdmSharedState.size()); // 3 for ECID +  3 for  Email
 
 		// verify persisted data
-		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
-									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(6, persistedMap.size());  // 3 for ECID +  3 for  Email
+		final String persistedJson =
+				TestPersistenceHelper.readPersistedData(
+						IdentityConstants.DataStoreKey.DATASTORE_NAME,
+						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+		Map<String, String> persistedMap =
+				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		assertEquals(6, persistedMap.size()); // 3 for ECID +  3 for  Email
 	}
 
 	@Test
@@ -409,14 +463,17 @@ public class IdentityPublicAPITest {
 
 		// ECID is a reserved namespace and should not be removed
 		// verify xdm shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		assertEquals(3, xdmSharedState.size());  // 3 for ECID that still exists
+		Map<String, String> xdmSharedState =
+				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		assertEquals(3, xdmSharedState.size()); // 3 for ECID that still exists
 
 		// verify persisted data
-		final String persistedJson = TestPersistenceHelper.readPersistedData(IdentityConstants.DataStoreKey.DATASTORE_NAME,
-									 IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		assertEquals(3, persistedMap.size());  // 3 for ECID that still exists
+		final String persistedJson =
+				TestPersistenceHelper.readPersistedData(
+						IdentityConstants.DataStoreKey.DATASTORE_NAME,
+						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+		Map<String, String> persistedMap =
+				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		assertEquals(3, persistedMap.size()); // 3 for ECID that still exists
 	}
-
 }
