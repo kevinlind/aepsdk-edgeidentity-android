@@ -14,26 +14,28 @@ package com.adobe.marketing.mobile;
 /** Class to maintain test constants. */
 public class TestConstants {
 
-public class EventType {
-	static final String MONITOR = "com.adobe.functional.eventType.monitor";
+    public class EventType {
+        static final String MONITOR = "com.adobe.functional.eventType.monitor";
 
-	private EventType() {}
-}
+        private EventType() {}
+    }
 
-public class EventSource {
-	// Used by Monitor Extension
-	static final String XDM_SHARED_STATE_REQUEST = "com.adobe.eventSource.xdmsharedStateRequest";
-	static final String XDM_SHARED_STATE_RESPONSE = "com.adobe.eventSource.xdmsharedStateResponse";
-	static final String SHARED_STATE_REQUEST = "com.adobe.eventSource.sharedStateRequest";
-	static final String SHARED_STATE_RESPONSE = "com.adobe.eventSource.sharedStateResponse";
-	static final String UNREGISTER = "com.adobe.eventSource.unregister";
+    public class EventSource {
+        // Used by Monitor Extension
+        static final String XDM_SHARED_STATE_REQUEST =
+                "com.adobe.eventSource.xdmsharedStateRequest";
+        static final String XDM_SHARED_STATE_RESPONSE =
+                "com.adobe.eventSource.xdmsharedStateResponse";
+        static final String SHARED_STATE_REQUEST = "com.adobe.eventSource.sharedStateRequest";
+        static final String SHARED_STATE_RESPONSE = "com.adobe.eventSource.sharedStateResponse";
+        static final String UNREGISTER = "com.adobe.eventSource.unregister";
 
-	private EventSource() {}
-}
+        private EventSource() {}
+    }
 
-public class EventDataKey {
-	static final String STATE_OWNER = "stateowner";
+    public class EventDataKey {
+        static final String STATE_OWNER = "stateowner";
 
-	private EventDataKey() {};
-}
+        private EventDataKey() {};
+    }
 }

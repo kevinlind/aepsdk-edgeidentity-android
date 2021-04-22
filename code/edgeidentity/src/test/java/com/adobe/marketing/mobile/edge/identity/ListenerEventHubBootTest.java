@@ -26,53 +26,55 @@ import org.mockito.Mockito;
 
 public class ListenerEventHubBootTest {
 
-@Mock private IdentityExtension mockConsentExtension;
+    @Mock private IdentityExtension mockConsentExtension;
 
-private ListenerEventHubBoot listener;
+    private ListenerEventHubBoot listener;
 
-@Before
-public void setup() {
-	mockConsentExtension = Mockito.mock(IdentityExtension.class);
-	MobileCore.start(null);
-	listener =
-		spy(
-			new ListenerEventHubBoot(
-				null, IdentityConstants.EventType.HUB, IdentityConstants.EventSource.BOOTED));
-}
+    @Before
+    public void setup() {
+        mockConsentExtension = Mockito.mock(IdentityExtension.class);
+        MobileCore.start(null);
+        listener =
+                spy(
+                        new ListenerEventHubBoot(
+                                null,
+                                IdentityConstants.EventType.HUB,
+                                IdentityConstants.EventSource.BOOTED));
+    }
 
-@Test
-public void testHear() {
-	// setup
-	Event event =
-		new Event.Builder(
-				"Event Hub Boot",
-				IdentityConstants.EventType.HUB,
-				IdentityConstants.EventSource.BOOTED)
-			.build();
-	doReturn(mockConsentExtension).when(listener).getIdentityExtension();
+    @Test
+    public void testHear() {
+        // setup
+        Event event =
+                new Event.Builder(
+                                "Event Hub Boot",
+                                IdentityConstants.EventType.HUB,
+                                IdentityConstants.EventSource.BOOTED)
+                        .build();
+        doReturn(mockConsentExtension).when(listener).getIdentityExtension();
 
-	// test
-	listener.hear(event);
+        // test
+        listener.hear(event);
 
-	// verify
-	verify(mockConsentExtension, times(1)).handleEventHubBoot(event);
-}
+        // verify
+        verify(mockConsentExtension, times(1)).handleEventHubBoot(event);
+    }
 
-@Test
-public void testHear_WhenParentExtensionNull() {
-	// setup
-	Event event =
-		new Event.Builder(
-				"Event Hub Boot",
-				IdentityConstants.EventType.HUB,
-				IdentityConstants.EventSource.BOOTED)
-			.build();
-	doReturn(null).when(listener).getIdentityExtension();
+    @Test
+    public void testHear_WhenParentExtensionNull() {
+        // setup
+        Event event =
+                new Event.Builder(
+                                "Event Hub Boot",
+                                IdentityConstants.EventType.HUB,
+                                IdentityConstants.EventSource.BOOTED)
+                        .build();
+        doReturn(null).when(listener).getIdentityExtension();
 
-	// test
-	listener.hear(event);
+        // test
+        listener.hear(event);
 
-	// verify
-	verify(mockConsentExtension, times(0)).handleEventHubBoot(any(Event.class));
-}
+        // verify
+        verify(mockConsentExtension, times(0)).handleEventHubBoot(any(Event.class));
+    }
 }
