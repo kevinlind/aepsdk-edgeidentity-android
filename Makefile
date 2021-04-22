@@ -18,6 +18,12 @@ clean:
 	(rm -rf $(AAR_FILE_DIR))
 	(./code/gradlew -p code clean)
 
+format:
+	./code/gradlew -p code/edgeidentity spotlessApply
+
+check:
+	./code/gradlew -p code/edgeidentity spotlessCheck
+
 ci-build: create-ci
 	(mkdir -p ci/assemble)
 
