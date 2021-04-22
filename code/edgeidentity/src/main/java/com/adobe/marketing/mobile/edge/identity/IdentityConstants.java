@@ -43,7 +43,7 @@ final class IdentityConstants {
 	final class EventNames {
 		static final String IDENTITY_REQUEST_IDENTITY_ECID = "Edge Identity Request ECID";
 		static final String IDENTITY_RESPONSE_CONTENT_ONE_TIME =
-				"Edge Identity Response Content One Time";
+			"Edge Identity Response Content One Time";
 		static final String UPDATE_IDENTITIES = "Edge Identity Update Identities";
 		static final String REMOVE_IDENTITIES = "Edge Identity Remove Identities";
 		static final String REQUEST_IDENTITIES = "Edge Identity Request Identities";

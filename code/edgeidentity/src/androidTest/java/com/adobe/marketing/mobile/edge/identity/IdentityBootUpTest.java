@@ -29,8 +29,8 @@ public class IdentityBootUpTest {
 
 	@Rule
 	public RuleChain rule =
-			RuleChain.outerRule(new TestHelper.SetupCoreRule())
-					.around(new TestHelper.RegisterMonitorExtensionRule());
+		RuleChain.outerRule(new TestHelper.SetupCoreRule())
+		.around(new TestHelper.RegisterMonitorExtensionRule());
 
 	// --------------------------------------------------------------------------------------------
 	// OnBootUp
@@ -40,16 +40,16 @@ public class IdentityBootUpTest {
 	public void testOnBootUp_LoadsAllIdentitiesFromPreference() throws Exception {
 		// test
 		setEdgeIdentityPersistence(
-				createXDMIdentityMap(
-						new IdentityTestUtil.TestItem("ECID", "primaryECID"),
-						new IdentityTestUtil.TestItem("ECID", "secondaryECID"),
-						new IdentityTestUtil.TestItem("Email", "example@email.com"),
-						new IdentityTestUtil.TestItem("UserId", "JohnDoe")));
+			createXDMIdentityMap(
+				new IdentityTestUtil.TestItem("ECID", "primaryECID"),
+				new IdentityTestUtil.TestItem("ECID", "secondaryECID"),
+				new IdentityTestUtil.TestItem("Email", "example@email.com"),
+				new IdentityTestUtil.TestItem("UserId", "JohnDoe")));
 		registerEdgeIdentityExtension();
 
 		// verify xdm shared state
 		Map<String, String> xdmSharedState =
-				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+			flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
 		assertEquals(12, xdmSharedState.size()); // 3 for ECID and 3 for secondaryECID + 6
 		assertEquals("primaryECID", xdmSharedState.get("identityMap.ECID[0].id"));
 		assertEquals("secondaryECID", xdmSharedState.get("identityMap.ECID[1].id"));
@@ -58,11 +58,11 @@ public class IdentityBootUpTest {
 
 		// verify persisted data
 		final String persistedJson =
-				TestPersistenceHelper.readPersistedData(
-						IdentityConstants.DataStoreKey.DATASTORE_NAME,
-						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+			TestPersistenceHelper.readPersistedData(
+				IdentityConstants.DataStoreKey.DATASTORE_NAME,
+				IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
 		Map<String, String> persistedMap =
-				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+			flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
 		assertEquals(12, persistedMap.size()); // 3 for ECID and 3 for secondaryECID + 6
 	}
 

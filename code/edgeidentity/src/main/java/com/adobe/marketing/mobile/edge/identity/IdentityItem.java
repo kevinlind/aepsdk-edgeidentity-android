@@ -34,14 +34,14 @@ public final class IdentityItem {
 	* @throws IllegalArgumentException if id is null
 	*/
 	public IdentityItem(
-			final String id, final AuthenticatedState authenticatedState, final boolean primary) {
+		final String id, final AuthenticatedState authenticatedState, final boolean primary) {
 		if (id == null) {
 			throw new IllegalArgumentException("id must be non-null");
 		}
 
 		this.id = id;
 		this.authenticatedState =
-				authenticatedState != null ? authenticatedState : AuthenticatedState.AMBIGUOUS;
+			authenticatedState != null ? authenticatedState : AuthenticatedState.AMBIGUOUS;
 		this.primary = primary;
 	}
 
@@ -82,21 +82,21 @@ public final class IdentityItem {
 	@Override
 	public String toString() {
 		return "{"
-				+ "\""
-				+ IdentityConstants.XDMKeys.ID
-				+ "\": \""
-				+ id
-				+ "\", "
-				+ "\""
-				+ IdentityConstants.XDMKeys.AUTHENTICATED_STATE
-				+ "\": \""
-				+ (authenticatedState == null ? "null" : authenticatedState.getName())
-				+ "\", "
-				+ "\""
-				+ IdentityConstants.XDMKeys.PRIMARY
-				+ "\": "
-				+ primary
-				+ "}";
+			   + "\""
+			   + IdentityConstants.XDMKeys.ID
+			   + "\": \""
+			   + id
+			   + "\", "
+			   + "\""
+			   + IdentityConstants.XDMKeys.AUTHENTICATED_STATE
+			   + "\": \""
+			   + (authenticatedState == null ? "null" : authenticatedState.getName())
+			   + "\", "
+			   + "\""
+			   + IdentityConstants.XDMKeys.PRIMARY
+			   + "\": "
+			   + primary
+			   + "}";
 	}
 
 	@Override
@@ -138,8 +138,8 @@ public final class IdentityItem {
 			map.put(IdentityConstants.XDMKeys.AUTHENTICATED_STATE, authenticatedState.getName());
 		} else {
 			map.put(
-					IdentityConstants.XDMKeys.AUTHENTICATED_STATE,
-					AuthenticatedState.AMBIGUOUS.getName());
+				IdentityConstants.XDMKeys.AUTHENTICATED_STATE,
+				AuthenticatedState.AMBIGUOUS.getName());
 		}
 
 		map.put(IdentityConstants.XDMKeys.PRIMARY, primary);
@@ -160,8 +160,8 @@ public final class IdentityItem {
 		try {
 			final String id = (String) data.get(IdentityConstants.XDMKeys.ID);
 			AuthenticatedState authenticatedState =
-					AuthenticatedState.fromString(
-							(String) data.get(IdentityConstants.XDMKeys.AUTHENTICATED_STATE));
+				AuthenticatedState.fromString(
+					(String) data.get(IdentityConstants.XDMKeys.AUTHENTICATED_STATE));
 
 			if (authenticatedState == null) {
 				authenticatedState = AuthenticatedState.AMBIGUOUS;
@@ -176,9 +176,9 @@ public final class IdentityItem {
 			return new IdentityItem(id, authenticatedState, primary);
 		} catch (ClassCastException e) {
 			MobileCore.log(
-					LoggingMode.DEBUG,
-					LOG_TAG,
-					"IdentityItem - Failed to create IdentityItem from data.");
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"IdentityItem - Failed to create IdentityItem from data.");
 			return null;
 		}
 	}

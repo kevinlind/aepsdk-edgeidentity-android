@@ -35,22 +35,22 @@ public class ListenerEventHubBootTest {
 		mockConsentExtension = Mockito.mock(IdentityExtension.class);
 		MobileCore.start(null);
 		listener =
-				spy(
-						new ListenerEventHubBoot(
-								null,
-								IdentityConstants.EventType.HUB,
-								IdentityConstants.EventSource.BOOTED));
+			spy(
+				new ListenerEventHubBoot(
+					null,
+					IdentityConstants.EventType.HUB,
+					IdentityConstants.EventSource.BOOTED));
 	}
 
 	@Test
 	public void testHear() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Event Hub Boot",
-								IdentityConstants.EventType.HUB,
-								IdentityConstants.EventSource.BOOTED)
-						.build();
+			new Event.Builder(
+			"Event Hub Boot",
+			IdentityConstants.EventType.HUB,
+			IdentityConstants.EventSource.BOOTED)
+		.build();
 		doReturn(mockConsentExtension).when(listener).getIdentityExtension();
 
 		// test
@@ -64,11 +64,11 @@ public class ListenerEventHubBootTest {
 	public void testHear_WhenParentExtensionNull() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Event Hub Boot",
-								IdentityConstants.EventType.HUB,
-								IdentityConstants.EventSource.BOOTED)
-						.build();
+			new Event.Builder(
+			"Event Hub Boot",
+			IdentityConstants.EventType.HUB,
+			IdentityConstants.EventSource.BOOTED)
+		.build();
 		doReturn(null).when(listener).getIdentityExtension();
 
 		// test

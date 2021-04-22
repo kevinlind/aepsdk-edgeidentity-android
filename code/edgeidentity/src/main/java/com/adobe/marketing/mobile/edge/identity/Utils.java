@@ -84,11 +84,11 @@ class Utils {
 				value = jsonObject.get(nextKey);
 			} catch (JSONException e) {
 				MobileCore.log(
-						LoggingMode.DEBUG,
-						LOG_TAG,
-						"Utils(toMap) - Unable to convert jsonObject to Map for key "
-								+ nextKey
-								+ ", skipping.");
+					LoggingMode.DEBUG,
+					LOG_TAG,
+					"Utils(toMap) - Unable to convert jsonObject to Map for key "
+					+ nextKey
+					+ ", skipping.");
 			}
 
 			if (value == null) {
@@ -134,11 +134,11 @@ class Utils {
 				value = jsonArray.get(i);
 			} catch (JSONException e) {
 				MobileCore.log(
-						LoggingMode.DEBUG,
-						LOG_TAG,
-						"Utils(toList) - Unable to convert jsonObject to List for index "
-								+ i
-								+ ", skipping.");
+					LoggingMode.DEBUG,
+					LOG_TAG,
+					"Utils(toList) - Unable to convert jsonObject to List for index "
+					+ i
+					+ ", skipping.");
 			}
 
 			if (value == null) {
@@ -174,9 +174,9 @@ class Utils {
 			return Utils.toMap(new JSONObject(map));
 		} catch (NullPointerException e) {
 			MobileCore.log(
-					LoggingMode.DEBUG,
-					LOG_TAG,
-					"Utils(deepCopy) - Unable to deep copy map, json string invalid.");
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"Utils(deepCopy) - Unable to deep copy map, json string invalid.");
 		}
 
 		return null;

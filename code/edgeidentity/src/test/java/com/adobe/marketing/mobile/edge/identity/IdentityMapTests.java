@@ -49,7 +49,7 @@ public class IdentityMapTests {
 	public void test_getIdentityItemsForNamespace() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
 		// namespace "Login"
 
 		// test
@@ -68,7 +68,7 @@ public class IdentityMapTests {
 	public void test_getIdentityItemsForNamespace_InvalidInputs() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
 		// namespace "Login"
 
 		// test 1
@@ -88,7 +88,7 @@ public class IdentityMapTests {
 	public void test_RemoveItem() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
 		// namespace "Login"
 
 		// test
@@ -113,7 +113,7 @@ public class IdentityMapTests {
 	public void test_RemoveItem_InvalidInputs() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
 		// namespace "Login"
 
 		// test
@@ -131,7 +131,7 @@ public class IdentityMapTests {
 	public void test_merge() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
 		// namespace "Login"
 
 		// test
@@ -150,12 +150,12 @@ public class IdentityMapTests {
 		// setup
 		IdentityMap baseMap = new IdentityMap();
 		baseMap.addItem(
-				new IdentityItem("California", AuthenticatedState.LOGGED_OUT, false), "location");
+			new IdentityItem("California", AuthenticatedState.LOGGED_OUT, false), "location");
 
 		// test
 		IdentityMap newMap = new IdentityMap();
 		newMap.addItem(
-				new IdentityItem("California", AuthenticatedState.AUTHENTICATED, true), "location");
+			new IdentityItem("California", AuthenticatedState.AUTHENTICATED, true), "location");
 		baseMap.merge(newMap);
 
 		// verify the existing identityMap is unchanged
@@ -163,7 +163,7 @@ public class IdentityMapTests {
 		assertEquals(3, flattenedMap.size());
 		assertEquals("California", flattenedMap.get("identityMap.location[0].id"));
 		assertEquals(
-				"authenticated", flattenedMap.get("identityMap.location[0].authenticatedState"));
+			"authenticated", flattenedMap.get("identityMap.location[0].authenticatedState"));
 		assertEquals("true", flattenedMap.get("identityMap.location[0].primary"));
 	}
 
@@ -171,7 +171,7 @@ public class IdentityMapTests {
 	public void test_merge_EmptyIdentityMap() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "Location", 3 items with
 		// namespace "Login"
 
 		// test
@@ -187,7 +187,7 @@ public class IdentityMapTests {
 	public void test_merge_nullMap() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
 		// namespace "login"
 
 		// test
@@ -203,7 +203,7 @@ public class IdentityMapTests {
 	public void test_removeAllIdentityItemsForNamespace() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
 		// namespace "login"
 
 		// test
@@ -219,7 +219,7 @@ public class IdentityMapTests {
 	public void test_removeAllIdentityItemsForNamespace_InvalidNamespace() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
 		// namespace "login"
 
 		// test
@@ -246,7 +246,7 @@ public class IdentityMapTests {
 	public void test_remove() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
 		// namespace "login"
 		IdentityMap tobeRemovedMap = new IdentityMap();
 		tobeRemovedMap.addItem(new IdentityItem("Student"), "login");
@@ -265,7 +265,7 @@ public class IdentityMapTests {
 	public void test_remove_NullAndEmptyMap() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
 		// namespace "login"
 
 		// test
@@ -282,7 +282,7 @@ public class IdentityMapTests {
 	public void test_remove_nonexistentNamespaceAndItems() {
 		// setup
 		IdentityMap sampleUserMap =
-				buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
+			buildSampleIdentityMap(); // 2 items with namespace "location", 3 items with
 		// namespace "login"
 		IdentityMap tobeRemovedMap = new IdentityMap();
 		tobeRemovedMap.addItem(new IdentityItem("California"), "nonexistentNamespace");
@@ -301,28 +301,28 @@ public class IdentityMapTests {
 	public void test_FromData() throws Exception {
 		// setup
 		final String jsonStr =
-				"{\n"
-						+ "      \"identityMap\": {\n"
-						+ "        \"ECID\": [\n"
-						+ "          {\n"
-						+ "            \"id\":"
-						+ "randomECID"
-						+ ",\n"
-						+ "            \"authenticatedState\": \"ambiguous\",\n"
-						+ "            \"primary\": true\n"
-						+ "          }\n"
-						+ "        ],\n"
-						+ "        \"USERID\": [\n"
-						+ "          {\n"
-						+ "            \"id\":"
-						+ "someUserID"
-						+ ",\n"
-						+ "            \"authenticatedState\": \"authenticated\",\n"
-						+ "            \"primary\": false\n"
-						+ "          }\n"
-						+ "        ]\n"
-						+ "      }\n"
-						+ "}";
+			"{\n"
+			+ "      \"identityMap\": {\n"
+			+ "        \"ECID\": [\n"
+			+ "          {\n"
+			+ "            \"id\":"
+			+ "randomECID"
+			+ ",\n"
+			+ "            \"authenticatedState\": \"ambiguous\",\n"
+			+ "            \"primary\": true\n"
+			+ "          }\n"
+			+ "        ],\n"
+			+ "        \"USERID\": [\n"
+			+ "          {\n"
+			+ "            \"id\":"
+			+ "someUserID"
+			+ ",\n"
+			+ "            \"authenticatedState\": \"authenticated\",\n"
+			+ "            \"primary\": false\n"
+			+ "          }\n"
+			+ "        ]\n"
+			+ "      }\n"
+			+ "}";
 
 		final JSONObject jsonObject = new JSONObject(jsonStr);
 		final Map<String, Object> xdmData = Utils.toMap(jsonObject);
@@ -351,15 +351,15 @@ public class IdentityMapTests {
 		// setup
 		// ECID is map instead of list
 		final String invalidJsonStr =
-				"{\n"
-						+ "  \"identityMap\": {\n"
-						+ "    \"ECID\": {\n"
-						+ "        \"id\": \"randomECID\",\n"
-						+ "        \"authenticatedState\": \"ambiguous\",\n"
-						+ "        \"primary\": true\n"
-						+ "    }\n"
-						+ "  }\n"
-						+ "}";
+			"{\n"
+			+ "  \"identityMap\": {\n"
+			+ "    \"ECID\": {\n"
+			+ "        \"id\": \"randomECID\",\n"
+			+ "        \"authenticatedState\": \"ambiguous\",\n"
+			+ "        \"primary\": true\n"
+			+ "    }\n"
+			+ "  }\n"
+			+ "}";
 
 		final JSONObject jsonObject = new JSONObject(invalidJsonStr);
 		final Map<String, Object> xdmData = Utils.toMap(jsonObject);
@@ -397,13 +397,13 @@ public class IdentityMapTests {
 		// User Login Identity Items
 		IdentityItem email = new IdentityItem("john@doe", AuthenticatedState.AUTHENTICATED, true);
 		IdentityItem userName =
-				new IdentityItem("John Doe", AuthenticatedState.AUTHENTICATED, false);
+			new IdentityItem("John Doe", AuthenticatedState.AUTHENTICATED, false);
 		IdentityItem accountType =
-				new IdentityItem("Student", AuthenticatedState.AUTHENTICATED, false);
+			new IdentityItem("Student", AuthenticatedState.AUTHENTICATED, false);
 
 		// User Location Address Identity Items
 		IdentityItem street =
-				new IdentityItem("280 Highway Lane", AuthenticatedState.AMBIGUOUS, false);
+			new IdentityItem("280 Highway Lane", AuthenticatedState.AMBIGUOUS, false);
 		IdentityItem state = new IdentityItem("California", AuthenticatedState.AMBIGUOUS, false);
 
 		IdentityMap adobeIdentityMap = new IdentityMap();

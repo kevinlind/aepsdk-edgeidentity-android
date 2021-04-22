@@ -23,13 +23,13 @@ import java.util.Map;
 class IdentityProperties {
 
 	private static final List<String> reservedNamespaces =
-			new ArrayList<String>() {
-				{
-					add(IdentityConstants.Namespaces.ECID);
-					add(IdentityConstants.Namespaces.GAID);
-					add(IdentityConstants.Namespaces.IDFA);
-				}
-			};
+	new ArrayList<String>() {
+		{
+			add(IdentityConstants.Namespaces.ECID);
+			add(IdentityConstants.Namespaces.GAID);
+			add(IdentityConstants.Namespaces.IDFA);
+		}
+	};
 
 	private final IdentityMap identityMap;
 
@@ -46,9 +46,9 @@ class IdentityProperties {
 	IdentityProperties(final Map<String, Object> xdmData) {
 		IdentityMap map = IdentityMap.fromXDMMap(xdmData);
 		this.identityMap =
-				map == null
-						? new IdentityMap()
-						: map; // always keep an empty identity map so there is no need for null
+			map == null
+			? new IdentityMap()
+			: map; // always keep an empty identity map so there is no need for null
 		// check
 	}
 
@@ -73,7 +73,7 @@ class IdentityProperties {
 		} else {
 			// And add the new primary Ecid as a first element of Identity map
 			final IdentityItem newECIDItem =
-					new IdentityItem(newEcid.toString(), AuthenticatedState.AMBIGUOUS, false);
+				new IdentityItem(newEcid.toString(), AuthenticatedState.AMBIGUOUS, false);
 			identityMap.addItem(newECIDItem, IdentityConstants.Namespaces.ECID, true);
 		}
 	}
@@ -85,7 +85,7 @@ class IdentityProperties {
 	*/
 	ECID getECID() {
 		final List<IdentityItem> ecidItems =
-				identityMap.getIdentityItemsForNamespace(IdentityConstants.Namespaces.ECID);
+			identityMap.getIdentityItemsForNamespace(IdentityConstants.Namespaces.ECID);
 
 		if (ecidItems != null
 				&& !ecidItems.isEmpty()
@@ -114,17 +114,17 @@ class IdentityProperties {
 		// do not set secondary ECID if primary ECID is not set
 		if (getECID() == null) {
 			MobileCore.log(
-					LoggingMode.DEBUG,
-					LOG_TAG,
-					"Cannot set secondary ECID value as no primary ECID exists.");
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"Cannot set secondary ECID value as no primary ECID exists.");
 			return;
 		}
 
 		// add the new secondary ECID to Identity map
 		if (newSecondaryEcid != null) {
 			final IdentityItem newSecondaryECIDItem =
-					new IdentityItem(
-							newSecondaryEcid.toString(), AuthenticatedState.AMBIGUOUS, false);
+				new IdentityItem(
+				newSecondaryEcid.toString(), AuthenticatedState.AMBIGUOUS, false);
 			identityMap.addItem(newSecondaryECIDItem, IdentityConstants.Namespaces.ECID);
 		}
 	}
@@ -136,7 +136,7 @@ class IdentityProperties {
 	*/
 	ECID getECIDSecondary() {
 		final List<IdentityItem> ecidItems =
-				identityMap.getIdentityItemsForNamespace(IdentityConstants.Namespaces.ECID);
+			identityMap.getIdentityItemsForNamespace(IdentityConstants.Namespaces.ECID);
 
 		if (ecidItems != null
 				&& ecidItems.size() > 1
@@ -203,11 +203,11 @@ class IdentityProperties {
 		for (final String reservedNamespace : reservedNamespaces) {
 			if (identityMap.clearItemsForNamespace(reservedNamespace)) {
 				MobileCore.log(
-						LoggingMode.DEBUG,
-						LOG_TAG,
-						String.format(
-								"IdentityProperties - Updating/Removing identifiers in namespace %s is not allowed.",
-								reservedNamespace));
+					LoggingMode.DEBUG,
+					LOG_TAG,
+					String.format(
+						"IdentityProperties - Updating/Removing identifiers in namespace %s is not allowed.",
+						reservedNamespace));
 			}
 		}
 	}

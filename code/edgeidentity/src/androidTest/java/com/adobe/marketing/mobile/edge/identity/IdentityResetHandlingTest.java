@@ -32,8 +32,8 @@ public class IdentityResetHandlingTest {
 
 	@Rule
 	public RuleChain rule =
-			RuleChain.outerRule(new TestHelper.SetupCoreRule())
-					.around(new TestHelper.RegisterMonitorExtensionRule());
+		RuleChain.outerRule(new TestHelper.SetupCoreRule())
+		.around(new TestHelper.RegisterMonitorExtensionRule());
 
 	// --------------------------------------------------------------------------------------------
 	// Setup
@@ -69,24 +69,24 @@ public class IdentityResetHandlingTest {
 
 		// verify edge reset complete event dispatched
 		List<Event> resetCompleteEvent =
-				getDispatchedEventsWith(
-						IdentityConstants.EventType.EDGE_IDENTITY,
-						IdentityConstants.EventSource.RESET_COMPLETE);
+			getDispatchedEventsWith(
+				IdentityConstants.EventType.EDGE_IDENTITY,
+				IdentityConstants.EventSource.RESET_COMPLETE);
 		assertEquals(1, resetCompleteEvent.size());
 
 		// verify shared state is updated
 		Map<String, String> xdmSharedState =
-				flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+			flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
 		assertEquals(3, xdmSharedState.size()); // 3 for ECID still exists
 		assertEquals(newECID, xdmSharedState.get("identityMap.ECID[0].id"));
 
 		// verify persistence is updated
 		final String persistedJson =
-				TestPersistenceHelper.readPersistedData(
-						IdentityConstants.DataStoreKey.DATASTORE_NAME,
-						IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
+			TestPersistenceHelper.readPersistedData(
+				IdentityConstants.DataStoreKey.DATASTORE_NAME,
+				IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
 		Map<String, String> persistedMap =
-				flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+			flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
 		assertEquals(3, persistedMap.size()); // 3 for ECID
 		assertEquals(newECID, persistedMap.get("identityMap.ECID[0].id"));
 	}

@@ -59,11 +59,11 @@ class IdentityTestUtil {
 				value = jsonObject.get(nextKey);
 			} catch (JSONException e) {
 				MobileCore.log(
-						LoggingMode.DEBUG,
-						"Functional Test",
-						"toMap - Unable to convert jsonObject to Map for key "
-								+ nextKey
-								+ ", skipping.");
+					LoggingMode.DEBUG,
+					"Functional Test",
+					"toMap - Unable to convert jsonObject to Map for key "
+					+ nextKey
+					+ ", skipping.");
 			}
 
 			if (value == null) {
@@ -109,11 +109,11 @@ class IdentityTestUtil {
 				value = jsonArray.get(i);
 			} catch (JSONException e) {
 				MobileCore.log(
-						LoggingMode.DEBUG,
-						"Functional Test",
-						"toList - Unable to convert jsonObject to List for index "
-								+ i
-								+ ", skipping.");
+					LoggingMode.DEBUG,
+					"Functional Test",
+					"toList - Unable to convert jsonObject to List for index "
+					+ i
+					+ ", skipping.");
 			}
 
 			if (value == null) {
@@ -170,11 +170,11 @@ class IdentityTestUtil {
 	/** Helper method to build remove identity request event with XDM formatted Identity map */
 	static Event buildRemoveIdentityRequest(final Map<String, Object> map) {
 		return new Event.Builder(
-						"Remove Identity Event",
-						IdentityConstants.EventType.EDGE_IDENTITY,
-						IdentityConstants.EventSource.REMOVE_IDENTITY)
-				.setEventData(map)
-				.build();
+				   "Remove Identity Event",
+				   IdentityConstants.EventType.EDGE_IDENTITY,
+				   IdentityConstants.EventSource.REMOVE_IDENTITY)
+			   .setEventData(map)
+			   .build();
 	}
 
 	/**
@@ -189,11 +189,11 @@ class IdentityTestUtil {
 	/** Helper method to build update identity request event with XDM formatted Identity map */
 	static Event buildUpdateIdentityRequest(final Map<String, Object> map) {
 		return new Event.Builder(
-						"Update Identity Event",
-						IdentityConstants.EventType.EDGE_IDENTITY,
-						IdentityConstants.EventSource.UPDATE_IDENTITY)
-				.setEventData(map)
-				.build();
+				   "Update Identity Event",
+				   IdentityConstants.EventType.EDGE_IDENTITY,
+				   IdentityConstants.EventSource.UPDATE_IDENTITY)
+			   .setEventData(map)
+			   .build();
 	}
 
 	/**
@@ -229,9 +229,9 @@ class IdentityTestUtil {
 			return payloadMap;
 		} catch (IOException e) {
 			MobileCore.log(
-					LoggingMode.ERROR,
-					"FunctionalTestUtils",
-					"Failed to parse JSON object to tree structure.");
+				LoggingMode.ERROR,
+				"FunctionalTestUtils",
+				"Failed to parse JSON object to tree structure.");
 		}
 
 		return Collections.emptyMap();
@@ -298,21 +298,21 @@ class IdentityTestUtil {
 			final HashMap<String, Object> getIdentityResponse = new HashMap<>();
 			final ADBCountDownLatch latch = new ADBCountDownLatch(1);
 			Identity.getIdentities(
-					new AdobeCallbackWithError<IdentityMap>() {
-						@Override
-						public void call(final IdentityMap identities) {
-							getIdentityResponse.put(
-									IdentityTestConstants.GetIdentitiesHelper.VALUE, identities);
-							latch.countDown();
-						}
+			new AdobeCallbackWithError<IdentityMap>() {
+				@Override
+				public void call(final IdentityMap identities) {
+					getIdentityResponse.put(
+						IdentityTestConstants.GetIdentitiesHelper.VALUE, identities);
+					latch.countDown();
+				}
 
-						@Override
-						public void fail(final AdobeError adobeError) {
-							getIdentityResponse.put(
-									IdentityTestConstants.GetIdentitiesHelper.ERROR, adobeError);
-							latch.countDown();
-						}
-					});
+				@Override
+				public void fail(final AdobeError adobeError) {
+					getIdentityResponse.put(
+						IdentityTestConstants.GetIdentitiesHelper.ERROR, adobeError);
+					latch.countDown();
+				}
+			});
 			latch.await();
 
 			return getIdentityResponse;
@@ -326,18 +326,18 @@ class IdentityTestUtil {
 			final HashMap<String, String> getExperienceCloudIdResponse = new HashMap<>();
 			final ADBCountDownLatch latch = new ADBCountDownLatch(1);
 			Identity.getExperienceCloudId(
-					new AdobeCallback<String>() {
-						@Override
-						public void call(final String ecid) {
-							getExperienceCloudIdResponse.put(
-									IdentityTestConstants.GetIdentitiesHelper.VALUE, ecid);
-							latch.countDown();
-						}
-					});
+			new AdobeCallback<String>() {
+				@Override
+				public void call(final String ecid) {
+					getExperienceCloudIdResponse.put(
+						IdentityTestConstants.GetIdentitiesHelper.VALUE, ecid);
+					latch.countDown();
+				}
+			});
 			latch.await();
 
 			return getExperienceCloudIdResponse.get(
-					IdentityTestConstants.GetIdentitiesHelper.VALUE);
+					   IdentityTestConstants.GetIdentitiesHelper.VALUE);
 		} catch (Exception exp) {
 			return null;
 		}
@@ -348,10 +348,10 @@ class IdentityTestUtil {
 	}
 
 	static IdentityMap CreateIdentityMap(
-			final String namespace,
-			final String id,
-			final AuthenticatedState state,
-			final boolean isPrimary) {
+		final String namespace,
+		final String id,
+		final AuthenticatedState state,
+		final boolean isPrimary) {
 		IdentityMap map = new IdentityMap();
 		IdentityItem item = new IdentityItem(id, state, isPrimary);
 		map.addItem(item, namespace);

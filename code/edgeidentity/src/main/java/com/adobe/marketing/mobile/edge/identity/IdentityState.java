@@ -52,33 +52,33 @@ class IdentityState {
 		// Generate new ECID on first launch
 		if (identityProperties.getECID() == null) {
 			final ECID directIdentityEcid =
-					IdentityStorageService.loadEcidFromDirectIdentityPersistence();
+				IdentityStorageService.loadEcidFromDirectIdentityPersistence();
 
 			if (directIdentityEcid == null) {
 				identityProperties.setECID(new ECID());
 				MobileCore.log(
-						LoggingMode.DEBUG,
-						LOG_TAG,
-						"IdentityState - Generating new ECID on bootup '"
-								+ identityProperties.getECID().toString()
-								+ "'");
+					LoggingMode.DEBUG,
+					LOG_TAG,
+					"IdentityState - Generating new ECID on bootup '"
+					+ identityProperties.getECID().toString()
+					+ "'");
 			} else {
 				identityProperties.setECID(directIdentityEcid);
 				MobileCore.log(
-						LoggingMode.DEBUG,
-						LOG_TAG,
-						"IdentityState -  On bootup Loading ECID from direct Identity extension '"
-								+ directIdentityEcid
-								+ "'");
+					LoggingMode.DEBUG,
+					LOG_TAG,
+					"IdentityState -  On bootup Loading ECID from direct Identity extension '"
+					+ directIdentityEcid
+					+ "'");
 			}
 
 			IdentityStorageService.savePropertiesToPersistence(identityProperties);
 		}
 
 		MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"IdentityState - Edge Identity has successfully booted up");
+			LoggingMode.DEBUG,
+			LOG_TAG,
+			"IdentityState - Edge Identity has successfully booted up");
 	}
 
 	/**
@@ -142,11 +142,11 @@ class IdentityState {
 		identityProperties.setECIDSecondary(legacyEcid);
 		IdentityStorageService.savePropertiesToPersistence(identityProperties);
 		MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"IdentityState - Identity direct ECID updated to '"
-						+ legacyEcid
-						+ "', updating the IdentityMap");
+			LoggingMode.DEBUG,
+			LOG_TAG,
+			"IdentityState - Identity direct ECID updated to '"
+			+ legacyEcid
+			+ "', updating the IdentityMap");
 		return true;
 	}
 }

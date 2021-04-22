@@ -32,17 +32,17 @@ class MonitorExtension extends Extension {
 		super(extensionApi);
 
 		extensionApi.registerWildcardListener(
-				MonitorListener.class,
-				new ExtensionErrorCallback<ExtensionError>() {
-					@Override
-					public void error(ExtensionError extensionError) {
-						MobileCore.log(
-								LoggingMode.ERROR,
-								LOG_TAG,
-								"There was an error registering Extension Listener: "
-										+ extensionError.getErrorName());
-					}
-				});
+			MonitorListener.class,
+		new ExtensionErrorCallback<ExtensionError>() {
+			@Override
+			public void error(ExtensionError extensionError) {
+				MobileCore.log(
+					LoggingMode.ERROR,
+					LOG_TAG,
+					"There was an error registering Extension Listener: "
+					+ extensionError.getErrorName());
+			}
+		});
 	}
 
 	@Override
@@ -52,38 +52,38 @@ class MonitorExtension extends Extension {
 
 	public static void registerExtension() {
 		MobileCore.registerExtension(
-				MonitorExtension.class,
-				new ExtensionErrorCallback<ExtensionError>() {
-					@Override
-					public void error(ExtensionError extensionError) {
-						MobileCore.log(
-								LoggingMode.ERROR,
-								LOG_TAG,
-								"There was an error registering the Monitor extension: "
-										+ extensionError.getErrorName());
-					}
-				});
+			MonitorExtension.class,
+		new ExtensionErrorCallback<ExtensionError>() {
+			@Override
+			public void error(ExtensionError extensionError) {
+				MobileCore.log(
+					LoggingMode.ERROR,
+					LOG_TAG,
+					"There was an error registering the Monitor extension: "
+					+ extensionError.getErrorName());
+			}
+		});
 	}
 
 	/** Unregister the Monitor Extension from the EventHub. */
 	public static void unregisterExtension() {
 		Event event =
-				new Event.Builder(
-								"Unregister Monitor Extension Request",
-								TestConstants.EventType.MONITOR,
-								TestConstants.EventSource.UNREGISTER)
-						.build();
+			new Event.Builder(
+			"Unregister Monitor Extension Request",
+			TestConstants.EventType.MONITOR,
+			TestConstants.EventSource.UNREGISTER)
+		.build();
 		MobileCore.dispatchEvent(
-				event,
-				new ExtensionErrorCallback<ExtensionError>() {
-					@Override
-					public void error(ExtensionError extensionError) {
-						MobileCore.log(
-								LoggingMode.ERROR,
-								LOG_TAG,
-								"Failed to unregister Monitor extension.");
-					}
-				});
+			event,
+		new ExtensionErrorCallback<ExtensionError>() {
+			@Override
+			public void error(ExtensionError extensionError) {
+				MobileCore.log(
+					LoggingMode.ERROR,
+					LOG_TAG,
+					"Failed to unregister Monitor extension.");
+			}
+		});
 	}
 
 	/**
@@ -123,10 +123,10 @@ class MonitorExtension extends Extension {
 	public void wildcardProcessor(final Event event) {
 		if (TestConstants.EventType.MONITOR.equalsIgnoreCase(event.getType())) {
 			if (TestConstants.EventSource.SHARED_STATE_REQUEST.equalsIgnoreCase(
-					event.getSource())) {
+						event.getSource())) {
 				processSharedStateRequest(event);
 			} else if (TestConstants.EventSource.XDM_SHARED_STATE_REQUEST.equalsIgnoreCase(
-					event.getSource())) {
+						   event.getSource())) {
 				processXDMSharedStateRequest(event);
 			} else if (TestConstants.EventSource.UNREGISTER.equalsIgnoreCase(event.getSource())) {
 				processUnregisterRequest(event);
@@ -182,13 +182,13 @@ class MonitorExtension extends Extension {
 		EventData sharedState = getApi().getXDMSharedEventState(stateOwner, event);
 
 		Event responseEvent =
-				new Event.Builder(
-								"Get Shared State Response",
-								TestConstants.EventType.MONITOR,
-								TestConstants.EventSource.XDM_SHARED_STATE_RESPONSE)
-						.setEventData(sharedState == null ? null : sharedState.toObjectMap())
-						.setPairID(event.getResponsePairID())
-						.build();
+			new Event.Builder(
+			"Get Shared State Response",
+			TestConstants.EventType.MONITOR,
+			TestConstants.EventSource.XDM_SHARED_STATE_RESPONSE)
+		.setEventData(sharedState == null ? null : sharedState.toObjectMap())
+		.setPairID(event.getResponsePairID())
+		.build();
 
 		MobileCore.dispatchResponseEvent(responseEvent, event, null);
 	}
@@ -215,13 +215,13 @@ class MonitorExtension extends Extension {
 		EventData sharedState = getApi().getSharedEventState(stateOwner, event);
 
 		Event responseEvent =
-				new Event.Builder(
-								"Get Shared State Response",
-								TestConstants.EventType.MONITOR,
-								TestConstants.EventSource.SHARED_STATE_RESPONSE)
-						.setEventData(sharedState == null ? null : sharedState.toObjectMap())
-						.setPairID(event.getResponsePairID())
-						.build();
+			new Event.Builder(
+			"Get Shared State Response",
+			TestConstants.EventType.MONITOR,
+			TestConstants.EventSource.SHARED_STATE_RESPONSE)
+		.setEventData(sharedState == null ? null : sharedState.toObjectMap())
+		.setPairID(event.getResponsePairID())
+		.build();
 
 		MobileCore.dispatchResponseEvent(responseEvent, event, null);
 	}

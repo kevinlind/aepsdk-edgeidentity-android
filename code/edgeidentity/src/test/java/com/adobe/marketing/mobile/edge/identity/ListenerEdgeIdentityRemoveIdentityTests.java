@@ -35,22 +35,22 @@ public class ListenerEdgeIdentityRemoveIdentityTests {
 		mockIdentityExtension = Mockito.mock(IdentityExtension.class);
 		MobileCore.start(null);
 		listener =
-				spy(
-						new ListenerEdgeIdentityRemoveIdentity(
-								null,
-								IdentityConstants.EventType.EDGE_IDENTITY,
-								IdentityConstants.EventSource.REMOVE_IDENTITY));
+			spy(
+				new ListenerEdgeIdentityRemoveIdentity(
+					null,
+					IdentityConstants.EventType.EDGE_IDENTITY,
+					IdentityConstants.EventSource.REMOVE_IDENTITY));
 	}
 
 	@Test
 	public void testHear() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Remove Identity",
-								IdentityConstants.EventType.EDGE_IDENTITY,
-								IdentityConstants.EventSource.REMOVE_IDENTITY)
-						.build();
+			new Event.Builder(
+			"Remove Identity",
+			IdentityConstants.EventType.EDGE_IDENTITY,
+			IdentityConstants.EventSource.REMOVE_IDENTITY)
+		.build();
 		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
 		// test
@@ -64,11 +64,11 @@ public class ListenerEdgeIdentityRemoveIdentityTests {
 	public void testHear_WhenParentExtensionNull() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Remove Identity",
-								IdentityConstants.EventType.EDGE_IDENTITY,
-								IdentityConstants.EventSource.REMOVE_IDENTITY)
-						.build();
+			new Event.Builder(
+			"Remove Identity",
+			IdentityConstants.EventType.EDGE_IDENTITY,
+			IdentityConstants.EventSource.REMOVE_IDENTITY)
+		.build();
 		doReturn(null).when(listener).getIdentityExtension();
 
 		// test

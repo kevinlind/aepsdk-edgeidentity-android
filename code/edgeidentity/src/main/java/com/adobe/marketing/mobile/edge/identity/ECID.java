@@ -28,11 +28,11 @@ final class ECID {
 		final long least = uuid.getLeastSignificantBits();
 		// return formatted string, flip negatives if they're set.
 		ecidString =
-				String.format(
-						Locale.US,
-						"%019d%019d",
-						most < 0 ? -most : most,
-						least < 0 ? -least : least);
+			String.format(
+				Locale.US,
+				"%019d%019d",
+				most < 0 ? -most : most,
+				least < 0 ? -least : least);
 	}
 
 	/**
@@ -44,9 +44,9 @@ final class ECID {
 	ECID(final String ecidString) {
 		if (Utils.isNullOrEmpty(ecidString)) {
 			MobileCore.log(
-					LoggingMode.DEBUG,
-					IdentityConstants.LOG_TAG,
-					"Creating an ECID with null or empty ecidString is not allowed, generating a new ECID.");
+				LoggingMode.DEBUG,
+				IdentityConstants.LOG_TAG,
+				"Creating an ECID with null or empty ecidString is not allowed, generating a new ECID.");
 			this.ecidString = new ECID().toString();
 			return;
 		}

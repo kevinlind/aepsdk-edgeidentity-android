@@ -90,11 +90,11 @@ public class IdentityPropertiesTests {
 	public void testConstruct_FromXDMData_LoadingDataFromPersistence() {
 		// setup
 		Map<String, Object> persistedIdentifiers =
-				createXDMIdentityMap(
-						new TestItem("UserId", "secretID"),
-						new TestItem("PushId", "token"),
-						new TestECIDItem("primaryECID"),
-						new TestECIDItem("secondaryECID"));
+			createXDMIdentityMap(
+				new TestItem("UserId", "secretID"),
+				new TestItem("PushId", "token"),
+				new TestECIDItem("primaryECID"),
+				new TestECIDItem("secondaryECID"));
 
 		// test
 		IdentityProperties props = new IdentityProperties(persistedIdentifiers);
@@ -196,9 +196,9 @@ public class IdentityPropertiesTests {
 	public void test_setECIDSecondary_NullRemovesFromIdentityMap() {
 		// setup
 		IdentityProperties props =
-				new IdentityProperties(
-						createXDMIdentityMap(
-								new TestECIDItem("primary"), new TestECIDItem("secondary")));
+			new IdentityProperties(
+			createXDMIdentityMap(
+				new TestECIDItem("primary"), new TestECIDItem("secondary")));
 		assertEquals(6, flattenMap(props.toXDMData(false)).size());
 
 		// test
@@ -213,9 +213,9 @@ public class IdentityPropertiesTests {
 	public void test_clearPrimaryECID_alsoClearsSecondaryECID() {
 		// setup
 		IdentityProperties props =
-				new IdentityProperties(
-						createXDMIdentityMap(
-								new TestECIDItem("primary"), new TestECIDItem("secondary")));
+			new IdentityProperties(
+			createXDMIdentityMap(
+				new TestECIDItem("primary"), new TestECIDItem("secondary")));
 
 		// test
 		props.setECID(null);
@@ -230,9 +230,9 @@ public class IdentityPropertiesTests {
 	public void test_setPrimaryECIDPreservesSecondaryECID() {
 		// setup
 		IdentityProperties props =
-				new IdentityProperties(
-						createXDMIdentityMap(
-								new TestECIDItem("primary"), new TestECIDItem("secondary")));
+			new IdentityProperties(
+			createXDMIdentityMap(
+				new TestECIDItem("primary"), new TestECIDItem("secondary")));
 
 		// test
 		props.setECID(new ECID("primaryAgain"));

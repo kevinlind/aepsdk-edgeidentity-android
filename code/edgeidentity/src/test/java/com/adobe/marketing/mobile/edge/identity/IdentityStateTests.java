@@ -52,9 +52,9 @@ public class IdentityStateTests {
 		Mockito.when(MobileCore.getApplication()).thenReturn(mockApplication);
 		Mockito.when(mockApplication.getApplicationContext()).thenReturn(mockContext);
 		Mockito.when(
-						mockContext.getSharedPreferences(
-								IdentityConstants.DataStoreKey.DATASTORE_NAME, 0))
-				.thenReturn(mockSharedPreference);
+			mockContext.getSharedPreferences(
+				IdentityConstants.DataStoreKey.DATASTORE_NAME, 0))
+		.thenReturn(mockSharedPreference);
 		Mockito.when(mockSharedPreference.edit()).thenReturn(mockSharedPreferenceEditor);
 	}
 
@@ -77,13 +77,13 @@ public class IdentityStateTests {
 		// setup
 		ECID ecid = new ECID();
 		Mockito.when(
-						mockContext.getSharedPreferences(
-								IdentityConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE_NAME, 0))
-				.thenReturn(mockSharedPreference);
+			mockContext.getSharedPreferences(
+				IdentityConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE_NAME, 0))
+		.thenReturn(mockSharedPreference);
 		Mockito.when(
-						mockSharedPreference.getString(
-								IdentityConstants.DataStoreKey.IDENTITY_DIRECT_ECID_KEY, null))
-				.thenReturn(ecid.toString());
+			mockSharedPreference.getString(
+				IdentityConstants.DataStoreKey.IDENTITY_DIRECT_ECID_KEY, null))
+		.thenReturn(ecid.toString());
 
 		IdentityState state = new IdentityState(new IdentityProperties());
 		assertNull(state.getIdentityProperties().getECID());
@@ -100,13 +100,13 @@ public class IdentityStateTests {
 	public void testBootUp_GeneratesECIDWhenDirectECIDIsNull() {
 		// setup
 		Mockito.when(
-						mockContext.getSharedPreferences(
-								IdentityConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE_NAME, 0))
-				.thenReturn(mockSharedPreference);
+			mockContext.getSharedPreferences(
+				IdentityConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE_NAME, 0))
+		.thenReturn(mockSharedPreference);
 		Mockito.when(
-						mockSharedPreference.getString(
-								IdentityConstants.DataStoreKey.IDENTITY_DIRECT_ECID_KEY, null))
-				.thenReturn(null);
+			mockSharedPreference.getString(
+				IdentityConstants.DataStoreKey.IDENTITY_DIRECT_ECID_KEY, null))
+		.thenReturn(null);
 
 		IdentityState state = new IdentityState(new IdentityProperties());
 		assertNull(state.getIdentityProperties().getECID());
@@ -129,9 +129,9 @@ public class IdentityStateTests {
 		final JSONObject jsonObject = new JSONObject(persistedProps.toXDMData(false));
 		final String propsJSON = jsonObject.toString();
 		Mockito.when(
-						mockSharedPreference.getString(
-								IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
-				.thenReturn(propsJSON);
+			mockSharedPreference.getString(
+				IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
+		.thenReturn(propsJSON);
 
 		// test
 		state.bootUp();
@@ -139,8 +139,8 @@ public class IdentityStateTests {
 
 		// verify
 		assertEquals(
-				persistedProps.getECID().toString(),
-				state.getIdentityProperties().getECID().toString());
+			persistedProps.getECID().toString(),
+			state.getIdentityProperties().getECID().toString());
 	}
 
 	@Test
@@ -148,13 +148,13 @@ public class IdentityStateTests {
 		// setup
 		ECID ecid = new ECID();
 		Mockito.when(
-						mockContext.getSharedPreferences(
-								IdentityConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE_NAME, 0))
-				.thenReturn(mockSharedPreference);
+			mockContext.getSharedPreferences(
+				IdentityConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE_NAME, 0))
+		.thenReturn(mockSharedPreference);
 		Mockito.when(
-						mockSharedPreference.getString(
-								IdentityConstants.DataStoreKey.IDENTITY_DIRECT_ECID_KEY, null))
-				.thenReturn(ecid.toString());
+			mockSharedPreference.getString(
+				IdentityConstants.DataStoreKey.IDENTITY_DIRECT_ECID_KEY, null))
+		.thenReturn(ecid.toString());
 
 		IdentityState state = new IdentityState(new IdentityProperties());
 
@@ -163,9 +163,9 @@ public class IdentityStateTests {
 		final JSONObject jsonObject = new JSONObject(persistedProps.toXDMData(false));
 		final String propsJSON = jsonObject.toString();
 		Mockito.when(
-						mockSharedPreference.getString(
-								IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
-				.thenReturn(propsJSON);
+			mockSharedPreference.getString(
+				IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
+		.thenReturn(propsJSON);
 
 		// test
 		state.bootUp();
@@ -188,13 +188,13 @@ public class IdentityStateTests {
 
 		// verify
 		assertNotEquals(
-				existingEcid,
-				state.getIdentityProperties().getECID()); // ECID should be regenerated
+			existingEcid,
+			state.getIdentityProperties().getECID()); // ECID should be regenerated
 		assertFalse(
-				state.getIdentityProperties()
-						.getECID()
-						.toString()
-						.isEmpty()); // ECID should not be empty
+			state.getIdentityProperties()
+			.getECID()
+			.toString()
+			.isEmpty()); // ECID should not be empty
 		assertNull(state.getIdentityProperties().getECIDSecondary()); // should be cleared
 		verify(mockSharedPreferenceEditor, Mockito.times(1)).apply(); // should save to data store
 	}

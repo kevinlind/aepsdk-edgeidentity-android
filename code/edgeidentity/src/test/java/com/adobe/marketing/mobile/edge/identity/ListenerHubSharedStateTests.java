@@ -34,22 +34,22 @@ public class ListenerHubSharedStateTests {
 		mockIdentityExtension = Mockito.mock(IdentityExtension.class);
 		MobileCore.start(null);
 		listener =
-				spy(
-						new ListenerHubSharedState(
-								null,
-								IdentityConstants.EventType.HUB,
-								IdentityConstants.EventSource.SHARED_STATE));
+			spy(
+				new ListenerHubSharedState(
+					null,
+					IdentityConstants.EventType.HUB,
+					IdentityConstants.EventSource.SHARED_STATE));
 	}
 
 	@Test
 	public void testHear() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Shared State Change",
-								IdentityConstants.EventType.HUB,
-								IdentityConstants.EventSource.SHARED_STATE)
-						.build();
+			new Event.Builder(
+			"Shared State Change",
+			IdentityConstants.EventType.HUB,
+			IdentityConstants.EventSource.SHARED_STATE)
+		.build();
 		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
 		// test
@@ -63,11 +63,11 @@ public class ListenerHubSharedStateTests {
 	public void testHear_WhenParentExtensionNull() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Shared State Change",
-								IdentityConstants.EventType.HUB,
-								IdentityConstants.EventSource.SHARED_STATE)
-						.build();
+			new Event.Builder(
+			"Shared State Change",
+			IdentityConstants.EventType.HUB,
+			IdentityConstants.EventSource.SHARED_STATE)
+		.build();
 		doReturn(null).when(listener).getIdentityExtension();
 
 		// test

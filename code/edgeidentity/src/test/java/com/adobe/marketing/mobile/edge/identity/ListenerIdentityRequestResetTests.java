@@ -34,22 +34,22 @@ public class ListenerIdentityRequestResetTests {
 		mockIdentityExtension = Mockito.mock(IdentityExtension.class);
 		MobileCore.start(null);
 		listener =
-				spy(
-						new ListenerIdentityRequestReset(
-								null,
-								IdentityConstants.EventType.EDGE_IDENTITY,
-								IdentityConstants.EventSource.REQUEST_RESET));
+			spy(
+				new ListenerIdentityRequestReset(
+					null,
+					IdentityConstants.EventType.EDGE_IDENTITY,
+					IdentityConstants.EventSource.REQUEST_RESET));
 	}
 
 	@Test
 	public void testHear() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Request Identity",
-								IdentityConstants.EventType.IDENTITY,
-								IdentityConstants.EventSource.REQUEST_IDENTITY)
-						.build();
+			new Event.Builder(
+			"Request Identity",
+			IdentityConstants.EventType.IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY)
+		.build();
 		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
 		// test
@@ -63,11 +63,11 @@ public class ListenerIdentityRequestResetTests {
 	public void testHear_WhenParentExtensionNull() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Request Identity",
-								IdentityConstants.EventType.IDENTITY,
-								IdentityConstants.EventSource.REQUEST_IDENTITY)
-						.build();
+			new Event.Builder(
+			"Request Identity",
+			IdentityConstants.EventType.IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY)
+		.build();
 		doReturn(null).when(listener).getIdentityExtension();
 
 		// test

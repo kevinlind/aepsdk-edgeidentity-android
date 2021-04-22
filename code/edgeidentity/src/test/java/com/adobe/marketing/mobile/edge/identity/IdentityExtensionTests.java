@@ -67,9 +67,9 @@ public class IdentityExtensionTests {
 		Mockito.when(MobileCore.getApplication()).thenReturn(mockApplication);
 		Mockito.when(mockApplication.getApplicationContext()).thenReturn(mockContext);
 		Mockito.when(
-						mockContext.getSharedPreferences(
-								IdentityConstants.DataStoreKey.DATASTORE_NAME, 0))
-				.thenReturn(mockSharedPreference);
+			mockContext.getSharedPreferences(
+				IdentityConstants.DataStoreKey.DATASTORE_NAME, 0))
+		.thenReturn(mockSharedPreference);
 		Mockito.when(mockSharedPreference.edit()).thenReturn(mockSharedPreferenceEditor);
 
 		extension = new IdentityExtension(mockExtensionApi);
@@ -82,62 +82,62 @@ public class IdentityExtensionTests {
 	public void test_ListenersRegistration() {
 		// setup
 		final ArgumentCaptor<ExtensionErrorCallback> callbackCaptor =
-				ArgumentCaptor.forClass(ExtensionErrorCallback.class);
+			ArgumentCaptor.forClass(ExtensionErrorCallback.class);
 
 		// test
 		// constructor is called in the setup step()
 
 		// verify 2 listeners are registered
 		verify(mockExtensionApi, times(7))
-				.registerEventListener(
-						anyString(),
-						anyString(),
-						any(Class.class),
-						any(ExtensionErrorCallback.class));
+		.registerEventListener(
+			anyString(),
+			anyString(),
+			any(Class.class),
+			any(ExtensionErrorCallback.class));
 
 		// verify listeners are registered with correct event source and type
 		verify(mockExtensionApi, times(1))
-				.registerEventListener(
-						eq(IdentityConstants.EventType.EDGE_IDENTITY),
-						eq(IdentityConstants.EventSource.REQUEST_IDENTITY),
-						eq(ListenerEdgeIdentityRequestIdentity.class),
-						callbackCaptor.capture());
+		.registerEventListener(
+			eq(IdentityConstants.EventType.EDGE_IDENTITY),
+			eq(IdentityConstants.EventSource.REQUEST_IDENTITY),
+			eq(ListenerEdgeIdentityRequestIdentity.class),
+			callbackCaptor.capture());
 		verify(mockExtensionApi, times(1))
-				.registerEventListener(
-						eq(IdentityConstants.EventType.GENERIC_IDENTITY),
-						eq(IdentityConstants.EventSource.REQUEST_CONTENT),
-						eq(ListenerGenericIdentityRequestContent.class),
-						callbackCaptor.capture());
+		.registerEventListener(
+			eq(IdentityConstants.EventType.GENERIC_IDENTITY),
+			eq(IdentityConstants.EventSource.REQUEST_CONTENT),
+			eq(ListenerGenericIdentityRequestContent.class),
+			callbackCaptor.capture());
 		verify(mockExtensionApi, times(1))
-				.registerEventListener(
-						eq(IdentityConstants.EventType.EDGE_IDENTITY),
-						eq(IdentityConstants.EventSource.UPDATE_IDENTITY),
-						eq(ListenerEdgeIdentityUpdateIdentity.class),
-						callbackCaptor.capture());
+		.registerEventListener(
+			eq(IdentityConstants.EventType.EDGE_IDENTITY),
+			eq(IdentityConstants.EventSource.UPDATE_IDENTITY),
+			eq(ListenerEdgeIdentityUpdateIdentity.class),
+			callbackCaptor.capture());
 		verify(mockExtensionApi, times(1))
-				.registerEventListener(
-						eq(IdentityConstants.EventType.EDGE_IDENTITY),
-						eq(IdentityConstants.EventSource.REMOVE_IDENTITY),
-						eq(ListenerEdgeIdentityRemoveIdentity.class),
-						callbackCaptor.capture());
+		.registerEventListener(
+			eq(IdentityConstants.EventType.EDGE_IDENTITY),
+			eq(IdentityConstants.EventSource.REMOVE_IDENTITY),
+			eq(ListenerEdgeIdentityRemoveIdentity.class),
+			callbackCaptor.capture());
 		verify(mockExtensionApi, times(1))
-				.registerEventListener(
-						eq(IdentityConstants.EventType.GENERIC_IDENTITY),
-						eq(IdentityConstants.EventSource.REQUEST_RESET),
-						eq(ListenerIdentityRequestReset.class),
-						callbackCaptor.capture());
+		.registerEventListener(
+			eq(IdentityConstants.EventType.GENERIC_IDENTITY),
+			eq(IdentityConstants.EventSource.REQUEST_RESET),
+			eq(ListenerIdentityRequestReset.class),
+			callbackCaptor.capture());
 		verify(mockExtensionApi, times(1))
-				.registerEventListener(
-						eq(IdentityConstants.EventType.HUB),
-						eq(IdentityConstants.EventSource.SHARED_STATE),
-						eq(ListenerHubSharedState.class),
-						callbackCaptor.capture());
+		.registerEventListener(
+			eq(IdentityConstants.EventType.HUB),
+			eq(IdentityConstants.EventSource.SHARED_STATE),
+			eq(ListenerHubSharedState.class),
+			callbackCaptor.capture());
 		verify(mockExtensionApi, times(1))
-				.registerEventListener(
-						eq(IdentityConstants.EventType.HUB),
-						eq(IdentityConstants.EventSource.BOOTED),
-						eq(ListenerEventHubBoot.class),
-						callbackCaptor.capture());
+		.registerEventListener(
+			eq(IdentityConstants.EventType.HUB),
+			eq(IdentityConstants.EventSource.BOOTED),
+			eq(ListenerEventHubBoot.class),
+			callbackCaptor.capture());
 
 		// verify the callback
 		ExtensionErrorCallback extensionErrorCallback = callbackCaptor.getValue();
@@ -155,9 +155,9 @@ public class IdentityExtensionTests {
 		// test
 		String moduleName = extension.getName();
 		assertEquals(
-				"getName should return the correct module name",
-				IdentityConstants.EXTENSION_NAME,
-				moduleName);
+			"getName should return the correct module name",
+			IdentityConstants.EXTENSION_NAME,
+			moduleName);
 	}
 
 	// ========================================================================================
@@ -168,9 +168,9 @@ public class IdentityExtensionTests {
 		// test
 		String moduleVersion = extension.getVersion();
 		assertEquals(
-				"getVersion should return the correct module version",
-				IdentityConstants.EXTENSION_VERSION,
-				moduleVersion);
+			"getVersion should return the correct module version",
+			IdentityConstants.EXTENSION_VERSION,
+			moduleVersion);
 	}
 
 	// ========================================================================================
@@ -187,11 +187,11 @@ public class IdentityExtensionTests {
 	public void test_handleIdentityRequest_generatesNewECID() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Test event",
-								IdentityConstants.EventType.EDGE_IDENTITY,
-								IdentityConstants.EventSource.REQUEST_IDENTITY)
-						.build();
+			new Event.Builder(
+			"Test event",
+			IdentityConstants.EventType.EDGE_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY)
+		.build();
 		final ArgumentCaptor<Event> responseEventCaptor = ArgumentCaptor.forClass(Event.class);
 		final ArgumentCaptor<Event> requestEventCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -201,9 +201,9 @@ public class IdentityExtensionTests {
 		// verify
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
 		MobileCore.dispatchResponseEvent(
-				responseEventCaptor.capture(),
-				requestEventCaptor.capture(),
-				any(ExtensionErrorCallback.class));
+			responseEventCaptor.capture(),
+			requestEventCaptor.capture(),
+			any(ExtensionErrorCallback.class));
 
 		// verify response event containing ECID is dispatched
 		Event ecidResponseEvent = responseEventCaptor.getAllValues().get(0);
@@ -221,11 +221,11 @@ public class IdentityExtensionTests {
 		setupExistingIdentityProps(existingECID);
 
 		Event event =
-				new Event.Builder(
-								"Test event",
-								IdentityConstants.EventType.EDGE_IDENTITY,
-								IdentityConstants.EventSource.REQUEST_IDENTITY)
-						.build();
+			new Event.Builder(
+			"Test event",
+			IdentityConstants.EventType.EDGE_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY)
+		.build();
 		final ArgumentCaptor<Event> responseEventCaptor = ArgumentCaptor.forClass(Event.class);
 		final ArgumentCaptor<Event> requestEventCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -236,9 +236,9 @@ public class IdentityExtensionTests {
 		// verify
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
 		MobileCore.dispatchResponseEvent(
-				responseEventCaptor.capture(),
-				requestEventCaptor.capture(),
-				any(ExtensionErrorCallback.class));
+			responseEventCaptor.capture(),
+			requestEventCaptor.capture(),
+			any(ExtensionErrorCallback.class));
 
 		// verify response event containing ECID is dispatched
 		Event ecidResponseEvent = responseEventCaptor.getAllValues().get(0);
@@ -253,14 +253,14 @@ public class IdentityExtensionTests {
 		// setup
 		IdentityProperties emptyProps = new IdentityProperties();
 		PowerMockito.stub(PowerMockito.method(IdentityState.class, "getIdentityProperties"))
-				.toReturn(emptyProps);
+		.toReturn(emptyProps);
 
 		Event event =
-				new Event.Builder(
-								"Test event",
-								IdentityConstants.EventType.EDGE_IDENTITY,
-								IdentityConstants.EventSource.REQUEST_IDENTITY)
-						.build();
+			new Event.Builder(
+			"Test event",
+			IdentityConstants.EventType.EDGE_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY)
+		.build();
 		final ArgumentCaptor<Event> responseEventCaptor = ArgumentCaptor.forClass(Event.class);
 		final ArgumentCaptor<Event> requestEventCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -270,9 +270,9 @@ public class IdentityExtensionTests {
 		// verify
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
 		MobileCore.dispatchResponseEvent(
-				responseEventCaptor.capture(),
-				requestEventCaptor.capture(),
-				any(ExtensionErrorCallback.class));
+			responseEventCaptor.capture(),
+			requestEventCaptor.capture(),
+			any(ExtensionErrorCallback.class));
 
 		// verify response event containing ECID is dispatched
 		Event ecidResponseEvent = responseEventCaptor.getAllValues().get(0);
@@ -286,11 +286,11 @@ public class IdentityExtensionTests {
 	public void test_handleIdentityResetRequest() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Test event",
-								IdentityConstants.EventType.GENERIC_IDENTITY,
-								IdentityConstants.EventSource.REQUEST_RESET)
-						.build();
+			new Event.Builder(
+			"Test event",
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_RESET)
+		.build();
 		final ArgumentCaptor<Map> sharedStateCaptor = ArgumentCaptor.forClass(Map.class);
 		final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -299,8 +299,8 @@ public class IdentityExtensionTests {
 
 		// verify
 		verify(mockExtensionApi, times(1))
-				.setXDMSharedEventState(
-						sharedStateCaptor.capture(), eq(event), any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			sharedStateCaptor.capture(), eq(event), any(ExtensionErrorCallback.class));
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
 		MobileCore.dispatchEvent(eventCaptor.capture(), any(ExtensionErrorCallback.class));
 
@@ -311,43 +311,43 @@ public class IdentityExtensionTests {
 	@Test
 	public void test_handleHubSharedState_updateLegacyEcidOnDirectIdentityStateChange() {
 		when(mockExtensionApi.getSharedEventState(
-						eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
-						any(Event.class),
-						any(ExtensionErrorCallback.class)))
-				.thenReturn(
-						new HashMap<String, Object>() {
-							{
-								put(IdentityConstants.EventDataKeys.VISITOR_ID_ECID, "1234");
-							}
-						});
+				 eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
+				 any(Event.class),
+				 any(ExtensionErrorCallback.class)))
+		.thenReturn(
+		new HashMap<String, Object>() {
+			{
+				put(IdentityConstants.EventDataKeys.VISITOR_ID_ECID, "1234");
+			}
+		});
 
 		Event event =
-				new Event.Builder(
-								"Test event",
-								IdentityConstants.EventType.HUB,
-								IdentityConstants.EventSource.SHARED_STATE)
-						.setEventData(
-								new HashMap<String, Object>() {
-									{
-										put(
-												IdentityConstants.EventDataKeys.STATE_OWNER,
-												IdentityConstants.SharedStateKeys.IDENTITY_DIRECT);
-									}
-								})
-						.build();
+			new Event.Builder(
+			"Test event",
+			IdentityConstants.EventType.HUB,
+			IdentityConstants.EventSource.SHARED_STATE)
+		.setEventData(
+		new HashMap<String, Object>() {
+			{
+				put(
+					IdentityConstants.EventDataKeys.STATE_OWNER,
+					IdentityConstants.SharedStateKeys.IDENTITY_DIRECT);
+			}
+		})
+		.build();
 
 		extension.handleHubSharedState(event);
 
 		final ArgumentCaptor<Map<String, Object>> sharedStateCaptor =
-				ArgumentCaptor.forClass(Map.class);
+			ArgumentCaptor.forClass(Map.class);
 		verify(mockExtensionApi, times(1))
-				.setXDMSharedEventState(
-						sharedStateCaptor.capture(), eq(event), any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			sharedStateCaptor.capture(), eq(event), any(ExtensionErrorCallback.class));
 		Map<String, Object> sharedState = sharedStateCaptor.getValue();
 		assertEquals(
-				"1234",
-				flattenMap(sharedState)
-						.get("identityMap.ECID[1].id")); // Legacy ECID is set as a secondary ECID
+			"1234",
+			flattenMap(sharedState)
+			.get("identityMap.ECID[1].id")); // Legacy ECID is set as a secondary ECID
 
 		final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 		// verify no event dispatched
@@ -359,154 +359,154 @@ public class IdentityExtensionTests {
 	@Test
 	public void test_handleHubSharedState_noOpNullEvent() {
 		when(mockExtensionApi.getSharedEventState(
-						eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
-						any(Event.class),
-						any(ExtensionErrorCallback.class)))
-				.thenReturn(
-						new HashMap<String, Object>() {
-							{
-								put(IdentityConstants.EventDataKeys.VISITOR_ID_ECID, "1234");
-							}
-						});
+				 eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
+				 any(Event.class),
+				 any(ExtensionErrorCallback.class)))
+		.thenReturn(
+		new HashMap<String, Object>() {
+			{
+				put(IdentityConstants.EventDataKeys.VISITOR_ID_ECID, "1234");
+			}
+		});
 
 		extension.handleHubSharedState(null);
 
 		verify(mockExtensionApi, times(0))
-				.setXDMSharedEventState(
-						any(Map.class), any(Event.class), any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			any(Map.class), any(Event.class), any(ExtensionErrorCallback.class));
 	}
 
 	@Test
 	public void test_handleHubSharedState_noOpNullEventData() {
 		when(mockExtensionApi.getSharedEventState(
-						eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
-						any(Event.class),
-						any(ExtensionErrorCallback.class)))
-				.thenReturn(
-						new HashMap<String, Object>() {
-							{
-								put(IdentityConstants.EventDataKeys.VISITOR_ID_ECID, "1234");
-							}
-						});
+				 eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
+				 any(Event.class),
+				 any(ExtensionErrorCallback.class)))
+		.thenReturn(
+		new HashMap<String, Object>() {
+			{
+				put(IdentityConstants.EventDataKeys.VISITOR_ID_ECID, "1234");
+			}
+		});
 
 		Event event =
-				new Event.Builder(
-								"Test event",
-								IdentityConstants.EventType.HUB,
-								IdentityConstants.EventSource.SHARED_STATE)
-						.build();
+			new Event.Builder(
+			"Test event",
+			IdentityConstants.EventType.HUB,
+			IdentityConstants.EventSource.SHARED_STATE)
+		.build();
 
 		extension.handleHubSharedState(event);
 
 		verify(mockExtensionApi, times(0))
-				.setXDMSharedEventState(
-						any(Map.class), any(Event.class), any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			any(Map.class), any(Event.class), any(ExtensionErrorCallback.class));
 	}
 
 	@Test
 	public void test_handleHubSharedState_noOpNotDirectIdentityStateChange() {
 		when(mockExtensionApi.getSharedEventState(
-						eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
-						any(Event.class),
-						any(ExtensionErrorCallback.class)))
-				.thenReturn(
-						new HashMap<String, Object>() {
-							{
-								put(IdentityConstants.EventDataKeys.VISITOR_ID_ECID, "1234");
-							}
-						});
+				 eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
+				 any(Event.class),
+				 any(ExtensionErrorCallback.class)))
+		.thenReturn(
+		new HashMap<String, Object>() {
+			{
+				put(IdentityConstants.EventDataKeys.VISITOR_ID_ECID, "1234");
+			}
+		});
 
 		Event event =
-				new Event.Builder(
-								"Test event",
-								IdentityConstants.EventType.HUB,
-								IdentityConstants.EventSource.SHARED_STATE)
-						.setEventData(
-								new HashMap<String, Object>() {
-									{
-										put(
-												IdentityConstants.EventDataKeys.STATE_OWNER,
-												"com.adobe.module.configuration");
-									}
-								})
-						.build();
+			new Event.Builder(
+			"Test event",
+			IdentityConstants.EventType.HUB,
+			IdentityConstants.EventSource.SHARED_STATE)
+		.setEventData(
+		new HashMap<String, Object>() {
+			{
+				put(
+					IdentityConstants.EventDataKeys.STATE_OWNER,
+					"com.adobe.module.configuration");
+			}
+		})
+		.build();
 
 		extension.handleHubSharedState(event);
 
 		verify(mockExtensionApi, times(0))
-				.setXDMSharedEventState(
-						any(Map.class), any(Event.class), any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			any(Map.class), any(Event.class), any(ExtensionErrorCallback.class));
 	}
 
 	@Test
 	public void test_handleHubSharedState_noOpNoDirectIdentitySharedState() {
 		when(mockExtensionApi.getSharedEventState(
-						eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
-						any(Event.class),
-						any(ExtensionErrorCallback.class)))
-				.thenReturn(null);
+				 eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
+				 any(Event.class),
+				 any(ExtensionErrorCallback.class)))
+		.thenReturn(null);
 
 		Event event =
-				new Event.Builder(
-								"Test event",
-								IdentityConstants.EventType.HUB,
-								IdentityConstants.EventSource.SHARED_STATE)
-						.setEventData(
-								new HashMap<String, Object>() {
-									{
-										put(
-												IdentityConstants.EventDataKeys.STATE_OWNER,
-												IdentityConstants.SharedStateKeys.IDENTITY_DIRECT);
-									}
-								})
-						.build();
+			new Event.Builder(
+			"Test event",
+			IdentityConstants.EventType.HUB,
+			IdentityConstants.EventSource.SHARED_STATE)
+		.setEventData(
+		new HashMap<String, Object>() {
+			{
+				put(
+					IdentityConstants.EventDataKeys.STATE_OWNER,
+					IdentityConstants.SharedStateKeys.IDENTITY_DIRECT);
+			}
+		})
+		.build();
 
 		extension.handleHubSharedState(event);
 
 		verify(mockExtensionApi, times(0))
-				.setXDMSharedEventState(
-						any(Map.class), any(Event.class), any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			any(Map.class), any(Event.class), any(ExtensionErrorCallback.class));
 	}
 
 	@Test
 	public void test_handleHubSharedState_doesNotShareStateIfLegacyECIDDoesNotChange() {
 		when(mockExtensionApi.getSharedEventState(
-						eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
-						any(Event.class),
-						any(ExtensionErrorCallback.class)))
-				.thenReturn(
-						new HashMap<String, Object>() {
-							{
-								put(IdentityConstants.EventDataKeys.VISITOR_ID_ECID, "1234");
-							}
-						});
+				 eq(IdentityConstants.SharedStateKeys.IDENTITY_DIRECT),
+				 any(Event.class),
+				 any(ExtensionErrorCallback.class)))
+		.thenReturn(
+		new HashMap<String, Object>() {
+			{
+				put(IdentityConstants.EventDataKeys.VISITOR_ID_ECID, "1234");
+			}
+		});
 
 		Event event =
-				new Event.Builder(
-								"Test event",
-								IdentityConstants.EventType.HUB,
-								IdentityConstants.EventSource.SHARED_STATE)
-						.setEventData(
-								new HashMap<String, Object>() {
-									{
-										put(
-												IdentityConstants.EventDataKeys.STATE_OWNER,
-												IdentityConstants.SharedStateKeys.IDENTITY_DIRECT);
-									}
-								})
-						.build();
+			new Event.Builder(
+			"Test event",
+			IdentityConstants.EventType.HUB,
+			IdentityConstants.EventSource.SHARED_STATE)
+		.setEventData(
+		new HashMap<String, Object>() {
+			{
+				put(
+					IdentityConstants.EventDataKeys.STATE_OWNER,
+					IdentityConstants.SharedStateKeys.IDENTITY_DIRECT);
+			}
+		})
+		.build();
 
 		// IdentityState.updateLegacyExperienceCloudId returns false if Legacy ECID was not updated
 		PowerMockito.stub(PowerMockito.method(IdentityState.class, "updateLegacyExperienceCloudId"))
-				.toReturn(false);
+		.toReturn(false);
 
 		extension.handleHubSharedState(event);
 
 		final ArgumentCaptor<Map<String, Object>> sharedStateCaptor =
-				ArgumentCaptor.forClass(Map.class);
+			ArgumentCaptor.forClass(Map.class);
 		verify(mockExtensionApi, times(0))
-				.setXDMSharedEventState(
-						sharedStateCaptor.capture(), eq(event), any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			sharedStateCaptor.capture(), eq(event), any(ExtensionErrorCallback.class));
 	}
 
 	// ========================================================================================
@@ -526,10 +526,10 @@ public class IdentityExtensionTests {
 
 		// verify shared state
 		verify(mockExtensionApi, times(1))
-				.setXDMSharedEventState(
-						sharedStateCaptor.capture(),
-						eq(updateIdentityEvent),
-						any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			sharedStateCaptor.capture(),
+			eq(updateIdentityEvent),
+			any(ExtensionErrorCallback.class));
 		Map<String, String> sharedState = flattenMap(sharedStateCaptor.getValue());
 		assertEquals("secretID", sharedState.get("identityMap.UserId[0].id"));
 		assertEquals("ambiguous", sharedState.get("identityMap.UserId[0].authenticatedState"));
@@ -542,11 +542,11 @@ public class IdentityExtensionTests {
 
 		// verify persistence
 		verify(mockSharedPreferenceEditor, times(2))
-				.putString(
-						eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES),
-						persistenceValueCaptor.capture());
+		.putString(
+			eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES),
+			persistenceValueCaptor.capture());
 		Map<String, String> persistedData =
-				flattenJSONString(persistenceValueCaptor.getAllValues().get(1));
+			flattenJSONString(persistenceValueCaptor.getAllValues().get(1));
 		assertEquals("secretID", persistedData.get("identityMap.UserId[0].id"));
 		assertEquals("ambiguous", persistedData.get("identityMap.UserId[0].authenticatedState"));
 		assertEquals("false", persistedData.get("identityMap.UserId[0].primary"));
@@ -556,13 +556,13 @@ public class IdentityExtensionTests {
 	public void test_handleUpdateIdentities_DoNotUpdateReservedNamespace() throws Exception {
 		// setup
 		Map<String, Object> identityXDM =
-				createXDMIdentityMap(
-						new TestItem("ECID", "somevalue"),
-						new TestItem("GAID", "somevalue"),
-						new TestItem("IDFA", "somevalue"),
-						new TestItem("IdFA", "somevalue"),
-						new TestItem("gaid", "somevalue"),
-						new TestItem("UserId", "somevalue"));
+			createXDMIdentityMap(
+				new TestItem("ECID", "somevalue"),
+				new TestItem("GAID", "somevalue"),
+				new TestItem("IDFA", "somevalue"),
+				new TestItem("IdFA", "somevalue"),
+				new TestItem("gaid", "somevalue"),
+				new TestItem("UserId", "somevalue"));
 
 		final ArgumentCaptor<Map> sharedStateCaptor = ArgumentCaptor.forClass(Map.class);
 		final ArgumentCaptor<String> persistenceValueCaptor = ArgumentCaptor.forClass(String.class);
@@ -573,48 +573,48 @@ public class IdentityExtensionTests {
 
 		// verify shared state
 		verify(mockExtensionApi, times(1))
-				.setXDMSharedEventState(
-						sharedStateCaptor.capture(),
-						eq(updateIdentityEvent),
-						any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			sharedStateCaptor.capture(),
+			eq(updateIdentityEvent),
+			any(ExtensionErrorCallback.class));
 		Map<String, String> sharedState = flattenMap(sharedStateCaptor.getValue());
 		assertEquals(
-				6,
-				sharedState
-						.size()); // 6 represents id, primary and authState of USERID identifier and
+			6,
+			sharedState
+			.size()); // 6 represents id, primary and authState of USERID identifier and
 		// generated ECID
 		assertEquals("somevalue", sharedState.get("identityMap.UserId[0].id"));
 		assertNotEquals(
-				"somevalue",
-				sharedState.get("identityMap.ECID[0].id")); // verify that the ECID is not disturbed
+			"somevalue",
+			sharedState.get("identityMap.ECID[0].id")); // verify that the ECID is not disturbed
 
 		// verify persistence
 		verify(mockSharedPreferenceEditor, times(2))
-				.putString(
-						eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES),
-						persistenceValueCaptor.capture());
+		.putString(
+			eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES),
+			persistenceValueCaptor.capture());
 		Map<String, String> persistedData =
-				flattenJSONString(persistenceValueCaptor.getAllValues().get(1));
+			flattenJSONString(persistenceValueCaptor.getAllValues().get(1));
 		assertEquals(
-				6,
-				persistedData
-						.size()); // 3 represents id, primary and authState of USERID identifier and
+			6,
+			persistedData
+			.size()); // 3 represents id, primary and authState of USERID identifier and
 		// generated ECID
 		assertEquals("somevalue", persistedData.get("identityMap.UserId[0].id"));
 		assertNotEquals(
-				"somevalue",
-				persistedData.get(
-						"identityMap.ECID[0].id")); // verify that the ECID is not disturbed
+			"somevalue",
+			persistedData.get(
+				"identityMap.ECID[0].id")); // verify that the ECID is not disturbed
 	}
 
 	@Test
 	public void test_handleUpdateIdentities_CaseSensitiveNamespace_OnCustomIdentifiers()
-			throws Exception {
+	throws Exception {
 		// setup
 		Map<String, Object> identityXDM =
-				createXDMIdentityMap(
-						new TestItem("pushToken", "somevalue"),
-						new TestItem("PUSHTOKEN", "SOMEVALUE"));
+			createXDMIdentityMap(
+				new TestItem("pushToken", "somevalue"),
+				new TestItem("PUSHTOKEN", "SOMEVALUE"));
 		Event updateIdentityEvent = buildUpdateIdentityRequest(identityXDM);
 		extension.handleUpdateIdentities(updateIdentityEvent);
 
@@ -622,10 +622,10 @@ public class IdentityExtensionTests {
 
 		// verify shared state
 		verify(mockExtensionApi, times(1))
-				.setXDMSharedEventState(
-						sharedStateCaptor.capture(),
-						eq(updateIdentityEvent),
-						any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			sharedStateCaptor.capture(),
+			eq(updateIdentityEvent),
+			any(ExtensionErrorCallback.class));
 		Map<String, String> sharedState = flattenMap(sharedStateCaptor.getValue());
 		assertEquals("somevalue", sharedState.get("identityMap.pushToken[0].id"));
 		assertEquals("SOMEVALUE", sharedState.get("identityMap.PUSHTOKEN[0].id"));
@@ -639,12 +639,12 @@ public class IdentityExtensionTests {
 
 		// verify shared state
 		verify(mockExtensionApi, times(0))
-				.setXDMSharedEventState(
-						any(Map.class), any(Event.class), any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			any(Map.class), any(Event.class), any(ExtensionErrorCallback.class));
 
 		// verify persistence
 		verify(mockSharedPreferenceEditor, times(1))
-				.putString(anyString(), anyString()); // called only once while generating ECID
+		.putString(anyString(), anyString()); // called only once while generating ECID
 	}
 
 	// ========================================================================================
@@ -654,13 +654,13 @@ public class IdentityExtensionTests {
 	public void test_handleRemoveIdentity() throws Exception {
 		// setup
 		Map<String, Object> identityXDM =
-				createXDMIdentityMap(
-						new TestItem("UserId", "secretID"), new TestItem("PushId", "token"));
+			createXDMIdentityMap(
+				new TestItem("UserId", "secretID"), new TestItem("PushId", "token"));
 		JSONObject identityXDMJSON = new JSONObject(identityXDM);
 		Mockito.when(
-						mockSharedPreference.getString(
-								IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
-				.thenReturn(identityXDMJSON.toString());
+			mockSharedPreference.getString(
+				IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
+		.thenReturn(identityXDMJSON.toString());
 
 		final ArgumentCaptor<Map> sharedStateCaptor = ArgumentCaptor.forClass(Map.class);
 		final ArgumentCaptor<String> persistenceValueCaptor = ArgumentCaptor.forClass(String.class);
@@ -670,16 +670,16 @@ public class IdentityExtensionTests {
 
 		// test
 		Map<String, Object> removedIdentityXDM =
-				createXDMIdentityMap(new TestItem("UserId", "secretID"));
+			createXDMIdentityMap(new TestItem("UserId", "secretID"));
 		Event removeIdentityEvent = buildRemoveIdentityRequest(removedIdentityXDM);
 		extension.handleRemoveIdentity(removeIdentityEvent);
 
 		// verify shared state
 		verify(mockExtensionApi, times(1))
-				.setXDMSharedEventState(
-						sharedStateCaptor.capture(),
-						eq(removeIdentityEvent),
-						any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			sharedStateCaptor.capture(),
+			eq(removeIdentityEvent),
+			any(ExtensionErrorCallback.class));
 		Map<String, String> sharedState = flattenMap(sharedStateCaptor.getValue());
 		assertNull(sharedState.get("identityMap.UserId[0].id"));
 		assertEquals("token", sharedState.get("identityMap.PushId[0].id"));
@@ -691,11 +691,11 @@ public class IdentityExtensionTests {
 
 		// verify persistence
 		verify(mockSharedPreferenceEditor, times(3))
-				.putString(
-						eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES),
-						persistenceValueCaptor.capture());
+		.putString(
+			eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES),
+			persistenceValueCaptor.capture());
 		Map<String, String> persistedData =
-				flattenJSONString(persistenceValueCaptor.getAllValues().get(2));
+			flattenJSONString(persistenceValueCaptor.getAllValues().get(2));
 		assertNull(persistedData.get("identityMap.UserId[0].id"));
 		assertEquals("token", persistedData.get("identityMap.PushId[0].id"));
 	}
@@ -704,15 +704,15 @@ public class IdentityExtensionTests {
 	public void test_handleRemoveIdentity_DoNotRemoveReservedNamespace() throws Exception {
 		// setup
 		Map<String, Object> identityXDM =
-				createXDMIdentityMap(
-						new TestItem("GAID", "someGAID"),
-						new TestItem("ECID", "someECID"),
-						new TestItem("IDFA", "someIDFA"));
+			createXDMIdentityMap(
+				new TestItem("GAID", "someGAID"),
+				new TestItem("ECID", "someECID"),
+				new TestItem("IDFA", "someIDFA"));
 		JSONObject identityXDMJSON = new JSONObject(identityXDM);
 		Mockito.when(
-						mockSharedPreference.getString(
-								IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
-				.thenReturn(identityXDMJSON.toString());
+			mockSharedPreference.getString(
+				IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
+		.thenReturn(identityXDMJSON.toString());
 
 		final ArgumentCaptor<Map> sharedStateCaptor = ArgumentCaptor.forClass(Map.class);
 		final ArgumentCaptor<String> persistenceValueCaptor = ArgumentCaptor.forClass(String.class);
@@ -720,19 +720,19 @@ public class IdentityExtensionTests {
 
 		// test
 		Map<String, Object> removedIdentityXDM =
-				createXDMIdentityMap(
-						new TestItem("GAID", "someGAID"),
-						new TestItem("ecid", "someECID"),
-						new TestItem("Idfa", "someIDFA"));
+			createXDMIdentityMap(
+				new TestItem("GAID", "someGAID"),
+				new TestItem("ecid", "someECID"),
+				new TestItem("Idfa", "someIDFA"));
 		Event removeIdentityEvent = buildRemoveIdentityRequest(removedIdentityXDM);
 		extension.handleRemoveIdentity(removeIdentityEvent);
 
 		// verify shared state
 		verify(mockExtensionApi, times(1))
-				.setXDMSharedEventState(
-						sharedStateCaptor.capture(),
-						eq(removeIdentityEvent),
-						any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			sharedStateCaptor.capture(),
+			eq(removeIdentityEvent),
+			any(ExtensionErrorCallback.class));
 		Map<String, String> sharedState = flattenMap(sharedStateCaptor.getValue());
 		assertEquals("someGAID", sharedState.get("identityMap.GAID[0].id"));
 		assertEquals("someECID", sharedState.get("identityMap.ECID[0].id"));
@@ -740,11 +740,11 @@ public class IdentityExtensionTests {
 
 		// verify persistence
 		verify(mockSharedPreferenceEditor, times(2))
-				.putString(
-						eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES),
-						persistenceValueCaptor.capture());
+		.putString(
+			eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES),
+			persistenceValueCaptor.capture());
 		Map<String, String> persistedData =
-				flattenJSONString(persistenceValueCaptor.getAllValues().get(1));
+			flattenJSONString(persistenceValueCaptor.getAllValues().get(1));
 		assertEquals("someGAID", persistedData.get("identityMap.GAID[0].id"));
 		assertEquals("someECID", persistedData.get("identityMap.ECID[0].id"));
 		assertEquals("someIDFA", persistedData.get("identityMap.IDFA[0].id"));
@@ -756,9 +756,9 @@ public class IdentityExtensionTests {
 		Map<String, Object> identityXDM = createXDMIdentityMap(new TestItem("PushId", "token"));
 		JSONObject identityXDMJSON = new JSONObject(identityXDM);
 		Mockito.when(
-						mockSharedPreference.getString(
-								IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
-				.thenReturn(identityXDMJSON.toString());
+			mockSharedPreference.getString(
+				IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
+		.thenReturn(identityXDMJSON.toString());
 		extension = new IdentityExtension(mockExtensionApi);
 
 		// test
@@ -767,14 +767,14 @@ public class IdentityExtensionTests {
 
 		// verify shared state
 		verify(mockExtensionApi, times(0))
-				.setXDMSharedEventState(
-						any(Map.class), eq(removeIdentityEvent), any(ExtensionErrorCallback.class));
+		.setXDMSharedEventState(
+			any(Map.class), eq(removeIdentityEvent), any(ExtensionErrorCallback.class));
 
 		// verify persistence
 		verify(mockSharedPreferenceEditor, times(2))
-				.putString(
-						eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES),
-						anyString()); // once during constructor and other during remove
+		.putString(
+			eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES),
+			anyString()); // once during constructor and other during remove
 		// IdentityEvent
 	}
 
@@ -788,8 +788,8 @@ public class IdentityExtensionTests {
 		final JSONObject jsonObject = new JSONObject(persistedProps.toXDMData(false));
 		final String propsJSON = jsonObject.toString();
 		Mockito.when(
-						mockSharedPreference.getString(
-								IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
-				.thenReturn(propsJSON);
+			mockSharedPreference.getString(
+				IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null))
+		.thenReturn(propsJSON);
 	}
 }

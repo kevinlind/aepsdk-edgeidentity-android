@@ -35,22 +35,22 @@ public class ListenerGenericIdentityRequestContentTests {
 		mockIdentityExtension = Mockito.mock(IdentityExtension.class);
 		MobileCore.start(null);
 		listener =
-				spy(
-						new ListenerGenericIdentityRequestContent(
-								null,
-								IdentityConstants.EventType.GENERIC_IDENTITY,
-								IdentityConstants.EventSource.REQUEST_CONTENT));
+			spy(
+				new ListenerGenericIdentityRequestContent(
+					null,
+					IdentityConstants.EventType.GENERIC_IDENTITY,
+					IdentityConstants.EventSource.REQUEST_CONTENT));
 	}
 
 	@Test
 	public void testHear() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Generic Identity Request event",
-								IdentityConstants.EventType.GENERIC_IDENTITY,
-								IdentityConstants.EventSource.REQUEST_CONTENT)
-						.build();
+			new Event.Builder(
+			"Generic Identity Request event",
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_CONTENT)
+		.build();
 		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
 		// test
@@ -64,11 +64,11 @@ public class ListenerGenericIdentityRequestContentTests {
 	public void testHear_WhenParentExtensionNull() {
 		// setup
 		Event event =
-				new Event.Builder(
-								"Generic Identity Request event",
-								IdentityConstants.EventType.GENERIC_IDENTITY,
-								IdentityConstants.EventSource.REQUEST_CONTENT)
-						.build();
+			new Event.Builder(
+			"Generic Identity Request event",
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_CONTENT)
+		.build();
 		doReturn(null).when(listener).getIdentityExtension();
 
 		// test

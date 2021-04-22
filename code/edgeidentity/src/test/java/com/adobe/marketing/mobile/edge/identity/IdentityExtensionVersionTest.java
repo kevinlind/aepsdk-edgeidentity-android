@@ -37,11 +37,11 @@ public class IdentityExtensionVersionTest {
 		assertFalse(moduleVersion.isEmpty());
 
 		assertEquals(
-				String.format(
-						"Expected version to match in gradle.properties (%s) and extensionVersion API (%s)",
-						moduleVersion, Identity.extensionVersion()),
-				moduleVersion,
-				Identity.extensionVersion());
+			String.format(
+				"Expected version to match in gradle.properties (%s) and extensionVersion API (%s)",
+				moduleVersion, Identity.extensionVersion()),
+			moduleVersion,
+			Identity.extensionVersion());
 	}
 
 	private Properties loadProperties(final String filepath) {

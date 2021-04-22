@@ -27,7 +27,7 @@ class ListenerEdgeIdentityRemoveIdentity extends ExtensionListener {
 	* @param source the {@link String} eventSource this listener is registered to handle
 	*/
 	ListenerEdgeIdentityRemoveIdentity(
-			final ExtensionApi extensionApi, final String type, final String source) {
+		final ExtensionApi extensionApi, final String type, final String source) {
 		super(extensionApi, type, source);
 	}
 
@@ -42,9 +42,9 @@ class ListenerEdgeIdentityRemoveIdentity extends ExtensionListener {
 	public void hear(final Event event) {
 		if (event == null || event.getEventData() == null) {
 			MobileCore.log(
-					LoggingMode.DEBUG,
-					IdentityConstants.LOG_TAG,
-					"ListenerEdgeIdentityRemoveIdentity - Event or Event data is null. Ignoring the event.");
+				LoggingMode.DEBUG,
+				IdentityConstants.LOG_TAG,
+				"ListenerEdgeIdentityRemoveIdentity - Event or Event data is null. Ignoring the event.");
 			return;
 		}
 
@@ -52,9 +52,9 @@ class ListenerEdgeIdentityRemoveIdentity extends ExtensionListener {
 
 		if (parentExtension == null) {
 			MobileCore.log(
-					LoggingMode.DEBUG,
-					IdentityConstants.LOG_TAG,
-					"ListenerEdgeIdentityRemoveIdentity - The parent extension, associated with this listener is null, Ignoring the event.");
+				LoggingMode.DEBUG,
+				IdentityConstants.LOG_TAG,
+				"ListenerEdgeIdentityRemoveIdentity - The parent extension, associated with this listener is null, Ignoring the event.");
 			return;
 		}
 

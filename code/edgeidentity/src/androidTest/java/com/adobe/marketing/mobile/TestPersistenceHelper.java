@@ -25,13 +25,13 @@ import java.util.ArrayList;
 public class TestPersistenceHelper {
 
 	private static ArrayList<String> knownDatastoreName =
-			new ArrayList<String>() {
-				{
-					add(IdentityTestConstants.DataStoreKey.IDENTITY_DATASTORE);
-					add(IdentityTestConstants.DataStoreKey.CONFIG_DATASTORE);
-					add(IdentityTestConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE);
-				}
-			};
+	new ArrayList<String>() {
+		{
+			add(IdentityTestConstants.DataStoreKey.IDENTITY_DATASTORE);
+			add(IdentityTestConstants.DataStoreKey.CONFIG_DATASTORE);
+			add(IdentityTestConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE);
+		}
+	};
 
 	/**
 	* Helper method to update the {@link SharedPreferences} data.
@@ -41,27 +41,27 @@ public class TestPersistenceHelper {
 	* @param value the new value
 	*/
 	public static void updatePersistence(
-			final String datastore, final String key, final String value) {
+		final String datastore, final String key, final String value) {
 		final Application application = TestHelper.defaultApplication;
 
 		if (application == null) {
 			fail(
-					"Unable to updatePersistence by TestPersistenceHelper. Application is null, fast failing the test case.");
+				"Unable to updatePersistence by TestPersistenceHelper. Application is null, fast failing the test case.");
 		}
 
 		final Context context = application.getApplicationContext();
 
 		if (context == null) {
 			fail(
-					"Unable to updatePersistence by TestPersistenceHelper. Context is null, fast failing the test case.");
+				"Unable to updatePersistence by TestPersistenceHelper. Context is null, fast failing the test case.");
 		}
 
 		SharedPreferences sharedPreferences =
-				context.getSharedPreferences(datastore, Context.MODE_PRIVATE);
+			context.getSharedPreferences(datastore, Context.MODE_PRIVATE);
 
 		if (sharedPreferences == null) {
 			fail(
-					"Unable to updatePersistence by TestPersistenceHelper. sharedPreferences is null, fast failing the test case.");
+				"Unable to updatePersistence by TestPersistenceHelper. sharedPreferences is null, fast failing the test case.");
 		}
 
 		SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -82,22 +82,22 @@ public class TestPersistenceHelper {
 
 		if (application == null) {
 			fail(
-					"Unable to readPersistedData by TestPersistenceHelper. Application is null, fast failing the test case.");
+				"Unable to readPersistedData by TestPersistenceHelper. Application is null, fast failing the test case.");
 		}
 
 		final Context context = application.getApplicationContext();
 
 		if (context == null) {
 			fail(
-					"Unable to readPersistedData by TestPersistenceHelper. Context is null, fast failing the test case.");
+				"Unable to readPersistedData by TestPersistenceHelper. Context is null, fast failing the test case.");
 		}
 
 		SharedPreferences sharedPreferences =
-				context.getSharedPreferences(datastore, Context.MODE_PRIVATE);
+			context.getSharedPreferences(datastore, Context.MODE_PRIVATE);
 
 		if (sharedPreferences == null) {
 			fail(
-					"Unable to readPersistedData by TestPersistenceHelper. sharedPreferences is null, fast failing the test case.");
+				"Unable to readPersistedData by TestPersistenceHelper. sharedPreferences is null, fast failing the test case.");
 		}
 
 		return sharedPreferences.getString(key, null);
@@ -110,23 +110,23 @@ public class TestPersistenceHelper {
 
 		if (application == null) {
 			fail(
-					"Unable to resetPersistence by TestPersistenceHelper. Application is null, fast failing the test case.");
+				"Unable to resetPersistence by TestPersistenceHelper. Application is null, fast failing the test case.");
 		}
 
 		final Context context = application.getApplicationContext();
 
 		if (context == null) {
 			fail(
-					"Unable to resetPersistence by TestPersistenceHelper. Context is null, fast failing the test case.");
+				"Unable to resetPersistence by TestPersistenceHelper. Context is null, fast failing the test case.");
 		}
 
 		for (String eachDatastore : knownDatastoreName) {
 			SharedPreferences sharedPreferences =
-					context.getSharedPreferences(eachDatastore, Context.MODE_PRIVATE);
+				context.getSharedPreferences(eachDatastore, Context.MODE_PRIVATE);
 
 			if (sharedPreferences == null) {
 				fail(
-						"Unable to resetPersistence by TestPersistenceHelper. sharedPreferences is null, fast failing the test case.");
+					"Unable to resetPersistence by TestPersistenceHelper. sharedPreferences is null, fast failing the test case.");
 			}
 
 			SharedPreferences.Editor editor = sharedPreferences.edit();

@@ -93,17 +93,17 @@ public class IdentityMap {
 	public void removeItem(final IdentityItem item, final String namespace) {
 		if (item == null) {
 			MobileCore.log(
-					LoggingMode.DEBUG,
-					LOG_TAG,
-					"IdentityMap remove item ignored as must contain a non-null IdentityItem.");
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"IdentityMap remove item ignored as must contain a non-null IdentityItem.");
 			return;
 		}
 
 		if (Utils.isNullOrEmpty(namespace)) {
 			MobileCore.log(
-					LoggingMode.DEBUG,
-					LOG_TAG,
-					"IdentityMap remove item ignored as must contain a non-null/non-empty namespace.");
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"IdentityMap remove item ignored as must contain a non-null/non-empty namespace.");
 			return;
 		}
 
@@ -166,17 +166,17 @@ public class IdentityMap {
 	void addItem(final IdentityItem item, final String namespace, final boolean isFirstItem) {
 		if (item == null) {
 			MobileCore.log(
-					LoggingMode.DEBUG,
-					LOG_TAG,
-					"IdentityMap - add item ignored as must contain a non-null IdentityItem.");
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"IdentityMap - add item ignored as must contain a non-null IdentityItem.");
 			return;
 		}
 
 		if (Utils.isNullOrEmpty(namespace)) {
 			MobileCore.log(
-					LoggingMode.DEBUG,
-					LOG_TAG,
-					"IdentityMap - add item ignored as must contain a non-null/non-empty namespace.");
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"IdentityMap - add item ignored as must contain a non-null/non-empty namespace.");
 			return;
 		}
 
@@ -303,7 +303,7 @@ public class IdentityMap {
 		}
 
 		final Map<String, Object> identityMapDict =
-				(HashMap<String, Object>) map.get(IdentityConstants.XDMKeys.IDENTITY_MAP);
+			(HashMap<String, Object>) map.get(IdentityConstants.XDMKeys.IDENTITY_MAP);
 
 		if (identityMapDict == null) {
 			return null;
@@ -314,7 +314,7 @@ public class IdentityMap {
 		for (final String namespace : identityMapDict.keySet()) {
 			try {
 				final ArrayList<HashMap<String, Object>> idArr =
-						(ArrayList<HashMap<String, Object>>) identityMapDict.get(namespace);
+					(ArrayList<HashMap<String, Object>>) identityMapDict.get(namespace);
 
 				for (Object idMap : idArr) {
 					final IdentityItem item = IdentityItem.fromData((Map<String, Object>) idMap);
@@ -325,7 +325,7 @@ public class IdentityMap {
 				}
 			} catch (ClassCastException e) {
 				MobileCore.log(
-						LoggingMode.DEBUG, LOG_TAG, "Failed to create IdentityMap from data.");
+					LoggingMode.DEBUG, LOG_TAG, "Failed to create IdentityMap from data.");
 			}
 		}
 
@@ -337,7 +337,7 @@ public class IdentityMap {
 	// ========================================================================================
 
 	private void addItemToMap(
-			final IdentityItem newItem, final String namespace, final boolean isFirstItem) {
+		final IdentityItem newItem, final String namespace, final boolean isFirstItem) {
 		// check if namespace exists
 		final List<IdentityItem> itemList;
 
