@@ -14,34 +14,35 @@ package com.adobe.marketing.mobile.edge.identity;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Partial mock class for {@link IdentityState} to be used for testing
- */
+/** Partial mock class for {@link IdentityState} to be used for testing */
 class MockIdentityState extends IdentityState {
 
-	MockIdentityState(final IdentityProperties identityProperties) {
-		super(identityProperties);
-	}
+    MockIdentityState(final IdentityProperties identityProperties) {
+        super(identityProperties);
+    }
 
-	int updateCustomerIdentifiersCalledTimes = 0;
-	List<IdentityMap> updateCustomerIdentifiersParams = new ArrayList<>();
-	@Override
-	void updateCustomerIdentifiers(final IdentityMap map) {
-		updateCustomerIdentifiersCalledTimes++;
-		updateCustomerIdentifiersParams.add(map);
-	}
+    int updateCustomerIdentifiersCalledTimes = 0;
+    List<IdentityMap> updateCustomerIdentifiersParams = new ArrayList<>();
 
-	int removeCustomerIdentifiersCalledTimes = 0;
-	List<IdentityMap> removeCustomerIdentifiersParams = new ArrayList<>();
-	@Override
-	void removeCustomerIdentifiers(final IdentityMap map) {
-		removeCustomerIdentifiersCalledTimes++;
-		removeCustomerIdentifiersParams.add(map);
-	}
+    @Override
+    void updateCustomerIdentifiers(final IdentityMap map) {
+        updateCustomerIdentifiersCalledTimes++;
+        updateCustomerIdentifiersParams.add(map);
+    }
 
-	boolean hasBooted = false;
-	@Override
-	boolean hasBooted() {
-		return hasBooted;
-	}
+    int removeCustomerIdentifiersCalledTimes = 0;
+    List<IdentityMap> removeCustomerIdentifiersParams = new ArrayList<>();
+
+    @Override
+    void removeCustomerIdentifiers(final IdentityMap map) {
+        removeCustomerIdentifiersCalledTimes++;
+        removeCustomerIdentifiersParams.add(map);
+    }
+
+    boolean hasBooted = false;
+
+    @Override
+    boolean hasBooted() {
+        return hasBooted;
+    }
 }

@@ -15,59 +15,60 @@ import com.adobe.marketing.mobile.services.HttpConnecting;
 import com.adobe.marketing.mobile.services.NetworkCallback;
 import com.adobe.marketing.mobile.services.NetworkRequest;
 import com.adobe.marketing.mobile.services.Networking;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 /**
- * Mock network service used by MobileCore for functional test cases.
- * This network service returns '200' HttpConnection responses for every request.
+ * Mock network service used by MobileCore for functional test cases. This network service returns
+ * '200' HttpConnection responses for every request.
  */
 class MockNetworkService implements Networking {
-	private static String TAG = "MockNetworkService";
+    private static String TAG = "MockNetworkService";
 
-	private static HttpConnecting dummyConnection = new HttpConnecting() {
-		@Override
-		public InputStream getInputStream() {
-			return new ByteArrayInputStream("{}".getBytes());
-		}
+    private static HttpConnecting dummyConnection =
+            new HttpConnecting() {
+                @Override
+                public InputStream getInputStream() {
+                    return new ByteArrayInputStream("{}".getBytes());
+                }
 
-		@Override
-		public InputStream getErrorStream() {
-			return null;
-		}
+                @Override
+                public InputStream getErrorStream() {
+                    return null;
+                }
 
-		@Override
-		public int getResponseCode() {
-			return 200;
-		}
+                @Override
+                public int getResponseCode() {
+                    return 200;
+                }
 
-		@Override
-		public String getResponseMessage() {
-			return null;
-		}
+                @Override
+                public String getResponseMessage() {
+                    return null;
+                }
 
-		@Override
-		public String getResponsePropertyValue(String s) {
-			return null;
-		}
+                @Override
+                public String getResponsePropertyValue(String s) {
+                    return null;
+                }
 
-		@Override
-		public void close() {
+                @Override
+                public void close() {}
+            };
 
-		}
-	};
+    @Override
+    public void connectAsync(NetworkRequest networkRequest, NetworkCallback networkCallback) {
+        if (networkRequest == null) {
+            return;
+        }
 
-	@Override
-	public void connectAsync(NetworkRequest networkRequest, NetworkCallback networkCallback) {
-		if (networkRequest == null) {
-			return;
-		}
+        MobileCore.log(
+                LoggingMode.DEBUG,
+                TAG,
+                "Received async request '" + networkRequest.getUrl() + "', ignoring.");
 
-		MobileCore.log(LoggingMode.DEBUG, TAG, "Received async request '" + networkRequest.getUrl() + "', ignoring.");
-
-		if (networkCallback != null) {
-			networkCallback.call(dummyConnection);
-		}
-	}
+        if (networkCallback != null) {
+            networkCallback.call(dummyConnection);
+        }
+    }
 }
