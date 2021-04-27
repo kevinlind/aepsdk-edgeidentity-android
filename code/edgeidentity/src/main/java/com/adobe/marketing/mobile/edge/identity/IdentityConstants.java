@@ -12,11 +12,9 @@
 package com.adobe.marketing.mobile.edge.identity;
 
 final class IdentityConstants {
-
 	static final String LOG_TAG = "EdgeIdentity";
 	static final String EXTENSION_NAME = "com.adobe.edge.identity";
 	static final String EXTENSION_VERSION = "1.0.0";
-
 
 	final class EventSource {
 		static final String REQUEST_IDENTITY = "com.adobe.eventSource.requestIdentity";
@@ -28,7 +26,8 @@ final class IdentityConstants {
 		static final String SHARED_STATE = "com.adobe.eventSource.sharedState";
 		static final String RESET_COMPLETE = "com.adobe.eventSource.resetComplete";
 		static final String BOOTED = "com.adobe.eventSource.booted";
-		private EventSource() { }
+
+		private EventSource() {}
 	}
 
 	final class EventType {
@@ -36,7 +35,8 @@ final class IdentityConstants {
 		static final String EDGE_IDENTITY = "com.adobe.eventType.edgeIdentity";
 		static final String IDENTITY = "com.adobe.eventType.identity";
 		static final String HUB = "com.adobe.eventType.hub";
-		private EventType() { }
+
+		private EventType() {}
 	}
 
 	final class EventNames {
@@ -46,7 +46,8 @@ final class IdentityConstants {
 		static final String REMOVE_IDENTITIES = "Edge Identity Remove Identities";
 		static final String REQUEST_IDENTITIES = "Edge Identity Request Identities";
 		static final String RESET_IDENTITIES_COMPLETE = "Edge Identity Reset Identities Complete";
-		private EventNames() { }
+
+		private EventNames() {}
 	}
 
 	final class SharedState {
@@ -55,23 +56,26 @@ final class IdentityConstants {
 		final class Hub {
 			static final String NAME = "com.adobe.module.eventhub";
 			static final String EXTENSIONS = "extensions";
+
 			private Hub() {}
 		}
 
 		final class IdentityDirect {
 			static final String NAME = "com.adobe.module.identity";
 			static final String ECID = "mid";
+
 			private IdentityDirect() {}
 		}
 
-		private SharedState() { }
+		private SharedState() {}
 	}
 
 	final class Namespaces {
 		static final String ECID = "ECID";
 		static final String IDFA = "IDFA";
 		static final String GAID = "GAID";
-		private Namespaces() { }
+
+		private Namespaces() {}
 	}
 
 	final class XDMKeys {
@@ -79,7 +83,8 @@ final class IdentityConstants {
 		static final String ID = "id";
 		static final String AUTHENTICATED_STATE = "authenticatedState";
 		static final String PRIMARY = "primary";
-		private XDMKeys() { }
+
+		private XDMKeys() {}
 	}
 
 	final class DataStoreKey {
@@ -87,7 +92,8 @@ final class IdentityConstants {
 		static final String IDENTITY_PROPERTIES = "identity.properties";
 		static final String IDENTITY_DIRECT_DATASTORE_NAME = "visitorIDServiceDataStore";
 		static final String IDENTITY_DIRECT_ECID_KEY = "ADOBEMOBILE_PERSISTED_MID";
-		private DataStoreKey() { }
+
+		private DataStoreKey() {}
 	}
 
 	private IdentityConstants() {}

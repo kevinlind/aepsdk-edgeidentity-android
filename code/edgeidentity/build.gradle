@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'jacoco'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+apply plugin: "com.diffplug.spotless"
 
 jacoco {
     toolVersion = rootProject.ext.jacocoVersion
@@ -59,6 +60,26 @@ android {
         androidTest {
             java.srcDirs += [sharedTestUtilJavaDir]
         }
+    }
+}
+
+spotless {
+    java {
+        //toggleOffOn("format:off", "format:on")
+        target "src/*/java/**/*.java"
+        removeUnusedImports()
+
+        // Use Google-Java-Format or Prettier
+        //googleJavaFormat('1.7').aosp() // Java 1.7, Android Open Source Project style
+        prettier(['prettier': '2.0.5', 'prettier-plugin-java': '0.8.0']).config(['parser': 'java', 'tabWidth': 4, 'useTabs': true, 'printWidth': 120])
+
+        //indentWithTabs()
+        //importOrder('android', 'androidx', 'java', 'javax', 'org', 'com.adobe', '', '\\#')
+        endWithNewline()
+
+
+        //licenseHeader '/* (C) $YEAR */' // or licenseHeaderFile
+        //licenseHeaderFile "../../tools/header.txt"
     }
 }
 

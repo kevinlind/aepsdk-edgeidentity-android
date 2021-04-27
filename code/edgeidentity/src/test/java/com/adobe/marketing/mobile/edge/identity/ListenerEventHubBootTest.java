@@ -11,26 +11,22 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.MobileCore;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class ListenerEventHubBootTest {
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.MobileCore;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
+public class ListenerEventHubBootTest {
 	@Mock
 	private IdentityExtension mockIdentityExtension;
 
@@ -43,14 +39,19 @@ public class ListenerEventHubBootTest {
 		mockIdentityExtension = Mockito.mock(IdentityExtension.class);
 		doReturn(testExecutor).when(mockIdentityExtension).getExecutor();
 		MobileCore.start(null);
-		listener = spy(new ListenerEventHubBoot(null, IdentityConstants.EventType.HUB, IdentityConstants.EventSource.BOOTED));
+		listener =
+			spy(new ListenerEventHubBoot(null, IdentityConstants.EventType.HUB, IdentityConstants.EventSource.BOOTED));
 	}
 
 	@Test
 	public void testHear() throws Exception {
 		// setup
-		Event event = new Event.Builder("Event Hub Boot", IdentityConstants.EventType.HUB,
-										IdentityConstants.EventSource.BOOTED).build();
+		Event event = new Event.Builder(
+			"Event Hub Boot",
+			IdentityConstants.EventType.HUB,
+			IdentityConstants.EventSource.BOOTED
+		)
+		.build();
 		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
 		// test
@@ -64,8 +65,12 @@ public class ListenerEventHubBootTest {
 	@Test
 	public void testHear_WhenParentExtensionNull() throws Exception {
 		// setup
-		Event event = new Event.Builder("Event Hub Boot", IdentityConstants.EventType.HUB,
-										IdentityConstants.EventSource.BOOTED).build();
+		Event event = new Event.Builder(
+			"Event Hub Boot",
+			IdentityConstants.EventType.HUB,
+			IdentityConstants.EventSource.BOOTED
+		)
+		.build();
 		doReturn(null).when(listener).getIdentityExtension();
 
 		// test
@@ -75,5 +80,4 @@ public class ListenerEventHubBootTest {
 		testExecutor.awaitTermination(100, TimeUnit.MILLISECONDS);
 		verify(mockIdentityExtension, times(0)).bootupIfReady();
 	}
-
 }

@@ -15,7 +15,6 @@ import com.adobe.marketing.mobile.services.HttpConnecting;
 import com.adobe.marketing.mobile.services.NetworkCallback;
 import com.adobe.marketing.mobile.services.NetworkRequest;
 import com.adobe.marketing.mobile.services.Networking;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
@@ -27,6 +26,7 @@ class MockNetworkService implements Networking {
 	private static String TAG = "MockNetworkService";
 
 	private static HttpConnecting dummyConnection = new HttpConnecting() {
+
 		@Override
 		public InputStream getInputStream() {
 			return new ByteArrayInputStream("{}".getBytes());
@@ -53,9 +53,7 @@ class MockNetworkService implements Networking {
 		}
 
 		@Override
-		public void close() {
-
-		}
+		public void close() {}
 	};
 
 	@Override

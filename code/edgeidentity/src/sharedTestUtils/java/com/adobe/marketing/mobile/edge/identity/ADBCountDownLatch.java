@@ -55,5 +55,4 @@ public class ADBCountDownLatch {
 	public String toString() {
 		return String.format("%s, initial: %d, current: %d", latch.toString(), initialCount, currentCount.get());
 	}
-
 }

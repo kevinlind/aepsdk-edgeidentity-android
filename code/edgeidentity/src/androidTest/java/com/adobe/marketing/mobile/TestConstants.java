@@ -18,6 +18,7 @@ public class TestConstants {
 
 	public class EventType {
 		static final String MONITOR = "com.adobe.functional.eventType.monitor";
+
 		private EventType() {}
 	}
 
@@ -28,12 +29,13 @@ public class TestConstants {
 		static final String SHARED_STATE_REQUEST = "com.adobe.eventSource.sharedStateRequest";
 		static final String SHARED_STATE_RESPONSE = "com.adobe.eventSource.sharedStateResponse";
 		static final String UNREGISTER = "com.adobe.eventSource.unregister";
+
 		private EventSource() {}
 	}
 
 	public class EventDataKey {
 		static final String STATE_OWNER = "stateowner";
-		private EventDataKey() {};
-	}
 
+		private EventDataKey() {}
+	}
 }

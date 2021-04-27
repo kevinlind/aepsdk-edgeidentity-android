@@ -11,26 +11,23 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.MobileCore;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class ListenerEdgeIdentityUpdateIdentityTests {
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.MobileCore;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
+public class ListenerEdgeIdentityUpdateIdentityTests {
 	@Mock
 	private IdentityExtension mockIdentityExtension;
 
@@ -43,15 +40,25 @@ public class ListenerEdgeIdentityUpdateIdentityTests {
 		mockIdentityExtension = Mockito.mock(IdentityExtension.class);
 		doReturn(testExecutor).when(mockIdentityExtension).getExecutor();
 		MobileCore.start(null);
-		listener = spy(new ListenerEdgeIdentityUpdateIdentity(null, IdentityConstants.EventType.EDGE_IDENTITY,
-					   IdentityConstants.EventSource.UPDATE_IDENTITY));
+		listener =
+			spy(
+				new ListenerEdgeIdentityUpdateIdentity(
+					null,
+					IdentityConstants.EventType.EDGE_IDENTITY,
+					IdentityConstants.EventSource.UPDATE_IDENTITY
+				)
+			);
 	}
 
 	@Test
 	public void testHear() throws Exception {
 		// setup
-		Event event = new Event.Builder("Update Identities", IdentityConstants.EventType.EDGE_IDENTITY,
-										IdentityConstants.EventSource.UPDATE_IDENTITY).build();
+		Event event = new Event.Builder(
+			"Update Identities",
+			IdentityConstants.EventType.EDGE_IDENTITY,
+			IdentityConstants.EventSource.UPDATE_IDENTITY
+		)
+		.build();
 		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
 		// test
@@ -65,8 +72,12 @@ public class ListenerEdgeIdentityUpdateIdentityTests {
 	@Test
 	public void testHear_WhenParentExtensionNull() throws Exception {
 		// setup
-		Event event = new Event.Builder("Update Identities", IdentityConstants.EventType.EDGE_IDENTITY,
-										IdentityConstants.EventSource.UPDATE_IDENTITY).build();
+		Event event = new Event.Builder(
+			"Update Identities",
+			IdentityConstants.EventType.EDGE_IDENTITY,
+			IdentityConstants.EventSource.UPDATE_IDENTITY
+		)
+		.build();
 		doReturn(null).when(listener).getIdentityExtension();
 
 		// test

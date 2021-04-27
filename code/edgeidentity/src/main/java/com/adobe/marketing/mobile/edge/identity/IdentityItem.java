@@ -11,14 +11,13 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
+import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
+
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
 /**
  * Identity is used to clearly distinguish people that are interacting with digital experiences.
@@ -93,12 +92,24 @@ public final class IdentityItem {
 
 	@Override
 	public String toString() {
-		return "{"
-			   + "\"" + IdentityConstants.XDMKeys.ID + "\": \"" + id + "\", "
-			   + "\"" + IdentityConstants.XDMKeys.AUTHENTICATED_STATE + "\": \"" + (authenticatedState == null ? "null" :
-					   authenticatedState.getName()) + "\", "
-			   + "\"" + IdentityConstants.XDMKeys.PRIMARY + "\": " + primary
-			   + "}";
+		return (
+			"{" +
+			"\"" +
+			IdentityConstants.XDMKeys.ID +
+			"\": \"" +
+			id +
+			"\", " +
+			"\"" +
+			IdentityConstants.XDMKeys.AUTHENTICATED_STATE +
+			"\": \"" +
+			(authenticatedState == null ? "null" : authenticatedState.getName()) +
+			"\", " +
+			"\"" +
+			IdentityConstants.XDMKeys.PRIMARY +
+			"\": " +
+			primary +
+			"}"
+		);
 	}
 
 	@Override
@@ -157,8 +168,9 @@ public final class IdentityItem {
 
 		try {
 			final String id = (String) data.get(IdentityConstants.XDMKeys.ID);
-			AuthenticatedState authenticatedState = AuthenticatedState.fromString((String) data.get(
-					IdentityConstants.XDMKeys.AUTHENTICATED_STATE));
+			AuthenticatedState authenticatedState = AuthenticatedState.fromString(
+				(String) data.get(IdentityConstants.XDMKeys.AUTHENTICATED_STATE)
+			);
 
 			if (authenticatedState == null) {
 				authenticatedState = AuthenticatedState.AMBIGUOUS;

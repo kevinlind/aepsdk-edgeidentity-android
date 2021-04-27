@@ -11,13 +11,21 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+
 import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.AdobeCallbackWithError;
 import com.adobe.marketing.mobile.AdobeError;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.MobileCore;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,18 +37,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({MobileCore.class})
+@PrepareForTest({ MobileCore.class })
 public class IdentityTests {
 
 	@Before
@@ -56,8 +54,11 @@ public class IdentityTests {
 	public void test_extensionVersionAPI() {
 		// test
 		String extensionVersion = Identity.extensionVersion();
-		assertEquals("The Extension version API returns the correct value", IdentityConstants.EXTENSION_VERSION,
-					 extensionVersion);
+		assertEquals(
+			"The Extension version API returns the correct value",
+			IdentityConstants.EXTENSION_VERSION,
+			extensionVersion
+		);
 	}
 
 	// ========================================================================================
@@ -67,7 +68,9 @@ public class IdentityTests {
 	public void testRegistration() {
 		// test
 		Identity.registerExtension();
-		final ArgumentCaptor<ExtensionErrorCallback> callbackCaptor = ArgumentCaptor.forClass(ExtensionErrorCallback.class);
+		final ArgumentCaptor<ExtensionErrorCallback> callbackCaptor = ArgumentCaptor.forClass(
+			ExtensionErrorCallback.class
+		);
 
 		// The identity extension should register with core
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
@@ -76,7 +79,6 @@ public class IdentityTests {
 		// verify the callback
 		ExtensionErrorCallback extensionErrorCallback = callbackCaptor.getValue();
 		assertNotNull("The extension callback should not be null", extensionErrorCallback);
-
 		// TODO - enable when ExtensionError creation is available
 		// should not crash on calling the callback
 		//extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
@@ -91,21 +93,28 @@ public class IdentityTests {
 		final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 		final ArgumentCaptor<AdobeCallback> adobeCallbackCaptor = ArgumentCaptor.forClass(AdobeCallback.class);
 		final ArgumentCaptor<ExtensionErrorCallback> extensionErrorCallbackCaptor = ArgumentCaptor.forClass(
-					ExtensionErrorCallback.class);
+			ExtensionErrorCallback.class
+		);
 		final List<String> callbackReturnValues = new ArrayList<>();
 
 		// test
-		Identity.getExperienceCloudId(new AdobeCallback<String>() {
-			@Override
-			public void call(String s) {
-				callbackReturnValues.add(s);
+		Identity.getExperienceCloudId(
+			new AdobeCallback<String>() {
+
+				@Override
+				public void call(String s) {
+					callbackReturnValues.add(s);
+				}
 			}
-		});
+		);
 
 		// verify
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
-		MobileCore.dispatchEventWithResponseCallback(eventCaptor.capture(), adobeCallbackCaptor.capture(),
-				extensionErrorCallbackCaptor.capture());
+		MobileCore.dispatchEventWithResponseCallback(
+			eventCaptor.capture(),
+			adobeCallbackCaptor.capture(),
+			extensionErrorCallbackCaptor.capture()
+		);
 
 		// verify the dispatched event details
 		Event dispatchedEvent = eventCaptor.getValue();
@@ -128,7 +137,6 @@ public class IdentityTests {
 
 		adobeCallbackCaptor.getValue().call(buildIdentityResponseEvent(xdmData));
 		assertEquals(ecid.toString(), callbackReturnValues.get(0));
-
 		// TODO - enable when ExtensionError creation is available
 		// should not crash on calling the callback
 		//extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
@@ -141,8 +149,11 @@ public class IdentityTests {
 
 		// verify
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(0));
-		MobileCore.dispatchEventWithResponseCallback(any(Event.class), any(AdobeCallback.class),
-				any(ExtensionErrorCallback.class));
+		MobileCore.dispatchEventWithResponseCallback(
+			any(Event.class),
+			any(AdobeCallback.class),
+			any(ExtensionErrorCallback.class)
+		);
 	}
 
 	@Test
@@ -153,6 +164,7 @@ public class IdentityTests {
 		final Map<String, Object> errorCapture = new HashMap<>();
 		final ArgumentCaptor<AdobeCallback> adobeCallbackCaptor = ArgumentCaptor.forClass(AdobeCallback.class);
 		final AdobeCallbackWithError callbackWithError = new AdobeCallbackWithError() {
+
 			@Override
 			public void fail(AdobeError adobeError) {
 				errorCapture.put(KEY_IS_ERRORCALLBACK_CALLED, true);
@@ -160,8 +172,7 @@ public class IdentityTests {
 			}
 
 			@Override
-			public void call(Object o) {
-			}
+			public void call(Object o) {}
 		};
 
 		// test
@@ -169,8 +180,11 @@ public class IdentityTests {
 
 		// verify if the event is dispatched
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
-		MobileCore.dispatchEventWithResponseCallback(any(Event.class), adobeCallbackCaptor.capture(),
-				any(ExtensionErrorCallback.class));
+		MobileCore.dispatchEventWithResponseCallback(
+			any(Event.class),
+			adobeCallbackCaptor.capture(),
+			any(ExtensionErrorCallback.class)
+		);
 
 		// set response event to null
 		adobeCallbackCaptor.getValue().call(null);
@@ -188,6 +202,7 @@ public class IdentityTests {
 		final Map<String, Object> errorCapture = new HashMap<>();
 		final ArgumentCaptor<AdobeCallback> adobeCallbackCaptor = ArgumentCaptor.forClass(AdobeCallback.class);
 		final AdobeCallbackWithError callbackWithError = new AdobeCallbackWithError() {
+
 			@Override
 			public void fail(AdobeError adobeError) {
 				errorCapture.put(KEY_IS_ERRORCALLBACK_CALLED, true);
@@ -195,8 +210,7 @@ public class IdentityTests {
 			}
 
 			@Override
-			public void call(Object o) {
-			}
+			public void call(Object o) {}
 		};
 
 		// test
@@ -204,8 +218,11 @@ public class IdentityTests {
 
 		// verify if the event is dispatched
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
-		MobileCore.dispatchEventWithResponseCallback(any(Event.class), adobeCallbackCaptor.capture(),
-				any(ExtensionErrorCallback.class));
+		MobileCore.dispatchEventWithResponseCallback(
+			any(Event.class),
+			adobeCallbackCaptor.capture(),
+			any(ExtensionErrorCallback.class)
+		);
 
 		// set response event to null
 		Map<String, Object> eventData = new HashMap<>();
@@ -225,6 +242,7 @@ public class IdentityTests {
 		final Map<String, Object> errorCapture = new HashMap<>();
 		final ArgumentCaptor<AdobeCallback> adobeCallbackCaptor = ArgumentCaptor.forClass(AdobeCallback.class);
 		final AdobeCallbackWithError callbackWithError = new AdobeCallbackWithError() {
+
 			@Override
 			public void fail(AdobeError adobeError) {
 				errorCapture.put(KEY_IS_ERRORCALLBACK_CALLED, true);
@@ -232,8 +250,7 @@ public class IdentityTests {
 			}
 
 			@Override
-			public void call(Object o) {
-			}
+			public void call(Object o) {}
 		};
 
 		// test
@@ -241,8 +258,11 @@ public class IdentityTests {
 
 		// verify if the event is dispatched
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
-		MobileCore.dispatchEventWithResponseCallback(any(Event.class), adobeCallbackCaptor.capture(),
-				any(ExtensionErrorCallback.class));
+		MobileCore.dispatchEventWithResponseCallback(
+			any(Event.class),
+			adobeCallbackCaptor.capture(),
+			any(ExtensionErrorCallback.class)
+		);
 
 		// set response event to map missing ECID
 		Map<String, Object> emptyXDMData = new HashMap<>();
@@ -261,7 +281,8 @@ public class IdentityTests {
 		// setup
 		final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 		final ArgumentCaptor<ExtensionErrorCallback> extensionErrorCallbackCaptor = ArgumentCaptor.forClass(
-					ExtensionErrorCallback.class);
+			ExtensionErrorCallback.class
+		);
 
 		// test
 		IdentityMap map = new IdentityMap();
@@ -297,13 +318,13 @@ public class IdentityTests {
 		MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
 	}
 
-
 	@Test
 	public void testRemoveIdentity() {
 		// setup
 		final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 		final ArgumentCaptor<ExtensionErrorCallback> extensionErrorCallbackCaptor = ArgumentCaptor.forClass(
-					ExtensionErrorCallback.class);
+			ExtensionErrorCallback.class
+		);
 		IdentityItem sampleItem = new IdentityItem("sample", AuthenticatedState.AMBIGUOUS, false);
 
 		// test
@@ -320,7 +341,6 @@ public class IdentityTests {
 		IdentityMap sampleInputIdentitymap = new IdentityMap();
 		sampleInputIdentitymap.addItem(sampleItem, "namespace");
 		assertEquals(sampleInputIdentitymap.asXDMMap(), dispatchedEvent.getEventData());
-
 		// TODO - enable when ExtensionError creation is available
 		// should not crash on calling the callback
 		//extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
@@ -341,7 +361,6 @@ public class IdentityTests {
 		MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
 	}
 
-
 	// ========================================================================================
 	// getIdentities API
 	// ========================================================================================
@@ -351,21 +370,28 @@ public class IdentityTests {
 		final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 		final ArgumentCaptor<AdobeCallback> adobeCallbackCaptor = ArgumentCaptor.forClass(AdobeCallback.class);
 		final ArgumentCaptor<ExtensionErrorCallback> extensionErrorCallbackCaptor = ArgumentCaptor.forClass(
-					ExtensionErrorCallback.class);
+			ExtensionErrorCallback.class
+		);
 		final List<IdentityMap> callbackReturnValues = new ArrayList<>();
 
 		// test
-		Identity.getIdentities(new AdobeCallback<IdentityMap>() {
-			@Override
-			public void call(IdentityMap map) {
-				callbackReturnValues.add(map);
+		Identity.getIdentities(
+			new AdobeCallback<IdentityMap>() {
+
+				@Override
+				public void call(IdentityMap map) {
+					callbackReturnValues.add(map);
+				}
 			}
-		});
+		);
 
 		// verify
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
-		MobileCore.dispatchEventWithResponseCallback(eventCaptor.capture(), adobeCallbackCaptor.capture(),
-				extensionErrorCallbackCaptor.capture());
+		MobileCore.dispatchEventWithResponseCallback(
+			eventCaptor.capture(),
+			adobeCallbackCaptor.capture(),
+			extensionErrorCallbackCaptor.capture()
+		);
 
 		// verify the dispatched event details
 		Event dispatchedEvent = eventCaptor.getValue();
@@ -377,24 +403,29 @@ public class IdentityTests {
 		// verify callback responses
 		final ECID ecid = new ECID();
 		final String coreId = "core-test-id";
-		final String jsonStr = "{\n" +
-							   "      \"identityMap\": {\n" +
-							   "        \"ECID\": [\n" +
-							   "          {\n" +
-							   "            \"id\":" + ecid.toString() + ",\n" +
-							   "            \"authenticatedState\": \"ambiguous\",\n" +
-							   "            \"primary\": true\n" +
-							   "          }\n" +
-							   "        ],\n" +
-							   "        \"CORE\": [\n" +
-							   "          {\n" +
-							   "            \"id\":" + coreId + ",\n" +
-							   "            \"authenticatedState\": \"authenticated\",\n" +
-							   "            \"primary\": false\n" +
-							   "          }\n" +
-							   "        ]\n" +
-							   "      }\n" +
-							   "}";
+		final String jsonStr =
+			"{\n" +
+			"      \"identityMap\": {\n" +
+			"        \"ECID\": [\n" +
+			"          {\n" +
+			"            \"id\":" +
+			ecid.toString() +
+			",\n" +
+			"            \"authenticatedState\": \"ambiguous\",\n" +
+			"            \"primary\": true\n" +
+			"          }\n" +
+			"        ],\n" +
+			"        \"CORE\": [\n" +
+			"          {\n" +
+			"            \"id\":" +
+			coreId +
+			",\n" +
+			"            \"authenticatedState\": \"authenticated\",\n" +
+			"            \"primary\": false\n" +
+			"          }\n" +
+			"        ]\n" +
+			"      }\n" +
+			"}";
 
 		final JSONObject jsonObject = new JSONObject(jsonStr);
 		final Map<String, Object> xdmData = Utils.toMap(jsonObject);
@@ -410,7 +441,6 @@ public class IdentityTests {
 		assertEquals(coreId, coreItem.getId());
 		assertEquals(AuthenticatedState.AUTHENTICATED, coreItem.getAuthenticatedState());
 		assertEquals(false, coreItem.isPrimary());
-
 		// TODO - enable when ExtensionError creation is available
 		// should not crash on calling the callback
 		//extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
@@ -423,8 +453,11 @@ public class IdentityTests {
 
 		// verify
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(0));
-		MobileCore.dispatchEventWithResponseCallback(any(Event.class), any(AdobeCallback.class),
-				any(ExtensionErrorCallback.class));
+		MobileCore.dispatchEventWithResponseCallback(
+			any(Event.class),
+			any(AdobeCallback.class),
+			any(ExtensionErrorCallback.class)
+		);
 	}
 
 	@Test
@@ -435,6 +468,7 @@ public class IdentityTests {
 		final Map<String, Object> errorCapture = new HashMap<>();
 		final ArgumentCaptor<AdobeCallback> adobeCallbackCaptor = ArgumentCaptor.forClass(AdobeCallback.class);
 		final AdobeCallbackWithError callbackWithError = new AdobeCallbackWithError() {
+
 			@Override
 			public void fail(AdobeError adobeError) {
 				errorCapture.put(KEY_IS_ERRORCALLBACK_CALLED, true);
@@ -442,8 +476,7 @@ public class IdentityTests {
 			}
 
 			@Override
-			public void call(Object o) {
-			}
+			public void call(Object o) {}
 		};
 
 		// test
@@ -451,8 +484,11 @@ public class IdentityTests {
 
 		// verify if the event is dispatched
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
-		MobileCore.dispatchEventWithResponseCallback(any(Event.class), adobeCallbackCaptor.capture(),
-				any(ExtensionErrorCallback.class));
+		MobileCore.dispatchEventWithResponseCallback(
+			any(Event.class),
+			adobeCallbackCaptor.capture(),
+			any(ExtensionErrorCallback.class)
+		);
 
 		// set response event to null
 		adobeCallbackCaptor.getValue().call(null);
@@ -470,6 +506,7 @@ public class IdentityTests {
 		final Map<String, Object> errorCapture = new HashMap<>();
 		final ArgumentCaptor<AdobeCallback> adobeCallbackCaptor = ArgumentCaptor.forClass(AdobeCallback.class);
 		final AdobeCallbackWithError callbackWithError = new AdobeCallbackWithError() {
+
 			@Override
 			public void fail(AdobeError adobeError) {
 				errorCapture.put(KEY_IS_ERRORCALLBACK_CALLED, true);
@@ -477,8 +514,7 @@ public class IdentityTests {
 			}
 
 			@Override
-			public void call(Object o) {
-			}
+			public void call(Object o) {}
 		};
 
 		// test
@@ -486,8 +522,11 @@ public class IdentityTests {
 
 		// verify if the event is dispatched
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
-		MobileCore.dispatchEventWithResponseCallback(any(Event.class), adobeCallbackCaptor.capture(),
-				any(ExtensionErrorCallback.class));
+		MobileCore.dispatchEventWithResponseCallback(
+			any(Event.class),
+			adobeCallbackCaptor.capture(),
+			any(ExtensionErrorCallback.class)
+		);
 
 		// set response event to null
 		Map<String, Object> eventData = new HashMap<>();
@@ -507,6 +546,7 @@ public class IdentityTests {
 		final Map<String, Object> errorCapture = new HashMap<>();
 		final ArgumentCaptor<AdobeCallback> adobeCallbackCaptor = ArgumentCaptor.forClass(AdobeCallback.class);
 		final AdobeCallbackWithError callbackWithError = new AdobeCallbackWithError() {
+
 			@Override
 			public void fail(AdobeError adobeError) {
 				errorCapture.put(KEY_IS_ERRORCALLBACK_CALLED, true);
@@ -514,8 +554,7 @@ public class IdentityTests {
 			}
 
 			@Override
-			public void call(Object o) {
-			}
+			public void call(Object o) {}
 		};
 
 		// test
@@ -523,8 +562,11 @@ public class IdentityTests {
 
 		// verify if the event is dispatched
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
-		MobileCore.dispatchEventWithResponseCallback(any(Event.class), adobeCallbackCaptor.capture(),
-				any(ExtensionErrorCallback.class));
+		MobileCore.dispatchEventWithResponseCallback(
+			any(Event.class),
+			adobeCallbackCaptor.capture(),
+			any(ExtensionErrorCallback.class)
+		);
 
 		// set response event to map missing IdentityMap
 		Map<String, Object> emptyXDMData = new HashMap<>();
@@ -539,9 +581,12 @@ public class IdentityTests {
 	// Private method
 	// ========================================================================================
 	private Event buildIdentityResponseEvent(final Map<String, Object> eventData) {
-		return new Event.Builder(IdentityConstants.EventNames.IDENTITY_REQUEST_IDENTITY_ECID,
-								 IdentityConstants.EventType.EDGE_IDENTITY,
-								 IdentityConstants.EventSource.RESPONSE_IDENTITY).setEventData(eventData).build();
+		return new Event.Builder(
+			IdentityConstants.EventNames.IDENTITY_REQUEST_IDENTITY_ECID,
+			IdentityConstants.EventType.EDGE_IDENTITY,
+			IdentityConstants.EventSource.RESPONSE_IDENTITY
+		)
+			.setEventData(eventData)
+			.build();
 	}
-
 }
