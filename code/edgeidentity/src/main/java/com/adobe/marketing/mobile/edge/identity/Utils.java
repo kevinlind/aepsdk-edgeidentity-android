@@ -11,20 +11,18 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
+import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
+
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 class Utils {
 
@@ -42,16 +40,13 @@ class Utils {
 	 * Adds {@code key}/{@code value} to {@code map} if {@code value} is not null or an
 	 * empty collection.
 	 *
-	 * @param map collection to put {@code value} mapped to {@code key} if {@code value} is
-	 *            non-null and contains at least one entry
-	 * @param key key used to map {@code value} in {@code map}
+	 * @param map   collection to put {@code value} mapped to {@code key} if {@code value} is
+	 *              non-null and contains at least one entry
+	 * @param key   key used to map {@code value} in {@code map}
 	 * @param value a Object to add to {@code map} if not null
 	 */
 	static void putIfNotNull(final Map<String, Object> map, final String key, final Object value) {
-		boolean addValues =
-			map != null &&
-			key != null &&
-			value != null;
+		boolean addValues = map != null && key != null && value != null;
 
 		if (addValues) {
 			map.put(key, value);
@@ -61,6 +56,7 @@ class Utils {
 	/* JSON - Map conversion helpers */
 	// TODO: add tests / replace with third party library for json conversion; test more around jsonObject/jsonArray with null nodes
 	// TODO: check what should be the expected behavior with the konductor team (e.g. don't add the null nodes or add them with null values)
+
 	/**
 	 * Converts provided {@link JSONObject} into {@link Map} for any number of levels, which can be used as event data
 	 * This method is recursive.
@@ -78,15 +74,18 @@ class Utils {
 		Iterator<String> keysIterator = jsonObject.keys();
 
 		while (keysIterator.hasNext()) {
-			String nextKey  = keysIterator.next();
+			String nextKey = keysIterator.next();
 			Object value = null;
 			Object returnValue;
 
 			try {
 				value = jsonObject.get(nextKey);
 			} catch (JSONException e) {
-				MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
-							   "Utils(toMap) - Unable to convert jsonObject to Map for key " + nextKey + ", skipping.");
+				MobileCore.log(
+					LoggingMode.DEBUG,
+					LOG_TAG,
+					"Utils(toMap) - Unable to convert jsonObject to Map for key " + nextKey + ", skipping."
+				);
 			}
 
 			if (value == null) {
@@ -94,7 +93,7 @@ class Utils {
 			}
 
 			if (value instanceof JSONObject) {
-				returnValue = toMap((JSONObject)value);
+				returnValue = toMap((JSONObject) value);
 			} else if (value instanceof JSONArray) {
 				returnValue = toList((JSONArray) value);
 			} else {
@@ -130,8 +129,11 @@ class Utils {
 			try {
 				value = jsonArray.get(i);
 			} catch (JSONException e) {
-				MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
-							   "Utils(toList) - Unable to convert jsonObject to List for index " + i + ", skipping.");
+				MobileCore.log(
+					LoggingMode.DEBUG,
+					LOG_TAG,
+					"Utils(toList) - Unable to convert jsonObject to List for index " + i + ", skipping."
+				);
 			}
 
 			if (value == null) {
@@ -139,7 +141,7 @@ class Utils {
 			}
 
 			if (value instanceof JSONObject) {
-				returnValue = toMap((JSONObject)value);
+				returnValue = toMap((JSONObject) value);
 			} else if (value instanceof JSONArray) {
 				returnValue = toList((JSONArray) value);
 			} else {
@@ -151,7 +153,6 @@ class Utils {
 
 		return jsonArrayAsList;
 	}
-
 
 	/**
 	 * Creates a deep copy of the provided {@link Map}.
@@ -167,7 +168,11 @@ class Utils {
 		try {
 			return Utils.toMap(new JSONObject(map));
 		} catch (NullPointerException e) {
-			MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Utils(deepCopy) - Unable to deep copy map, json string invalid.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"Utils(deepCopy) - Unable to deep copy map, json string invalid."
+			);
 		}
 
 		return null;
@@ -193,5 +198,4 @@ class Utils {
 
 		return deepCopy;
 	}
-
 }
