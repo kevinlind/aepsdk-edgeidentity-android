@@ -48,6 +48,57 @@ class IdentityProperties {
 		this.identityMap = map == null ? new IdentityMap() : map; // always keep an empty identity map so there is no need for null check
 	}
 
+	// TODO: add getter/setter for adID properties; and that will save it in persistence properly when using that API
+	// setter; follow the logic from iOS impl; specifically removing from the identity map regardless of if a new one is added or not
+	// ecid has more complexity because it has 2 potential values; ad ID has one, more streamlined
+	// handle events to set ad ID from identity extn
+	// call iden prop to set the value -> using getter/setter
+	/**
+	 * Retrieves the current advertising identifier
+	 *
+	 * @return current advertising identifier
+	 */
+
+	String getAdId() {
+		final List<IdentityItem> adIdItems = identityMap.getIdentityItemsForNamespace(
+			IdentityConstants.Namespaces.GAID
+		);
+		// Check that:
+		// 1. The returned list itself is valid
+		// 2. The list is not empty
+		// 3. The first item in the list exists (there should only be one match)
+		// 4. The actual stored ID is not null or empty
+		if (
+			adIdItems != null &&
+			!adIdItems.isEmpty() &&
+			adIdItems.get(0) != null &&
+			!Utils.isNullOrEmpty(adIdItems.get(0).getId())
+		) {
+			return adIdItems.get(0).getId();
+		}
+		return null;
+	}
+
+	/**
+	 * Sets the current advertising identifier
+	 *
+	 * @param newAdId the new
+	 */
+	void setAdId(final String newAdId) {
+		// Delete the existing ad ID from the identity map if it exists
+		final String currentAdId = getAdId();
+
+		// Remove current ad ID; create a temp IdentityItem to use the IdentityMap's remove item method
+		if (currentAdId != null) {
+			final IdentityItem previousAdIdItem = new IdentityItem(currentAdId);
+			identityMap.removeItem(previousAdIdItem, IdentityConstants.Namespaces.GAID);
+		}
+
+		// Add new ad ID to Identity map
+		final IdentityItem newAdIdItem = new IdentityItem(newAdId, AuthenticatedState.AMBIGUOUS, false);
+		identityMap.addItem(newAdIdItem, IdentityConstants.Namespaces.GAID);
+	}
+
 	/**
 	 * Sets the current {@link ECID}
 	 *

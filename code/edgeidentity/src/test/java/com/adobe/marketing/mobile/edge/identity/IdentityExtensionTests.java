@@ -332,7 +332,7 @@ public class IdentityExtensionTests {
 				new HashMap<String, Object>() {
 					{
 						put(
-							IdentityConstants.SharedState.STATE_OWNER,
+							IdentityConstants.EventDataKeys.STATE_OWNER,
 							IdentityConstants.SharedState.IdentityDirect.NAME
 						);
 					}
@@ -394,7 +394,7 @@ public class IdentityExtensionTests {
 			.setEventData(
 				new HashMap<String, Object>() {
 					{
-						put(IdentityConstants.SharedState.STATE_OWNER, "com.adobe.module.configuration");
+						put(IdentityConstants.EventDataKeys.STATE_OWNER, "com.adobe.module.configuration");
 					}
 				}
 			)
@@ -426,7 +426,7 @@ public class IdentityExtensionTests {
 				new HashMap<String, Object>() {
 					{
 						put(
-							IdentityConstants.SharedState.STATE_OWNER,
+							IdentityConstants.EventDataKeys.STATE_OWNER,
 							IdentityConstants.SharedState.IdentityDirect.NAME
 						);
 					}
@@ -453,7 +453,7 @@ public class IdentityExtensionTests {
 				new HashMap<String, Object>() {
 					{
 						put(
-							IdentityConstants.SharedState.STATE_OWNER,
+							IdentityConstants.EventDataKeys.STATE_OWNER,
 							IdentityConstants.SharedState.IdentityDirect.NAME
 						);
 					}

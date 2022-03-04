@@ -66,6 +66,20 @@ final class EventUtils {
 	}
 
 	/**
+	 * Checks if the provided {@code event} is of type {@link IdentityConstants.EventType#GENERIC_IDENTITY} and source {@link IdentityConstants.EventSource#REQUEST_CONTENT}
+	 *
+	 * @param event the event to verify
+	 * @return true if both type and source match
+	 */
+	static boolean isRequestContentEvent(final Event event) {
+		return (
+			event != null &&
+			IdentityConstants.EventType.GENERIC_IDENTITY.equalsIgnoreCase(event.getType()) &&
+			IdentityConstants.EventSource.REQUEST_CONTENT.equalsIgnoreCase(event.getSource())
+		);
+	}
+
+	/**
 	 * Checks if the provided {@code event} is of type {@link IdentityConstants.EventType#GENERIC_IDENTITY} and source {@link IdentityConstants.EventSource#REQUEST_RESET}
 	 *
 	 * @param event the event to verify
@@ -94,7 +108,7 @@ final class EventUtils {
 		String stateOwner;
 
 		try {
-			stateOwner = (String) event.getEventData().get(IdentityConstants.SharedState.STATE_OWNER);
+			stateOwner = (String) event.getEventData().get(IdentityConstants.EventDataKeys.STATE_OWNER);
 		} catch (ClassCastException e) {
 			return false;
 		}

@@ -13,6 +13,7 @@ package com.adobe.marketing.mobile.edge.identity;
 
 import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
+import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
 import java.util.ArrayList;
@@ -34,6 +35,24 @@ class Utils {
 
 	static boolean isNullOrEmpty(final Map<String, Object> map) {
 		return map == null || map.isEmpty();
+	}
+
+	static boolean isAdIDEvent(final Event event) {
+		final Map<String, Object> data = event.getEventData();
+		return data.containsKey(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER);
+	}
+
+	static String getAdID(final Event event) {
+		final Map<String, Object> data = event.getEventData();
+		final String adID = (String) data.get(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER);
+		if (adID == null) {
+			return "";
+		} else {
+			if (adID == IdentityConstants.Default.ZERO_ADVERTISING_ID) {
+				return "";
+			}
+			return adID;
+		}
 	}
 
 	/**
