@@ -89,9 +89,13 @@ class IdentityProperties {
 		final String currentAdId = getAdId();
 
 		// Remove current ad ID; create a temp IdentityItem to use the IdentityMap's remove item method
-		if (currentAdId != null) {
+		if (currentAdId != null && !currentAdId.equalsIgnoreCase(newAdId)) {
 			final IdentityItem previousAdIdItem = new IdentityItem(currentAdId);
 			identityMap.removeItem(previousAdIdItem, IdentityConstants.Namespaces.GAID);
+		}
+
+		if (newAdId == null || newAdId.isEmpty()) {
+			return;
 		}
 
 		// Add new ad ID to Identity map

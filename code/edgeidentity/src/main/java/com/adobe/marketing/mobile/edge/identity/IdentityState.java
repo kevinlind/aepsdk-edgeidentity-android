@@ -13,6 +13,9 @@ package com.adobe.marketing.mobile.edge.identity;
 
 import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.ExtensionError;
+import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
 import java.util.HashMap;
@@ -160,6 +163,92 @@ class IdentityState {
 	void removeCustomerIdentifiers(final IdentityMap map) {
 		identityProperties.removeCustomerIdentifiers(map);
 		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+	}
+
+	/**
+	 * Construct the advertising identifier consent request event data using the provided consent value
+	 * @param consentVal the consent value defined by {@link IdentityConstants.XDMKeys.Consent#YES YES}
+	 *                   or {@link IdentityConstants.XDMKeys.Consent#NO NO}
+	 * @return the event data for advertising identifier consent request
+	 */
+	private Map<String, Object> buildConsentAdIdRequestData(final String consentVal) {
+		// build the map from the bottom level -> up
+		Map<String, Object> consentValMap = new HashMap<>();
+		consentValMap.put(IdentityConstants.XDMKeys.Consent.VAL, consentVal);
+		consentValMap.put(IdentityConstants.XDMKeys.Consent.ID_TYPE, IdentityConstants.Namespaces.GAID);
+
+		Map<String, Object> adIDMap = new HashMap<>();
+		adIDMap.put(IdentityConstants.XDMKeys.Consent.AD_ID, consentValMap);
+
+		Map<String, Object> consentMap = new HashMap<>();
+		consentMap.put(IdentityConstants.XDMKeys.Consent.CONSENTS, adIDMap);
+		return consentValMap;
+	}
+
+	/**
+	 * Dispatches a consent request event with the consent value passed
+	 *
+	 * @param consentVal the consent value to send in the event, from
+	 * {@link IdentityConstants.XDMKeys.Consent#YES YES}/{@link IdentityConstants.XDMKeys.Consent#NO NO}
+	 */
+	private void dispatchAdIdConsentRequestEvent(final String consentVal) {
+		Map<String, Object> consentData = buildConsentAdIdRequestData(consentVal);
+
+		final Event consentEvent = new Event.Builder(
+				IdentityConstants.EventNames.CONSENT_UPDATE_REQUEST_AD_ID,
+				IdentityConstants.EventType.EDGE_CONSENT,
+				IdentityConstants.EventSource.UPDATE_CONSENT
+		)
+				.setEventData(consentData)
+				.build();
+
+		// Callback is not required because there is no response for this type of event
+		MobileCore.dispatchEvent(
+				consentEvent,
+				new ExtensionErrorCallback<ExtensionError>() {
+					@Override
+					public void error(ExtensionError extensionError) {
+						MobileCore.log(
+								LoggingMode.DEBUG,
+								LOG_TAG,
+								"Failed to dispatch consent event " +
+										consentEvent.toString() +
+										": " +
+										extensionError.getErrorName()
+						);
+					}
+				}
+		);
+	}
+
+	void updateAdvertisingIdentifier(final Event event, final SharedStateCallback callback) {
+		// TODO: callback exists for create XDM shared state; dont need dispatcher for event becasue it goes
+		// direct through MobileCore anyways
+		final String newAdId = Utils.getAdID(event);
+		IdentityProperties identityProperties = IdentityStorageService.loadPropertiesFromPersistence();
+		final String currentAdId = identityProperties.getAdId();
+
+		// The ad ID has changed
+		if (!newAdId.equalsIgnoreCase(currentAdId)) {
+			// Ad ID updated in local state first
+			identityProperties.setAdId(newAdId);
+			// Consent has changed
+			if (newAdId.isEmpty() || currentAdId.isEmpty()) {
+				dispatchAdIdConsentRequestEvent(
+						newAdId.isEmpty() ? IdentityConstants.XDMKeys.Consent.NO : IdentityConstants.XDMKeys.Consent.YES
+				);
+			}
+
+			// Save to persistence
+			IdentityStorageService.savePropertiesToPersistence(identityProperties);
+			// TODO: create XDM shared state is handled by Core in Swift; because this method is
+			// private to IdentityExtension, does this have to live here? (it would not be accessible
+			// from IdentityState)
+			// have to call getIdentityProperties.toXDMData
+			// false -> (map: event data vs fully formatted XDM data)
+			callback.setXDMSharedEventState(identityProperties.toXDMData(false) ,event);
+		}
+		// Ad ID has not changed; no op
 	}
 
 	/**

@@ -42,6 +42,7 @@ public class IdentityPropertiesTests {
 		IdentityProperties props = new IdentityProperties();
 		props.setECID(new ECID());
 		props.setECIDSecondary(new ECID());
+		props.setAdId("test-ad-id");
 
 		// test
 		Map<String, Object> xdmData = props.toXDMData(false);
@@ -56,6 +57,11 @@ public class IdentityPropertiesTests {
 		assertEquals(props.getECIDSecondary().toString(), flatMap.get("identityMap.ECID[1].id"));
 		assertEquals("ambiguous", flatMap.get("identityMap.ECID[1].authenticatedState"));
 		assertEquals("false", flatMap.get("identityMap.ECID[1].primary"));
+
+		// verify ad ID
+		assertEquals("test-ad-id", flatMap.get("identityMap.GAID[0].id"));
+		assertEquals("ambiguous", flatMap.get("identityMap.GAID[0].authenticatedState"));
+		assertEquals("false", flatMap.get("identityMap.GAID[0].primary"));
 	}
 
 	@Test
@@ -63,12 +69,13 @@ public class IdentityPropertiesTests {
 		// setup
 		IdentityProperties props = new IdentityProperties();
 		props.setECID(new ECID());
+		props.setAdId("");
 
 		// test
 		Map<String, Object> xdmMap = props.toXDMData(false);
 
-		// verify
 		assertEquals(props.getECID().toString(), flattenMap(xdmMap).get("identityMap.ECID[0].id"));
+		assertNull(flattenMap(xdmMap).get("identityMap.GAID[0].id"));
 	}
 
 	@Test
@@ -82,6 +89,20 @@ public class IdentityPropertiesTests {
 		assertEquals(0, flattenMap(props.toXDMData(false)).size());
 	}
 
+	@Test
+	public void text_toXDMData_OnlyAdID() {
+		// setup
+		IdentityProperties props = new IdentityProperties();
+		props.setAdId("test-ad-id");
+
+		// test
+		Map<String, Object> xdmMap = props.toXDMData(false);
+
+		// verify
+		assertEquals("test-ad-id", props.getAdId());
+		assertEquals(props.getAdId(), flattenMap(xdmMap).get("identityMap.GAID[0].id"));
+	}
+
 	// ======================================================================================================================
 	// Tests for constructor : IdentityProperties(final Map<String, Object> xdmData)
 	// ======================================================================================================================
@@ -92,6 +113,7 @@ public class IdentityPropertiesTests {
 		Map<String, Object> persistedIdentifiers = createXDMIdentityMap(
 			new TestItem("UserId", "secretID"),
 			new TestItem("PushId", "token"),
+			new TestItem("GAID", "test-ad-id"),
 			new TestECIDItem("primaryECID"),
 			new TestECIDItem("secondaryECID")
 		);
@@ -101,11 +123,12 @@ public class IdentityPropertiesTests {
 
 		// verify
 		Map<String, String> flatMap = flattenMap(props.toXDMData(false));
-		assertEquals(12, flatMap.size()); // 4x3
+		assertEquals(15, flatMap.size()); // 5x3
 		assertEquals("primaryECID", props.getECID().toString());
 		assertEquals("secondaryECID", props.getECIDSecondary().toString());
 		assertEquals("secretID", flatMap.get("identityMap.UserId[0].id"));
 		assertEquals("token", flatMap.get("identityMap.PushId[0].id"));
+		assertEquals("test-ad-id", flatMap.get("identityMap.GAID[0].id"));
 	}
 
 	@Test
@@ -256,6 +279,10 @@ public class IdentityPropertiesTests {
 		assertEquals("primaryAgain", flatMap.get("identityMap.ECID[0].id"));
 		assertEquals("secondary", flatMap.get("identityMap.ECID[1].id"));
 	}
+	// ======================================================================================================================
+	// Tests for method : setAdId(final String newAdId)
+	// ======================================================================================================================
+
 	// ======================================================================================================================
 	// Tests for "updateCustomerIdentifiers" is already covered in "handleUpdateRequest" tests in IdentityExtensionTests
 	// ======================================================================================================================

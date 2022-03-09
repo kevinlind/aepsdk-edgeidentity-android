@@ -44,6 +44,8 @@ class IdentityExtension extends Extension {
 	 * <ul>
 	 *     <li> Listener {@link ListenerEventHubBoot} to listen for event with eventType {@link IdentityConstants.EventType#HUB}
 	 *      and EventSource {@link IdentityConstants.EventSource#BOOTED}</li>
+	 *     <li> Listener {@link ListenerIdentityRequestContent} to listen for event with eventType {@link IdentityConstants.EventType#GENERIC_IDENTITY}
+	 * 	   and EventSource {@link IdentityConstants.EventSource#REQUEST_CONTENT}</li>
 	 *     <li> Listener {@link ListenerEdgeIdentityRequestIdentity} to listen for event with eventType {@link IdentityConstants.EventType#EDGE_IDENTITY}
 	 *     and EventSource {@link IdentityConstants.EventSource#REQUEST_IDENTITY}</li>
 	 *     <li> Listener {@link ListenerEdgeIdentityUpdateIdentity} to listen for event with eventType {@link IdentityConstants.EventType#EDGE_IDENTITY}
@@ -81,6 +83,12 @@ class IdentityExtension extends Extension {
 			IdentityConstants.EventType.HUB,
 			IdentityConstants.EventSource.BOOTED,
 			ListenerEventHubBoot.class,
+			listenerErrorCallback
+		);
+		extensionApi.registerEventListener(
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_CONTENT,
+			ListenerIdentityRequestContent.class,
 			listenerErrorCallback
 		);
 		extensionApi.registerEventListener(
@@ -184,57 +192,7 @@ class IdentityExtension extends Extension {
 	 * @return True if the bootup is complete
 	 */
 	boolean bootupIfReady() {
-		SharedStateCallback callback = new SharedStateCallback() {
-			@Override
-			public Map<String, Object> getSharedState(final String stateOwner, final Event event) {
-				ExtensionApi api = getApi();
-
-				if (api == null) {
-					return null;
-				}
-
-				return api.getSharedEventState(
-					stateOwner,
-					event,
-					new ExtensionErrorCallback<ExtensionError>() {
-						@Override
-						public void error(ExtensionError extensionError) {
-							MobileCore.log(
-								LoggingMode.WARNING,
-								LOG_TAG,
-								"SharedStateCallback - Unable to fetch shared state, failed with error: " +
-								extensionError.getErrorName()
-							);
-						}
-					}
-				);
-			}
-
-			@Override
-			public boolean setXDMSharedEventState(final Map<String, Object> state, final Event event) {
-				ExtensionApi api = getApi();
-
-				if (api == null) {
-					return false;
-				}
-
-				return api.setXDMSharedEventState(
-					state,
-					event,
-					new ExtensionErrorCallback<ExtensionError>() {
-						@Override
-						public void error(ExtensionError extensionError) {
-							MobileCore.log(
-								LoggingMode.WARNING,
-								LOG_TAG,
-								"SharedStateCallback - Unable to set XDM shared state, failed with error: " +
-								extensionError.getErrorName()
-							);
-						}
-					}
-				);
-			}
-		};
+		final SharedStateCallback callback = createSharedStateCallback();
 
 		return state.bootupIfReady(callback);
 	}
@@ -406,84 +364,13 @@ class IdentityExtension extends Extension {
 	 * @param event the event containing `advertisingIdentifier` data {@link Event}
 	 */
 	void handleRequestContent(final Event event) {
-		// TODO: split out some functionality; ex: buildConsentAdIdRequest & pass Y/N value (for the nested map logic)
-		// TODO: this is where the meat of the logic should reside; based on the logic from iOS
-		// check if the adID changed (used helper function)
-		// check if consent should be updated (nil -> valid or valid -> nil)
-		// if adID changed:
-		// update the identityProperties
-		// if consent should be updated
-		// dispatch consent event the yes or no signal based detected change
-		// save change to persistence
-
-		// this getter should not be used to detect whether the event is an ad ID event or not;
-		// use Utils.isAdIdEvent instead
 		if (Utils.isAdIDEvent(event)) {
-			// getAdID returns sanitized value; null, all-zero converted to ""
-			// all other values returned as-is
-			final String newAdId = Utils.getAdID(event);
-			IdentityProperties identityProperties = IdentityStorageService.loadPropertiesFromPersistence();
-			final String currentAdId = identityProperties.getAdId();
-
-			// if ad ID != existing ad ID
-			if (!newAdId.equalsIgnoreCase(currentAdId)) {
-				// ad ID changed; see if consent needs updating
-				// ad ID should be updated in local state first
-
-				identityProperties.setAdId(newAdId);
-
-				if (newAdId.isEmpty() || currentAdId.isEmpty()) {
-					// consent needs updating (could be either Y or N)
-					// dispatch consent event
-					// setup
-					// build the map from the bottom level -> up
-					Map<String, Object> consentValMap = new HashMap<>();
-					consentValMap.put(
-						IdentityConstants.XDMKeys.Consent.VAL,
-						newAdId.isEmpty() ? IdentityConstants.XDMKeys.Consent.NO : IdentityConstants.XDMKeys.Consent.YES
-					);
-					consentValMap.put(IdentityConstants.XDMKeys.Consent.ID_TYPE, IdentityConstants.Namespaces.GAID);
-
-					Map<String, Object> adIDMap = new HashMap<>();
-					adIDMap.put(IdentityConstants.XDMKeys.Consent.AD_ID, consentValMap);
-
-					Map<String, Object> consentMap = new HashMap<>();
-					consentMap.put(IdentityConstants.XDMKeys.Consent.CONSENTS, adIDMap);
-
-					final Event consentEvent = new Event.Builder(
-						IdentityConstants.EventNames.CONSENT_UPDATE_REQUEST_AD_ID,
-						IdentityConstants.EventType.EDGE_CONSENT,
-						IdentityConstants.EventSource.UPDATE_CONSENT
-					)
-						.setEventData(consentMap)
-						.build();
-					// callback is not required because a response is not required for confirmation?
-					MobileCore.dispatchEvent(
-						consentEvent,
-						new ExtensionErrorCallback<ExtensionError>() {
-							@Override
-							public void error(ExtensionError extensionError) {
-								MobileCore.log(
-									LoggingMode.DEBUG,
-									LOG_TAG,
-									"Failed to dispatch consent event " +
-									consentEvent.toString() +
-									": " +
-									extensionError.getErrorName()
-								);
-							}
-						}
-					);
-				}
-
-				// Save to persistence
-				IdentityStorageService.savePropertiesToPersistence(identityProperties);
-			}
-			// nothing has changed; no op
+			// Doesn't need event dispatcher because MobileCore can be called directly
+			state.updateAdvertisingIdentifier(
+				event,
+				createSharedStateCallback()
+			);
 		}
-		//		if (state.updateLegacyExperienceCloudId(legacyEcid)) {
-		//			shareIdentityXDMSharedState(event);
-		//		}
 	}
 
 	/**
@@ -567,5 +454,59 @@ class IdentityExtension extends Extension {
 		};
 
 		extensionApi.setXDMSharedEventState(state.getIdentityProperties().toXDMData(false), event, errorCallback);
+	}
+
+	private SharedStateCallback createSharedStateCallback() {
+		return new SharedStateCallback() {
+			@Override
+			public Map<String, Object> getSharedState(final String stateOwner, final Event event) {
+				ExtensionApi api = getApi();
+
+				if (api == null) {
+					return null;
+				}
+
+				return api.getSharedEventState(
+						stateOwner,
+						event,
+						new ExtensionErrorCallback<ExtensionError>() {
+							@Override
+							public void error(ExtensionError extensionError) {
+								MobileCore.log(
+										LoggingMode.WARNING,
+										LOG_TAG,
+										"SharedStateCallback - Unable to fetch shared state, failed with error: " +
+												extensionError.getErrorName()
+								);
+							}
+						}
+				);
+			}
+
+			@Override
+			public boolean setXDMSharedEventState(final Map<String, Object> state, final Event event) {
+				ExtensionApi api = getApi();
+
+				if (api == null) {
+					return false;
+				}
+
+				return api.setXDMSharedEventState(
+						state,
+						event,
+						new ExtensionErrorCallback<ExtensionError>() {
+							@Override
+							public void error(ExtensionError extensionError) {
+								MobileCore.log(
+										LoggingMode.WARNING,
+										LOG_TAG,
+										"SharedStateCallback - Unable to set XDM shared state, failed with error: " +
+												extensionError.getErrorName()
+								);
+							}
+						}
+				);
+			}
+		};
 	}
 }
