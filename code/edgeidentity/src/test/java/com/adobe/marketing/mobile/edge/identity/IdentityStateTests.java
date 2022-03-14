@@ -13,11 +13,13 @@ package com.adobe.marketing.mobile.edge.identity;
 
 import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.createXDMIdentityMap;
 import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.flattenJSONString;
+import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.flattenMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -27,6 +29,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.MobileCore;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +47,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ MobileCore.class })
 public class IdentityStateTests {
+
+	//	@Mock
+	//	ExtensionApi mockExtensionApi;
 
 	@Mock
 	Application mockApplication;
@@ -327,12 +333,17 @@ public class IdentityStateTests {
 		assertEquals(1, setXDMSharedEventStateCalledTimes);
 	}
 
+	// ======================================================================================================================
+	// Tests for method : resetIdentifiers()
+	// ======================================================================================================================
+
 	@Test
 	public void testResetIdentifiers() {
 		// setup
 		IdentityState state = new IdentityState(new IdentityProperties());
 		state.getIdentityProperties().setECID(new ECID());
 		state.getIdentityProperties().setECIDSecondary(new ECID());
+		state.getIdentityProperties().setAdId("adID");
 		ECID existingEcid = state.getIdentityProperties().getECID();
 
 		// test
@@ -342,6 +353,7 @@ public class IdentityStateTests {
 		assertNotEquals(existingEcid, state.getIdentityProperties().getECID()); // ECID should be regenerated
 		assertFalse(state.getIdentityProperties().getECID().toString().isEmpty()); // ECID should not be empty
 		assertNull(state.getIdentityProperties().getECIDSecondary()); // should be cleared
+		assertNull(state.getIdentityProperties().getAdId()); // should be cleared
 		verify(mockSharedPreferenceEditor, Mockito.times(1)).apply(); // should save to data store
 	}
 
@@ -541,5 +553,307 @@ public class IdentityStateTests {
 
 		assertNull(state.getIdentityProperties().getECIDSecondary());
 		verify(mockSharedPreferenceEditor, Mockito.times(0)).apply();
+	}
+
+	// ======================================================================================================================
+	// Tests for method : updateAdvertisingIdentifier(final Event event, final SharedStateCallback callback)
+	// ======================================================================================================================
+
+	// With consent change
+	@Test
+	public void testupdateAdvertisingIdentifier_notSetWhenExistingIsNull() {
+		IdentityState state = new IdentityState(new IdentityProperties());
+		state.getIdentityProperties().setECID(new ECID());
+
+		state.updateLegacyExperienceCloudId(null);
+
+		assertNull(state.getIdentityProperties().getECIDSecondary());
+		verify(mockSharedPreferenceEditor, Mockito.times(0)).apply();
+	}
+
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenNull_thenChangedToValid() throws Exception {
+		assertUpdateAdvertisingIdentifier_updatedWithConsentChange(null, "adID", "adID", "y");
+	}
+
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenEmpty_thenChangedToValid() throws Exception {
+		assertUpdateAdvertisingIdentifier_updatedWithConsentChange("", "adID", "adID", "y");
+	}
+
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenValid_thenChangedToEmpty() throws Exception {
+		assertUpdateAdvertisingIdentifier_updatedWithConsentChange("oldAdId", "", null, "n");
+	}
+
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenValid_thenChangedToAllZeros() throws Exception {
+		assertUpdateAdvertisingIdentifier_updatedWithConsentChange(
+			"oldAdId",
+			IdentityConstants.Default.ZERO_ADVERTISING_ID,
+			null,
+			"n"
+		);
+	}
+
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenAllZeros_thenChangedToEmpty() throws Exception {
+		assertUpdateAdvertisingIdentifier_updatedWithConsentChange(
+			"oldAdId",
+			IdentityConstants.Default.ZERO_ADVERTISING_ID,
+			null,
+			"n"
+		);
+	}
+
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenAllZeros_thenSameValue() throws Exception {
+		assertUpdateAdvertisingIdentifier_updatedWithConsentChange(
+			IdentityConstants.Default.ZERO_ADVERTISING_ID,
+			IdentityConstants.Default.ZERO_ADVERTISING_ID,
+			null,
+			"n"
+		);
+	}
+
+	// Without consent change
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenValid_thenDifferentValid() throws Exception {
+		assertUpdateAdvertisingIdentifier_updatedWithoutConsentChange("oldAdId", "adId", "adId");
+	}
+
+	// Ad ID not updated
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenNull_thenEmpty() throws Exception {
+		assertUpdateAdvertisingIdentifier_notUpdated(null, "", null);
+	}
+
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenNull_thenAllZeros() throws Exception {
+		assertUpdateAdvertisingIdentifier_notUpdated(null, IdentityConstants.Default.ZERO_ADVERTISING_ID, null);
+	}
+
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenEmpty_thenSame() throws Exception {
+		assertUpdateAdvertisingIdentifier_notUpdated("", "", null);
+	}
+
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenEmpty_thenAllZeros() throws Exception {
+		assertUpdateAdvertisingIdentifier_notUpdated("", IdentityConstants.Default.ZERO_ADVERTISING_ID, null);
+	}
+
+	@Test
+	public void testUpdateAdvertisingIdentifier_whenValid_thenSame() throws Exception {
+		assertUpdateAdvertisingIdentifier_notUpdated("adId", "adId", "adId");
+	}
+
+	// Check:
+	// 1. Shared state only updated once
+	//     mockSharedPreferenceEditor times(1) check
+	// 2. Consent event only dispatched once
+	//     verifyStatic mobilecore.dispatchevent
+	//     2a. check validity of consent event; event data format exactly matches expected value
+	//         consentEventCaptor -> consentEventData -> assertEquals
+	// 3. Identity props ad ID matches the expected one after event dispatched
+	//     assertEquals state.getIdentityProperties().getAdId()
+	// 4. Identity props saved to persistence
+	//     mockSharedPreferenceEditor
+	//
+	// Expected values should be hard-coded to prevent tautological test (one where the test must pass by definition,
+	// because the expectation uses the same logic as the code being tested); has effect of checking:
+	// - Exact text - values and case sensitivity
+	// - Hierarchy of event data object
+
+	private void assertUpdateAdvertisingIdentifier_updatedWithConsentChange(
+		String persistedAdId,
+		String newAdId,
+		String expectedAdId,
+		String expectedConsent
+	) throws Exception {
+		// Setup
+		IdentityState state = new IdentityState((new IdentityProperties()));
+		state.getIdentityProperties().setECID(new ECID());
+		state.getIdentityProperties().setAdId(persistedAdId);
+
+		Event event = fakeGenericIdentityEvent(newAdId);
+		state.updateAdvertisingIdentifier(event, state.getIdentityProperties(), mockSharedStateCallback);
+
+		// Static method verification works differently from standard `verify`
+		// Use PowerMockito.verifyStatic with the mocked class holding the static method + # of times if desired
+		// Call the static method you want to verify right after the verifyStatic call to specify to
+		// the API which method should be tracked; this static method call is where you can place any captures
+		// if desired
+		// Remember that for verify calls (regular or static) should come AFTER the real API calls; mocked
+		// classes will store the calls and parameters and can be extracted after the fact with verify + ArgumentCaptors
+
+		// Verify consent event
+		if (expectedConsent == null) {
+			PowerMockito.verifyStatic(MobileCore.class, Mockito.never());
+			MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
+		} else {
+			final ArgumentCaptor<Event> consentEventCaptor = ArgumentCaptor.forClass(Event.class);
+			PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
+			MobileCore.dispatchEvent(consentEventCaptor.capture(), any(ExtensionErrorCallback.class));
+
+			Event consentEvent = consentEventCaptor.getAllValues().get(0);
+
+			Map<String, String> consentEventData = flattenMap(consentEvent.getEventData());
+			System.out.println(consentEventData);
+			// `flattenMap` allows for checking the keys' hierarchy and literal values simultaneously
+			assertEquals("GAID", consentEventData.get("consents.adID.idType"));
+			assertEquals(expectedConsent, consentEventData.get("consents.adID.val"));
+		}
+
+		// Verify persistent store
+		final ArgumentCaptor<String> persistenceValueCaptor = ArgumentCaptor.forClass(String.class);
+		verify(mockSharedPreferenceEditor, times(1))
+			.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), persistenceValueCaptor.capture());
+		Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(0));
+
+		if (expectedAdId != null) {
+			assertEquals(6, persistedData.size()); // updated ad ID + ECID
+			assertEquals("false", persistedData.get("identityMap.GAID[0].primary"));
+			assertEquals(expectedAdId, persistedData.get("identityMap.GAID[0].id"));
+			assertEquals("ambiguous", persistedData.get("identityMap.GAID[0].authenticatedState"));
+		} else {
+			assertEquals(3, persistedData.size()); // ECID
+		}
+		assertEquals("false", persistedData.get("identityMap.ECID[0].primary"));
+		assertEquals(state.getIdentityProperties().getECID().toString(), persistedData.get("identityMap.ECID[0].id"));
+		assertEquals("ambiguous", persistedData.get("identityMap.ECID[0].authenticatedState"));
+
+		// Verify identity map
+		final Map<String, String> flatIdentityMap = flattenMap(state.getIdentityProperties().toXDMData(false));
+		if (expectedAdId != null) {
+			assertEquals(6, flatIdentityMap.size()); // updated ad ID + ECID
+			assertEquals("false", flatIdentityMap.get("identityMap.GAID[0].primary"));
+			assertEquals(expectedAdId, flatIdentityMap.get("identityMap.GAID[0].id"));
+			assertEquals("ambiguous", flatIdentityMap.get("identityMap.GAID[0].authenticatedState"));
+		} else {
+			assertEquals(3, flatIdentityMap.size()); // ECID
+		}
+		assertEquals("false", flatIdentityMap.get("identityMap.ECID[0].primary"));
+		assertEquals(state.getIdentityProperties().getECID().toString(), flatIdentityMap.get("identityMap.ECID[0].id"));
+		assertEquals("ambiguous", flatIdentityMap.get("identityMap.ECID[0].authenticatedState"));
+
+		// Verify shared state and properties
+		assertEquals(1, setXDMSharedEventStateCalledTimes);
+		assertEquals(expectedAdId, state.getIdentityProperties().getAdId());
+	}
+
+	void assertUpdateAdvertisingIdentifier_updatedWithoutConsentChange(
+		String persistedAdId,
+		String newAdId,
+		String expectedAdId
+	) throws Exception {
+		// Setup
+		IdentityState state = new IdentityState((new IdentityProperties()));
+		state.getIdentityProperties().setECID(new ECID());
+		state.getIdentityProperties().setAdId(persistedAdId);
+
+		Event event = fakeGenericIdentityEvent(newAdId);
+		state.updateAdvertisingIdentifier(event, state.getIdentityProperties(), mockSharedStateCallback);
+
+		// Verify consent event
+		PowerMockito.verifyStatic(MobileCore.class, Mockito.never());
+		MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
+
+		// Verify persistent store
+		final ArgumentCaptor<String> persistenceValueCaptor = ArgumentCaptor.forClass(String.class);
+		verify(mockSharedPreferenceEditor, times(1))
+			.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), persistenceValueCaptor.capture());
+		Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(0));
+
+		if (expectedAdId != null) {
+			assertEquals(6, persistedData.size()); // updated ad ID + ECID
+			assertEquals("false", persistedData.get("identityMap.GAID[0].primary"));
+			assertEquals(expectedAdId, persistedData.get("identityMap.GAID[0].id"));
+			assertEquals("ambiguous", persistedData.get("identityMap.GAID[0].authenticatedState"));
+		} else {
+			assertEquals(3, persistedData.size()); // ECID
+		}
+		assertEquals("false", persistedData.get("identityMap.ECID[0].primary"));
+		assertEquals(state.getIdentityProperties().getECID().toString(), persistedData.get("identityMap.ECID[0].id"));
+		assertEquals("ambiguous", persistedData.get("identityMap.ECID[0].authenticatedState"));
+
+		// Verify identity map
+		final Map<String, String> flatIdentityMap = flattenMap(state.getIdentityProperties().toXDMData(false));
+		if (expectedAdId != null) {
+			assertEquals(6, flatIdentityMap.size()); // updated ad ID + ECID
+			assertEquals("false", flatIdentityMap.get("identityMap.GAID[0].primary"));
+			assertEquals(expectedAdId, flatIdentityMap.get("identityMap.GAID[0].id"));
+			assertEquals("ambiguous", flatIdentityMap.get("identityMap.GAID[0].authenticatedState"));
+		} else {
+			assertEquals(3, flatIdentityMap.size()); // ECID
+		}
+		assertEquals("false", flatIdentityMap.get("identityMap.ECID[0].primary"));
+		assertEquals(state.getIdentityProperties().getECID().toString(), flatIdentityMap.get("identityMap.ECID[0].id"));
+		assertEquals("ambiguous", flatIdentityMap.get("identityMap.ECID[0].authenticatedState"));
+
+		// Verify shared state and properties
+		assertEquals(1, setXDMSharedEventStateCalledTimes);
+		assertEquals(expectedAdId, state.getIdentityProperties().getAdId());
+	}
+
+	void assertUpdateAdvertisingIdentifier_notUpdated(String persistedAdId, String newAdId, String expectedAdId)
+		throws Exception {
+		// Setup
+		IdentityState state = new IdentityState((new IdentityProperties()));
+		state.getIdentityProperties().setECID(new ECID());
+		state.getIdentityProperties().setAdId(persistedAdId);
+
+		Event event = fakeGenericIdentityEvent(newAdId);
+		state.updateAdvertisingIdentifier(event, state.getIdentityProperties(), mockSharedStateCallback);
+
+		// Verify consent event
+		PowerMockito.verifyStatic(MobileCore.class, Mockito.never());
+		MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
+
+		// Verify persistent store
+		//		final ArgumentCaptor<String> persistenceValueCaptor = ArgumentCaptor.forClass(String.class);
+		verify(mockSharedPreferenceEditor, never())
+			.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), any(String.class));
+		//		Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(0));
+
+		final Map<String, String> flatIdentityMap = flattenMap(state.getIdentityProperties().toXDMData(false));
+		if (expectedAdId != null) {
+			assertEquals(6, flatIdentityMap.size()); // updated ad ID + ECID
+			assertEquals("false", flatIdentityMap.get("identityMap.GAID[0].primary"));
+			assertEquals(expectedAdId, flatIdentityMap.get("identityMap.GAID[0].id"));
+			assertEquals("ambiguous", flatIdentityMap.get("identityMap.GAID[0].authenticatedState"));
+		} else {
+			assertEquals(3, flatIdentityMap.size()); // ECID
+		}
+		assertEquals("false", flatIdentityMap.get("identityMap.ECID[0].primary"));
+		assertEquals(state.getIdentityProperties().getECID().toString(), flatIdentityMap.get("identityMap.ECID[0].id"));
+		assertEquals("ambiguous", flatIdentityMap.get("identityMap.ECID[0].authenticatedState"));
+
+		// Verify shared state and properties
+		assertEquals(0, setXDMSharedEventStateCalledTimes);
+		assertEquals(expectedAdId, state.getIdentityProperties().getAdId());
+	}
+
+	// Test helpers
+
+	/**
+	 * Creates an event with the given adId in data
+	 * @param adId
+	 * @return
+	 */
+	private Event fakeGenericIdentityEvent(final String adId) {
+		return new Event.Builder(
+			"Test event",
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY
+		)
+			.setEventData(
+				new HashMap<String, Object>() {
+					{
+						put(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER, adId);
+					}
+				}
+			)
+			.build();
 	}
 }

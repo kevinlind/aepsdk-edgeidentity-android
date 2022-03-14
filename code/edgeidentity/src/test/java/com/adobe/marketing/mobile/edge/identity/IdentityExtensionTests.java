@@ -268,35 +268,24 @@ public class IdentityExtensionTests {
 	@Test
 	public void test_handleIdentityRequest_noIdentifiers_emptyXDMIdentityMap() {
 		// setup
-		// you create a new instance of the identity properties for the test
 		IdentityProperties emptyProps = new IdentityProperties();
-		// you create a stub of the identitystate class
 		PowerMockito.stub(PowerMockito.method(IdentityState.class, "getIdentityProperties")).toReturn(emptyProps);
 
-		// build the test event that will trigger the handler
 		Event event = new Event.Builder(
 			"Test event",
 			IdentityConstants.EventType.EDGE_IDENTITY,
 			IdentityConstants.EventSource.REQUEST_IDENTITY
 		)
 			.build();
-		// argument captors
+
 		final ArgumentCaptor<Event> responseEventCaptor = ArgumentCaptor.forClass(Event.class);
 		final ArgumentCaptor<Event> requestEventCaptor = ArgumentCaptor.forClass(Event.class);
 
 		// test
-		// send the event to the extension's request handler
 		extension.handleIdentityRequest(event);
 
 		// verify
-		// verifyStatic is just for static functions; in this case the method call is not dot notation
-		// because when you call methods in the verify, you're not actually calling the class youre calling the mock
-		// this means when inputting args, they need to be wrapped in mockito things
-		// verify is some kind of listener (static is called separately and im guessing emits some kind of error
-		// if not called exactly the amt of times specified)
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
-		// mobilecore dispatches a response event
-		// i think any() is used to match args without having to create a real instance?
 		MobileCore.dispatchResponseEvent(
 			responseEventCaptor.capture(),
 			requestEventCaptor.capture(),
@@ -304,8 +293,6 @@ public class IdentityExtensionTests {
 		);
 
 		// verify response event containing ECID is dispatched
-		// captors store values for later verification (getAllValues returns in a list)
-		// once the captured data is extracted, perform whatever verification is required
 		Event ecidResponseEvent = responseEventCaptor.getAllValues().get(0);
 		final Map<String, Object> xdmData = ecidResponseEvent.getEventData();
 		final Map<String, Object> identityMap = (Map<String, Object>) xdmData.get("identityMap");
