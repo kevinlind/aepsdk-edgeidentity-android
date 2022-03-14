@@ -47,12 +47,7 @@ class IdentityProperties {
 		IdentityMap map = IdentityMap.fromXDMMap(xdmData);
 		this.identityMap = map == null ? new IdentityMap() : map; // always keep an empty identity map so there is no need for null check
 	}
-
-	// TODO: add getter/setter for adID properties; and that will save it in persistence properly when using that API
-	// setter; follow the logic from iOS impl; specifically removing from the identity map regardless of if a new one is added or not
-	// ecid has more complexity because it has 2 potential values; ad ID has one, more streamlined
-	// handle events to set ad ID from identity extn
-	// call iden prop to set the value -> using getter/setter
+	
 	/**
 	 * Retrieves the current advertising identifier
 	 *
@@ -67,16 +62,10 @@ class IdentityProperties {
 		// 1. The returned list itself is valid
 		// 2. The list is not empty
 		// 3. The first item in the list exists (there should only be one match)
-		// 4. The actual stored ID is not null or empty
-		if (
-			adIdItems != null &&
-			!adIdItems.isEmpty() &&
-			adIdItems.get(0) != null &&
-			!Utils.isNullOrEmpty(adIdItems.get(0).getId())
-		) {
-			return adIdItems.get(0).getId();
+		if (Utils.isNullOrEmpty(adIdItems) || adIdItems.get(0) == null) {
+			return null;
 		}
-		return null;
+		return adIdItems.get(0).getId();
 	}
 
 	/**
@@ -94,7 +83,7 @@ class IdentityProperties {
 			identityMap.removeItem(previousAdIdItem, IdentityConstants.Namespaces.GAID);
 		}
 
-		if (newAdId == null || newAdId.isEmpty()) {
+		if (Utils.isNullOrEmpty(newAdId)) {
 			return;
 		}
 

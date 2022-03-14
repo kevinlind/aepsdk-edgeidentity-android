@@ -20,7 +20,6 @@ import com.adobe.marketing.mobile.ExtensionError;
 import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -361,16 +360,18 @@ class IdentityExtension extends Extension {
 	/**
 	 * Handles events to set the advertising identifier. Called by listener registered with event hub.
 	 *
-	 * @param event the event containing `advertisingIdentifier` data {@link Event}
+	 * @param event the {@link Event} containing advertising identifier data
 	 */
 	void handleRequestContent(final Event event) {
-		if (Utils.isAdIDEvent(event)) {
-			// Doesn't need event dispatcher because MobileCore can be called directly
-			state.updateAdvertisingIdentifier(
-				event,
-				createSharedStateCallback()
-			);
+		if (!EventUtils.isAdIDEvent(event)) {
+			return;
 		}
+		// Doesn't need event dispatcher because MobileCore can be called directly
+		state.updateAdvertisingIdentifier(
+			event,
+			IdentityStorageService.loadPropertiesFromPersistence(),
+			createSharedStateCallback()
+		);
 	}
 
 	/**
@@ -456,6 +457,10 @@ class IdentityExtension extends Extension {
 		extensionApi.setXDMSharedEventState(state.getIdentityProperties().toXDMData(false), event, errorCallback);
 	}
 
+	/**
+	 * Creates standard shared state callback with functionality from {@link ExtensionApi}
+	 * @return a new instance of {@link SharedStateCallback}
+	 */
 	private SharedStateCallback createSharedStateCallback() {
 		return new SharedStateCallback() {
 			@Override
@@ -467,19 +472,19 @@ class IdentityExtension extends Extension {
 				}
 
 				return api.getSharedEventState(
-						stateOwner,
-						event,
-						new ExtensionErrorCallback<ExtensionError>() {
-							@Override
-							public void error(ExtensionError extensionError) {
-								MobileCore.log(
-										LoggingMode.WARNING,
-										LOG_TAG,
-										"SharedStateCallback - Unable to fetch shared state, failed with error: " +
-												extensionError.getErrorName()
-								);
-							}
+					stateOwner,
+					event,
+					new ExtensionErrorCallback<ExtensionError>() {
+						@Override
+						public void error(ExtensionError extensionError) {
+							MobileCore.log(
+								LoggingMode.WARNING,
+								LOG_TAG,
+								"SharedStateCallback - Unable to fetch shared state, failed with error: " +
+								extensionError.getErrorName()
+							);
 						}
+					}
 				);
 			}
 
@@ -492,19 +497,19 @@ class IdentityExtension extends Extension {
 				}
 
 				return api.setXDMSharedEventState(
-						state,
-						event,
-						new ExtensionErrorCallback<ExtensionError>() {
-							@Override
-							public void error(ExtensionError extensionError) {
-								MobileCore.log(
-										LoggingMode.WARNING,
-										LOG_TAG,
-										"SharedStateCallback - Unable to set XDM shared state, failed with error: " +
-												extensionError.getErrorName()
-								);
-							}
+					state,
+					event,
+					new ExtensionErrorCallback<ExtensionError>() {
+						@Override
+						public void error(ExtensionError extensionError) {
+							MobileCore.log(
+								LoggingMode.WARNING,
+								LOG_TAG,
+								"SharedStateCallback - Unable to set XDM shared state, failed with error: " +
+								extensionError.getErrorName()
+							);
 						}
+					}
 				);
 			}
 		};

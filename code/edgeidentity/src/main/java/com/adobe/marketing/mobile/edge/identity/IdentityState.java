@@ -136,13 +136,10 @@ class IdentityState {
 	 * Clears all identities and regenerates a new ECID value, then saves the new identities to persistence.
 	 */
 	void resetIdentifiers() {
-		// TODO: AMSDK-11208 Determine if we should dispatch consent event
-
 		identityProperties = new IdentityProperties();
 		identityProperties.setECID(new ECID());
 		identityProperties.setECIDSecondary(null);
 		IdentityStorageService.savePropertiesToPersistence(identityProperties);
-		// TODO: AMSDK-11208 Use return value to tell Identity to dispatch consent ad id update
 	}
 
 	/**
@@ -167,8 +164,8 @@ class IdentityState {
 
 	/**
 	 * Construct the advertising identifier consent request event data using the provided consent value
-	 * @param consentVal the consent value defined by {@link IdentityConstants.XDMKeys.Consent#YES YES}
-	 *                   or {@link IdentityConstants.XDMKeys.Consent#NO NO}
+	 * @param consentVal the consent value defined by {@link IdentityConstants.XDMKeys.Consent#YES}
+	 *                   or {@link IdentityConstants.XDMKeys.Consent#NO}
 	 * @return the event data for advertising identifier consent request
 	 */
 	private Map<String, Object> buildConsentAdIdRequestData(final String consentVal) {
@@ -182,71 +179,76 @@ class IdentityState {
 
 		Map<String, Object> consentMap = new HashMap<>();
 		consentMap.put(IdentityConstants.XDMKeys.Consent.CONSENTS, adIDMap);
-		return consentValMap;
+		return consentMap;
 	}
 
 	/**
 	 * Dispatches a consent request event with the consent value passed
 	 *
 	 * @param consentVal the consent value to send in the event, from
-	 * {@link IdentityConstants.XDMKeys.Consent#YES YES}/{@link IdentityConstants.XDMKeys.Consent#NO NO}
+	 * {@link IdentityConstants.XDMKeys.Consent#YES}/{@link IdentityConstants.XDMKeys.Consent#NO}
 	 */
 	private void dispatchAdIdConsentRequestEvent(final String consentVal) {
 		Map<String, Object> consentData = buildConsentAdIdRequestData(consentVal);
 
 		final Event consentEvent = new Event.Builder(
-				IdentityConstants.EventNames.CONSENT_UPDATE_REQUEST_AD_ID,
-				IdentityConstants.EventType.EDGE_CONSENT,
-				IdentityConstants.EventSource.UPDATE_CONSENT
+			IdentityConstants.EventNames.CONSENT_UPDATE_REQUEST_AD_ID,
+			IdentityConstants.EventType.EDGE_CONSENT,
+			IdentityConstants.EventSource.UPDATE_CONSENT
 		)
-				.setEventData(consentData)
-				.build();
+			.setEventData(consentData)
+			.build();
 
 		// Callback is not required because there is no response for this type of event
 		MobileCore.dispatchEvent(
-				consentEvent,
-				new ExtensionErrorCallback<ExtensionError>() {
-					@Override
-					public void error(ExtensionError extensionError) {
-						MobileCore.log(
-								LoggingMode.DEBUG,
-								LOG_TAG,
-								"Failed to dispatch consent event " +
-										consentEvent.toString() +
-										": " +
-										extensionError.getErrorName()
-						);
-					}
+			consentEvent,
+			new ExtensionErrorCallback<ExtensionError>() {
+				@Override
+				public void error(ExtensionError extensionError) {
+					MobileCore.log(
+						LoggingMode.DEBUG,
+						LOG_TAG,
+						"Failed to dispatch consent event " +
+						consentEvent.toString() +
+						": " +
+						extensionError.getErrorName()
+					);
 				}
+			}
 		);
 	}
 
-	void updateAdvertisingIdentifier(final Event event, final SharedStateCallback callback) {
-		// TODO: callback exists for create XDM shared state; dont need dispatcher for event becasue it goes
-		// direct through MobileCore anyways
-		final String newAdId = Utils.getAdID(event);
-		IdentityProperties identityProperties = IdentityStorageService.loadPropertiesFromPersistence();
-		final String currentAdId = identityProperties.getAdId();
+	// update advertising identifier is the main entrypoint for the ad ID changes
+	// it will update persistent storage, share the XDM state, and dispatch consent
+
+	void updateAdvertisingIdentifier(
+		final Event event,
+		IdentityProperties identityProperties,
+		final SharedStateCallback callback
+	) {
+		final String newAdId = EventUtils.getAdID(event);
+		if (identityProperties == null) {
+			identityProperties = new IdentityProperties();
+		}
+		String currentAdId = identityProperties.getAdId();
+		if (currentAdId == null) {
+			currentAdId = "";
+		}
 
 		// The ad ID has changed
-		if (!newAdId.equalsIgnoreCase(currentAdId)) {
+		if (newAdId != null && !newAdId.equalsIgnoreCase(currentAdId)) {
 			// Ad ID updated in local state first
 			identityProperties.setAdId(newAdId);
 			// Consent has changed
 			if (newAdId.isEmpty() || currentAdId.isEmpty()) {
 				dispatchAdIdConsentRequestEvent(
-						newAdId.isEmpty() ? IdentityConstants.XDMKeys.Consent.NO : IdentityConstants.XDMKeys.Consent.YES
+					newAdId.isEmpty() ? IdentityConstants.XDMKeys.Consent.NO : IdentityConstants.XDMKeys.Consent.YES
 				);
 			}
 
 			// Save to persistence
 			IdentityStorageService.savePropertiesToPersistence(identityProperties);
-			// TODO: create XDM shared state is handled by Core in Swift; because this method is
-			// private to IdentityExtension, does this have to live here? (it would not be accessible
-			// from IdentityState)
-			// have to call getIdentityProperties.toXDMData
-			// false -> (map: event data vs fully formatted XDM data)
-			callback.setXDMSharedEventState(identityProperties.toXDMData(false) ,event);
+			callback.setXDMSharedEventState(identityProperties.toXDMData(false), event);
 		}
 		// Ad ID has not changed; no op
 	}

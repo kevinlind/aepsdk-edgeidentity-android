@@ -75,7 +75,7 @@ class ListenerIdentityRequestContent extends ExtensionListener {
 	 *
 	 * @return a {@link IdentityExtension} object registered with the eventHub
 	 */
-	IdentityExtension getIdentityExtension() {
+	private IdentityExtension getIdentityExtension() {
 		return (IdentityExtension) getParentExtension();
 	}
 }

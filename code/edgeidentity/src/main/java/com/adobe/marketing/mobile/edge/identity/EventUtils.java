@@ -141,4 +141,35 @@ final class EventUtils {
 
 		return legacyEcid;
 	}
+
+	static boolean isAdIDEvent(final Event event) {
+		final Map<String, Object> data = event.getEventData();
+		return data.containsKey(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER);
+	}
+
+	/**
+	 * Gets the advertising ID from the event data using the key
+	 * {@link IdentityConstants.EventDataKeys#ADVERTISING_IDENTIFIER}.
+	 *
+	 * Performs a sanitization of values, converting {@code null}, {@code ""}, and
+	 * {@link IdentityConstants.Default#ZERO_ADVERTISING_ID} into {@code ""}.
+	 *
+	 * This method should not be used to detect whether the event is an ad ID event or not;
+	 * use {@link #isAdIDEvent(Event)} instead.
+	 *
+	 * @param event the event containing the advertising ID
+	 * @return the adID
+	 */
+	static String getAdID(final Event event) {
+		final Map<String, Object> data = event.getEventData();
+		try {
+			final String adID = (String) data.get(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER);
+			if (adID == null || IdentityConstants.Default.ZERO_ADVERTISING_ID.equals(adID)) {
+				return "";
+			}
+			return adID;
+		} catch (ClassCastException e) {
+			return "";
+		}
+	}
 }
