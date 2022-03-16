@@ -174,10 +174,7 @@ class IdentityState {
 	 * @param callback {@link SharedStateCallback} used to get the EventHub and/or Identity direct shared state
 	 *        and create a shared state on the EventHub; should not be null
 	 */
-	void updateAdvertisingIdentifier(
-		final Event event,
-		final SharedStateCallback callback
-	) {
+	void updateAdvertisingIdentifier(final Event event, final SharedStateCallback callback) {
 		final String newAdId = EventUtils.getAdID(event);
 		if (identityProperties == null) {
 			identityProperties = new IdentityProperties();
@@ -197,7 +194,7 @@ class IdentityState {
 		// Consent has changed
 		if (newAdId.isEmpty() || currentAdId.isEmpty()) {
 			dispatchAdIdConsentRequestEvent(
-					newAdId.isEmpty() ? IdentityConstants.XDMKeys.Consent.NO : IdentityConstants.XDMKeys.Consent.YES
+				newAdId.isEmpty() ? IdentityConstants.XDMKeys.Consent.NO : IdentityConstants.XDMKeys.Consent.YES
 			);
 		}
 
@@ -331,29 +328,29 @@ class IdentityState {
 		Map<String, Object> consentData = buildConsentAdIdRequestData(consentVal);
 
 		final Event consentEvent = new Event.Builder(
-				IdentityConstants.EventNames.CONSENT_UPDATE_REQUEST_AD_ID,
-				IdentityConstants.EventType.EDGE_CONSENT,
-				IdentityConstants.EventSource.UPDATE_CONSENT
+			IdentityConstants.EventNames.CONSENT_UPDATE_REQUEST_AD_ID,
+			IdentityConstants.EventType.EDGE_CONSENT,
+			IdentityConstants.EventSource.UPDATE_CONSENT
 		)
-				.setEventData(consentData)
-				.build();
+			.setEventData(consentData)
+			.build();
 
 		// Callback is not required because there is no response for this type of event
 		MobileCore.dispatchEvent(
-				consentEvent,
-				new ExtensionErrorCallback<ExtensionError>() {
-					@Override
-					public void error(ExtensionError extensionError) {
-						MobileCore.log(
-								LoggingMode.DEBUG,
-								LOG_TAG,
-								"Failed to dispatch consent event " +
-										consentEvent.toString() +
-										": " +
-										extensionError.getErrorName()
-						);
-					}
+			consentEvent,
+			new ExtensionErrorCallback<ExtensionError>() {
+				@Override
+				public void error(ExtensionError extensionError) {
+					MobileCore.log(
+						LoggingMode.DEBUG,
+						LOG_TAG,
+						"Failed to dispatch consent event " +
+						consentEvent.toString() +
+						": " +
+						extensionError.getErrorName()
+					);
 				}
+			}
 		);
 	}
 }
