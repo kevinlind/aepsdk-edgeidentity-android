@@ -142,7 +142,13 @@ final class EventUtils {
 		return legacyEcid;
 	}
 
-	static boolean isAdIdEvent(final Event event) {
+	/**
+	 * Checks if the provided {@code event}'s data contains the key {@link IdentityConstants.EventDataKeys#ADVERTISING_IDENTIFIER}
+	 *
+	 * @param event the event to verify
+	 * @return {@code true} if key is present
+	 */
+	static boolean isAdIDEvent(final Event event) {
 		final Map<String, Object> data = event.getEventData();
 		return data.containsKey(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER);
 	}
@@ -155,12 +161,12 @@ final class EventUtils {
 	 * {@link IdentityConstants.Default#ZERO_ADVERTISING_ID} into {@code ""}.
 	 *
 	 * This method should not be used to detect whether the event is an ad ID event or not;
-	 * use {@link #isAdIdEvent(Event)} instead.
+	 * use {@link #isAdIDEvent(Event)} instead.
 	 *
 	 * @param event the event containing the advertising ID
 	 * @return the adID
 	 */
-	static String getAdId(final Event event) {
+	static String getAdID(final Event event) {
 		final Map<String, Object> data = event.getEventData();
 		try {
 			final String adID = (String) data.get(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER);

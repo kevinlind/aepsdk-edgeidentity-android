@@ -218,12 +218,19 @@ class IdentityState {
 		);
 	}
 
-	// update advertising identifier is the main entrypoint for the ad ID changes
-	// it will update persistent storage, share the XDM state, and dispatch consent
 
+
+	/**
+	 * This is the main entrypoint for handling ad ID changes. It will conditionally:
+	 * - Update persistent storage
+	 * - Share the XDM state
+	 * - Dispatch consent event
+	 * @param event the {@link Event} containing the advertising identifier
+	 * @param callback {@link SharedStateCallback} used to get the EventHub and/or Identity direct shared state
+	 *        and create a shared state on the EventHub; should not be null
+	 */
 	void updateAdvertisingIdentifier(
 		final Event event,
-		IdentityProperties identityProperties,
 		final SharedStateCallback callback
 	) {
 		final String newAdId = EventUtils.getAdId(event);
@@ -235,22 +242,23 @@ class IdentityState {
 			currentAdId = "";
 		}
 
-		// The ad ID has changed
-		if (newAdId != null && !newAdId.equalsIgnoreCase(currentAdId)) {
-			// Ad ID updated in local state first
-			identityProperties.setAdId(newAdId);
-			// Consent has changed
-			if (newAdId.isEmpty() || currentAdId.isEmpty()) {
-				dispatchAdIdConsentRequestEvent(
-					newAdId.isEmpty() ? IdentityConstants.XDMKeys.Consent.NO : IdentityConstants.XDMKeys.Consent.YES
-				);
-			}
-
-			// Save to persistence
-			IdentityStorageService.savePropertiesToPersistence(identityProperties);
-			callback.setXDMSharedEventState(identityProperties.toXDMData(false), event);
+		// Check if ad ID has changed
+		if (currentAdId.equals(newAdId)) {
+			return; // Ad ID has not changed: no op
 		}
-		// Ad ID has not changed; no op
+		// Ad ID has changed:
+		// Ad ID updated in local state first
+		identityProperties.setAdId(newAdId);
+		// Consent has changed
+		if (newAdId.isEmpty() || currentAdId.isEmpty()) {
+			dispatchAdIdConsentRequestEvent(
+					newAdId.isEmpty() ? IdentityConstants.XDMKeys.Consent.NO : IdentityConstants.XDMKeys.Consent.YES
+			);
+		}
+
+		// Save to persistence
+		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		callback.setXDMSharedEventState(identityProperties.toXDMData(false), event);
 	}
 
 	/**
