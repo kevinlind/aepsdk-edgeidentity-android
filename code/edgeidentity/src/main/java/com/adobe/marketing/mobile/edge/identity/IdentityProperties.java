@@ -47,7 +47,7 @@ class IdentityProperties {
 		IdentityMap map = IdentityMap.fromXDMMap(xdmData);
 		this.identityMap = map == null ? new IdentityMap() : map; // always keep an empty identity map so there is no need for null check
 	}
-	
+
 	/**
 	 * Retrieves the current advertising identifier
 	 *

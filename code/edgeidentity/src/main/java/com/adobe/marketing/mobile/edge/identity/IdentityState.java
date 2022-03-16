@@ -226,7 +226,7 @@ class IdentityState {
 		IdentityProperties identityProperties,
 		final SharedStateCallback callback
 	) {
-		final String newAdId = EventUtils.getAdID(event);
+		final String newAdId = EventUtils.getAdId(event);
 		if (identityProperties == null) {
 			identityProperties = new IdentityProperties();
 		}

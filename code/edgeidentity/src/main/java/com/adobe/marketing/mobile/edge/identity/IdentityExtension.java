@@ -363,7 +363,7 @@ class IdentityExtension extends Extension {
 	 * @param event the {@link Event} containing advertising identifier data
 	 */
 	void handleRequestContent(final Event event) {
-		if (!EventUtils.isAdIDEvent(event)) {
+		if (!EventUtils.isAdIdEvent(event)) {
 			return;
 		}
 		// Doesn't need event dispatcher because MobileCore can be called directly

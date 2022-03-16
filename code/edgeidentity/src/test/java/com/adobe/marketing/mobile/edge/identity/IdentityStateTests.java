@@ -355,7 +355,15 @@ public class IdentityStateTests {
 		assertNull(state.getIdentityProperties().getECIDSecondary()); // should be cleared
 		assertNull(state.getIdentityProperties().getAdId()); // should be cleared
 		verify(mockSharedPreferenceEditor, Mockito.times(1)).apply(); // should save to data store
+
+		// Verify consent event not sent (or any event). Consent should not be dispatched by resetIdentifiers
+		PowerMockito.verifyStatic(MobileCore.class, Mockito.never());
+		MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
 	}
+
+	// ======================================================================================================================
+	// Tests for method : updateCustomerIdentifiers(final IdentityMap map)
+	// ======================================================================================================================
 
 	@Test
 	public void testUpdateCustomerIdentifiers_happy() throws Exception {
@@ -811,10 +819,8 @@ public class IdentityStateTests {
 		MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
 
 		// Verify persistent store
-		//		final ArgumentCaptor<String> persistenceValueCaptor = ArgumentCaptor.forClass(String.class);
 		verify(mockSharedPreferenceEditor, never())
 			.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), any(String.class));
-		//		Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(0));
 
 		final Map<String, String> flatIdentityMap = flattenMap(state.getIdentityProperties().toXDMData(false));
 		if (expectedAdId != null) {
