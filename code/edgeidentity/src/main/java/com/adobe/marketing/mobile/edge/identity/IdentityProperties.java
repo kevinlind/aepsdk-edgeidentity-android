@@ -53,7 +53,6 @@ class IdentityProperties {
 	 *
 	 * @return current advertising identifier
 	 */
-
 	String getAdId() {
 		final List<IdentityItem> adIdItems = identityMap.getIdentityItemsForNamespace(
 			IdentityConstants.Namespaces.GAID
@@ -71,7 +70,7 @@ class IdentityProperties {
 	/**
 	 * Sets the current advertising identifier
 	 *
-	 * @param newAdId the new
+	 * @param newAdId the new advertising identifier to set
 	 */
 	void setAdId(final String newAdId) {
 		// Delete the existing ad ID from the identity map if it exists
