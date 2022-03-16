@@ -163,10 +163,13 @@ class IdentityState {
 	}
 
 	/**
-	 * This is the main entrypoint for handling ad ID changes. It will conditionally:
-	 * - Update persistent storage
-	 * - Share the XDM state
-	 * - Dispatch consent event
+	 * This is the main entrypoint for handling ad ID changes. When an ad ID change is detected, it will:
+	 * <ul>
+	 *     <li>Update persistent storage with the new ad ID</li>
+	 *	   <li>Share the XDM state</li>
+	 * 	   <li>Dispatch consent event - only when ad ID changes from invalid/valid and vice versa</li>
+	 * </ul>
+	 *
 	 * @param event the {@link Event} containing the advertising identifier
 	 * @param callback {@link SharedStateCallback} used to get the EventHub and/or Identity direct shared state
 	 *        and create a shared state on the EventHub; should not be null
