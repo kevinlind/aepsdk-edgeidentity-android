@@ -218,8 +218,6 @@ class IdentityState {
 		);
 	}
 
-
-
 	/**
 	 * This is the main entrypoint for handling ad ID changes. It will conditionally:
 	 * - Update persistent storage
@@ -229,10 +227,7 @@ class IdentityState {
 	 * @param callback {@link SharedStateCallback} used to get the EventHub and/or Identity direct shared state
 	 *        and create a shared state on the EventHub; should not be null
 	 */
-	void updateAdvertisingIdentifier(
-		final Event event,
-		final SharedStateCallback callback
-	) {
+	void updateAdvertisingIdentifier(final Event event, final SharedStateCallback callback) {
 		final String newAdId = EventUtils.getAdId(event);
 		if (identityProperties == null) {
 			identityProperties = new IdentityProperties();
@@ -252,7 +247,7 @@ class IdentityState {
 		// Consent has changed
 		if (newAdId.isEmpty() || currentAdId.isEmpty()) {
 			dispatchAdIdConsentRequestEvent(
-					newAdId.isEmpty() ? IdentityConstants.XDMKeys.Consent.NO : IdentityConstants.XDMKeys.Consent.YES
+				newAdId.isEmpty() ? IdentityConstants.XDMKeys.Consent.NO : IdentityConstants.XDMKeys.Consent.YES
 			);
 		}
 

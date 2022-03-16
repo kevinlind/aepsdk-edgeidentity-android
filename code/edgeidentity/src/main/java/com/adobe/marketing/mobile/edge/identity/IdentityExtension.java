@@ -367,10 +367,7 @@ class IdentityExtension extends Extension {
 			return;
 		}
 		// Doesn't need event dispatcher because MobileCore can be called directly
-		state.updateAdvertisingIdentifier(
-			event,
-			createSharedStateCallback()
-		);
+		state.updateAdvertisingIdentifier(event, createSharedStateCallback());
 	}
 
 	/**

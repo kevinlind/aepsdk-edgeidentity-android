@@ -685,15 +685,7 @@ public class IdentityStateTests {
 		state.getIdentityProperties().setAdId(persistedAdId);
 
 		Event event = fakeGenericIdentityEvent(newAdId);
-		state.updateAdvertisingIdentifier(event, state.getIdentityProperties(), mockSharedStateCallback);
-
-		// Static method verification works differently from standard `verify`
-		// Use PowerMockito.verifyStatic with the mocked class holding the static method + # of times if desired
-		// Call the static method you want to verify right after the verifyStatic call to specify to
-		// the API which method should be tracked; this static method call is where you can place any captures
-		// if desired
-		// Remember that for verify calls (regular or static) should come AFTER the real API calls; mocked
-		// classes will store the calls and parameters and can be extracted after the fact with verify + ArgumentCaptors
+		state.updateAdvertisingIdentifier(event, mockSharedStateCallback);
 
 		// Verify consent event
 		if (expectedConsent == null) {
@@ -761,7 +753,7 @@ public class IdentityStateTests {
 		state.getIdentityProperties().setAdId(persistedAdId);
 
 		Event event = fakeGenericIdentityEvent(newAdId);
-		state.updateAdvertisingIdentifier(event, state.getIdentityProperties(), mockSharedStateCallback);
+		state.updateAdvertisingIdentifier(event, mockSharedStateCallback);
 
 		// Verify consent event
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.never());
@@ -812,7 +804,7 @@ public class IdentityStateTests {
 		state.getIdentityProperties().setAdId(persistedAdId);
 
 		Event event = fakeGenericIdentityEvent(newAdId);
-		state.updateAdvertisingIdentifier(event, state.getIdentityProperties(), mockSharedStateCallback);
+		state.updateAdvertisingIdentifier(event, mockSharedStateCallback);
 
 		// Verify consent event
 		PowerMockito.verifyStatic(MobileCore.class, Mockito.never());
