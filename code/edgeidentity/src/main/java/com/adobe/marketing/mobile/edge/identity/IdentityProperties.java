@@ -243,14 +243,28 @@ class IdentityProperties {
 	private void removeIdentitiesWithReservedNamespaces(final IdentityMap identityMap) {
 		for (final String reservedNamespace : reservedNamespaces) {
 			if (identityMap.clearItemsForNamespace(reservedNamespace)) {
-				MobileCore.log(
-					LoggingMode.DEBUG,
-					LOG_TAG,
-					String.format(
-						"IdentityProperties - Updating/Removing identifiers in namespace %s is not allowed.",
-						reservedNamespace
-					)
-				);
+				if (
+					reservedNamespace.equalsIgnoreCase(IdentityConstants.Namespaces.GAID) ||
+					reservedNamespace.equalsIgnoreCase(IdentityConstants.Namespaces.IDFA)
+				) {
+					MobileCore.log(
+						LoggingMode.DEBUG,
+						LOG_TAG,
+						String.format(
+							"IdentityProperties - Operation not allowed for namespace %s; use MobileCore.setAdvertisingIdentifier instead.",
+							reservedNamespace
+						)
+					);
+				} else {
+					MobileCore.log(
+						LoggingMode.DEBUG,
+						LOG_TAG,
+						String.format(
+							"IdentityProperties - Updating/Removing identifiers in namespace %s is not allowed.",
+							reservedNamespace
+						)
+					);
+				}
 			}
 		}
 	}
