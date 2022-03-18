@@ -699,7 +699,6 @@ public class IdentityStateTests {
 			Event consentEvent = consentEventCaptor.getAllValues().get(0);
 
 			Map<String, String> consentEventData = flattenMap(consentEvent.getEventData());
-			System.out.println(consentEventData);
 			// `flattenMap` allows for checking the keys' hierarchy and literal values simultaneously
 			assertEquals("GAID", consentEventData.get("consents.adID.idType"));
 			assertEquals(expectedConsent, consentEventData.get("consents.adID.val"));
