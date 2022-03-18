@@ -171,8 +171,7 @@ class IdentityState {
 	 * </ul>
 	 *
 	 * @param event the {@link Event} containing the advertising identifier
-	 * @param callback {@link SharedStateCallback} used to get the EventHub and/or Identity direct shared state
-	 *        and create a shared state on the EventHub; should not be null
+	 * @param callback {@link SharedStateCallback} used to create a shared state on the EventHub; should not be null
 	 */
 	void updateAdvertisingIdentifier(final Event event, final SharedStateCallback callback) {
 		final String newAdId = EventUtils.getAdID(event);
