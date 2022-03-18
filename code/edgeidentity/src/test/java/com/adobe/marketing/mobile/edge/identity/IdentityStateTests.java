@@ -48,9 +48,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({ MobileCore.class })
 public class IdentityStateTests {
 
-	//	@Mock
-	//	ExtensionApi mockExtensionApi;
-
 	@Mock
 	Application mockApplication;
 
