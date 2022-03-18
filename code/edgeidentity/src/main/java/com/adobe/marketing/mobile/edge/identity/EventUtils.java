@@ -66,6 +66,20 @@ final class EventUtils {
 	}
 
 	/**
+	 * Checks if the provided {@code event} is of type {@link IdentityConstants.EventType#GENERIC_IDENTITY} and source {@link IdentityConstants.EventSource#REQUEST_CONTENT}
+	 *
+	 * @param event the event to verify
+	 * @return true if both type and source match
+	 */
+	static boolean isRequestContentEvent(final Event event) {
+		return (
+			event != null &&
+			IdentityConstants.EventType.GENERIC_IDENTITY.equalsIgnoreCase(event.getType()) &&
+			IdentityConstants.EventSource.REQUEST_CONTENT.equalsIgnoreCase(event.getSource())
+		);
+	}
+
+	/**
 	 * Checks if the provided {@code event} is of type {@link IdentityConstants.EventType#GENERIC_IDENTITY} and source {@link IdentityConstants.EventSource#REQUEST_RESET}
 	 *
 	 * @param event the event to verify
@@ -94,7 +108,7 @@ final class EventUtils {
 		String stateOwner;
 
 		try {
-			stateOwner = (String) event.getEventData().get(IdentityConstants.SharedState.STATE_OWNER);
+			stateOwner = (String) event.getEventData().get(IdentityConstants.EventDataKeys.STATE_OWNER);
 		} catch (ClassCastException e) {
 			return false;
 		}
@@ -126,5 +140,42 @@ final class EventUtils {
 		}
 
 		return legacyEcid;
+	}
+
+	/**
+	 * Checks if the provided {@code event}'s data contains the key {@link IdentityConstants.EventDataKeys#ADVERTISING_IDENTIFIER}
+	 *
+	 * @param event the event to verify
+	 * @return {@code true} if key is present
+	 */
+	static boolean isAdIDEvent(final Event event) {
+		final Map<String, Object> data = event.getEventData();
+		return data.containsKey(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER);
+	}
+
+	/**
+	 * Gets the advertising ID from the event data using the key
+	 * {@link IdentityConstants.EventDataKeys#ADVERTISING_IDENTIFIER}.
+	 *
+	 * Performs a sanitization of values, converting {@code null}, {@code ""}, and
+	 * {@link IdentityConstants.Default#ZERO_ADVERTISING_ID} into {@code ""}.
+	 *
+	 * This method should not be used to detect whether the event is an ad ID event or not;
+	 * use {@link #isAdIDEvent(Event)} instead.
+	 *
+	 * @param event the event containing the advertising ID
+	 * @return the adID
+	 */
+	static String getAdID(final Event event) {
+		final Map<String, Object> data = event.getEventData();
+		try {
+			final String adID = (String) data.get(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER);
+			if (adID == null || IdentityConstants.Default.ZERO_ADVERTISING_ID.equals(adID)) {
+				return "";
+			}
+			return adID;
+		} catch (ClassCastException e) {
+			return "";
+		}
 	}
 }

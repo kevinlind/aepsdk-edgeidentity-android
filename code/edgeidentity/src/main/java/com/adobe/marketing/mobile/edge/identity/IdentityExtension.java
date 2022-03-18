@@ -43,6 +43,8 @@ class IdentityExtension extends Extension {
 	 * <ul>
 	 *     <li> Listener {@link ListenerEventHubBoot} to listen for event with eventType {@link IdentityConstants.EventType#HUB}
 	 *      and EventSource {@link IdentityConstants.EventSource#BOOTED}</li>
+	 *     <li> Listener {@link ListenerIdentityRequestContent} to listen for event with eventType {@link IdentityConstants.EventType#GENERIC_IDENTITY}
+	 * 	   and EventSource {@link IdentityConstants.EventSource#REQUEST_CONTENT}</li>
 	 *     <li> Listener {@link ListenerEdgeIdentityRequestIdentity} to listen for event with eventType {@link IdentityConstants.EventType#EDGE_IDENTITY}
 	 *     and EventSource {@link IdentityConstants.EventSource#REQUEST_IDENTITY}</li>
 	 *     <li> Listener {@link ListenerEdgeIdentityUpdateIdentity} to listen for event with eventType {@link IdentityConstants.EventType#EDGE_IDENTITY}
@@ -80,6 +82,12 @@ class IdentityExtension extends Extension {
 			IdentityConstants.EventType.HUB,
 			IdentityConstants.EventSource.BOOTED,
 			ListenerEventHubBoot.class,
+			listenerErrorCallback
+		);
+		extensionApi.registerEventListener(
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_CONTENT,
+			ListenerIdentityRequestContent.class,
 			listenerErrorCallback
 		);
 		extensionApi.registerEventListener(
@@ -161,6 +169,8 @@ class IdentityExtension extends Extension {
 
 			if (EventUtils.isRequestIdentityEvent(event)) {
 				handleIdentityRequest(event);
+			} else if (EventUtils.isRequestContentEvent(event)) {
+				handleRequestContent(event);
 			} else if (EventUtils.isUpdateIdentityEvent(event)) {
 				handleUpdateIdentities(event);
 			} else if (EventUtils.isRemoveIdentityEvent(event)) {
@@ -181,57 +191,7 @@ class IdentityExtension extends Extension {
 	 * @return True if the bootup is complete
 	 */
 	boolean bootupIfReady() {
-		SharedStateCallback callback = new SharedStateCallback() {
-			@Override
-			public Map<String, Object> getSharedState(final String stateOwner, final Event event) {
-				ExtensionApi api = getApi();
-
-				if (api == null) {
-					return null;
-				}
-
-				return api.getSharedEventState(
-					stateOwner,
-					event,
-					new ExtensionErrorCallback<ExtensionError>() {
-						@Override
-						public void error(ExtensionError extensionError) {
-							MobileCore.log(
-								LoggingMode.WARNING,
-								LOG_TAG,
-								"SharedStateCallback - Unable to fetch shared state, failed with error: " +
-								extensionError.getErrorName()
-							);
-						}
-					}
-				);
-			}
-
-			@Override
-			public boolean setXDMSharedEventState(final Map<String, Object> state, final Event event) {
-				ExtensionApi api = getApi();
-
-				if (api == null) {
-					return false;
-				}
-
-				return api.setXDMSharedEventState(
-					state,
-					event,
-					new ExtensionErrorCallback<ExtensionError>() {
-						@Override
-						public void error(ExtensionError extensionError) {
-							MobileCore.log(
-								LoggingMode.WARNING,
-								LOG_TAG,
-								"SharedStateCallback - Unable to set XDM shared state, failed with error: " +
-								extensionError.getErrorName()
-							);
-						}
-					}
-				);
-			}
-		};
+		final SharedStateCallback callback = createSharedStateCallback();
 
 		return state.bootupIfReady(callback);
 	}
@@ -398,6 +358,19 @@ class IdentityExtension extends Extension {
 	}
 
 	/**
+	 * Handles events to set the advertising identifier. Called by listener registered with event hub.
+	 *
+	 * @param event the {@link Event} containing advertising identifier data
+	 */
+	void handleRequestContent(final Event event) {
+		if (!EventUtils.isAdIDEvent(event)) {
+			return;
+		}
+		// Doesn't need event dispatcher because MobileCore can be called directly
+		state.updateAdvertisingIdentifier(event, createSharedStateCallback());
+	}
+
+	/**
 	 * Called by listeners to retrieve an {@code ExecutorService}.
 	 * The {@code ExecutorService} is used to process events on a separate thread than the
 	 * {@code EventHub} thread on which they were received. Processing events on a separate
@@ -478,5 +451,63 @@ class IdentityExtension extends Extension {
 		};
 
 		extensionApi.setXDMSharedEventState(state.getIdentityProperties().toXDMData(false), event, errorCallback);
+	}
+
+	/**
+	 * Creates standard shared state callback with functionality from {@link ExtensionApi}
+	 * @return a new instance of {@link SharedStateCallback}
+	 */
+	private SharedStateCallback createSharedStateCallback() {
+		return new SharedStateCallback() {
+			@Override
+			public Map<String, Object> getSharedState(final String stateOwner, final Event event) {
+				ExtensionApi api = getApi();
+
+				if (api == null) {
+					return null;
+				}
+
+				return api.getSharedEventState(
+					stateOwner,
+					event,
+					new ExtensionErrorCallback<ExtensionError>() {
+						@Override
+						public void error(ExtensionError extensionError) {
+							MobileCore.log(
+								LoggingMode.WARNING,
+								LOG_TAG,
+								"SharedStateCallback - Unable to fetch shared state, failed with error: " +
+								extensionError.getErrorName()
+							);
+						}
+					}
+				);
+			}
+
+			@Override
+			public boolean setXDMSharedEventState(final Map<String, Object> state, final Event event) {
+				ExtensionApi api = getApi();
+
+				if (api == null) {
+					return false;
+				}
+
+				return api.setXDMSharedEventState(
+					state,
+					event,
+					new ExtensionErrorCallback<ExtensionError>() {
+						@Override
+						public void error(ExtensionError extensionError) {
+							MobileCore.log(
+								LoggingMode.WARNING,
+								LOG_TAG,
+								"SharedStateCallback - Unable to set XDM shared state, failed with error: " +
+								extensionError.getErrorName()
+							);
+						}
+					}
+				);
+			}
+		};
 	}
 }
