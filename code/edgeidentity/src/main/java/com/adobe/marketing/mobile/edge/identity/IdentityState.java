@@ -198,8 +198,7 @@ class IdentityState {
 		)
 			.setEventData(consentData)
 			.build();
-
-		// Callback is not required because there is no response for this type of event
+		
 		MobileCore.dispatchEvent(
 			consentEvent,
 			new ExtensionErrorCallback<ExtensionError>() {
