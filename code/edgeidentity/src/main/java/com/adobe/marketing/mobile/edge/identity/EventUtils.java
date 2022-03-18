@@ -168,14 +168,17 @@ final class EventUtils {
 	 */
 	static String getAdId(final Event event) {
 		final Map<String, Object> data = event.getEventData();
+		String adID;
+
 		try {
-			final String adID = (String) data.get(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER);
-			if (adID == null || IdentityConstants.Default.ZERO_ADVERTISING_ID.equals(adID)) {
-				return "";
-			}
-			return adID;
+			adID = (String) data.get(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER);
 		} catch (ClassCastException e) {
 			return "";
 		}
+
+		if (adID == null || IdentityConstants.Default.ZERO_ADVERTISING_ID.equals(adID)) {
+			return "";
+		}
+		return adID;
 	}
 }
