@@ -28,6 +28,8 @@ import static org.mockito.Mockito.verify;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.MobileCore;
@@ -706,32 +708,11 @@ public class IdentityStateTests {
 		verify(mockSharedPreferenceEditor, times(1))
 			.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), persistenceValueCaptor.capture());
 		Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(0));
-
-		if (expectedAdId != null) {
-			assertEquals(6, persistedData.size()); // updated ad ID + ECID
-			assertEquals("false", persistedData.get("identityMap.GAID[0].primary"));
-			assertEquals(expectedAdId, persistedData.get("identityMap.GAID[0].id"));
-			assertEquals("ambiguous", persistedData.get("identityMap.GAID[0].authenticatedState"));
-		} else {
-			assertEquals(3, persistedData.size()); // ECID
-		}
-		assertEquals("false", persistedData.get("identityMap.ECID[0].primary"));
-		assertEquals(state.getIdentityProperties().getECID().toString(), persistedData.get("identityMap.ECID[0].id"));
-		assertEquals("ambiguous", persistedData.get("identityMap.ECID[0].authenticatedState"));
+		verifyFlatIdentityMap(expectedAdId, state.getIdentityProperties().getECID().toString(), persistedData);
 
 		// Verify identity map
 		final Map<String, String> flatIdentityMap = flattenMap(state.getIdentityProperties().toXDMData(false));
-		if (expectedAdId != null) {
-			assertEquals(6, flatIdentityMap.size()); // updated ad ID + ECID
-			assertEquals("false", flatIdentityMap.get("identityMap.GAID[0].primary"));
-			assertEquals(expectedAdId, flatIdentityMap.get("identityMap.GAID[0].id"));
-			assertEquals("ambiguous", flatIdentityMap.get("identityMap.GAID[0].authenticatedState"));
-		} else {
-			assertEquals(3, flatIdentityMap.size()); // ECID
-		}
-		assertEquals("false", flatIdentityMap.get("identityMap.ECID[0].primary"));
-		assertEquals(state.getIdentityProperties().getECID().toString(), flatIdentityMap.get("identityMap.ECID[0].id"));
-		assertEquals("ambiguous", flatIdentityMap.get("identityMap.ECID[0].authenticatedState"));
+		verifyFlatIdentityMap(expectedAdId, state.getIdentityProperties().getECID().toString(), flatIdentityMap);
 
 		// Verify shared state and properties
 		assertEquals(1, setXDMSharedEventStateCalledTimes);
@@ -760,32 +741,11 @@ public class IdentityStateTests {
 		verify(mockSharedPreferenceEditor, times(1))
 			.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), persistenceValueCaptor.capture());
 		Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(0));
-
-		if (expectedAdId != null) {
-			assertEquals(6, persistedData.size()); // updated ad ID + ECID
-			assertEquals("false", persistedData.get("identityMap.GAID[0].primary"));
-			assertEquals(expectedAdId, persistedData.get("identityMap.GAID[0].id"));
-			assertEquals("ambiguous", persistedData.get("identityMap.GAID[0].authenticatedState"));
-		} else {
-			assertEquals(3, persistedData.size()); // ECID
-		}
-		assertEquals("false", persistedData.get("identityMap.ECID[0].primary"));
-		assertEquals(state.getIdentityProperties().getECID().toString(), persistedData.get("identityMap.ECID[0].id"));
-		assertEquals("ambiguous", persistedData.get("identityMap.ECID[0].authenticatedState"));
+		verifyFlatIdentityMap(expectedAdId, state.getIdentityProperties().getECID().toString(), persistedData);
 
 		// Verify identity map
 		final Map<String, String> flatIdentityMap = flattenMap(state.getIdentityProperties().toXDMData(false));
-		if (expectedAdId != null) {
-			assertEquals(6, flatIdentityMap.size()); // updated ad ID + ECID
-			assertEquals("false", flatIdentityMap.get("identityMap.GAID[0].primary"));
-			assertEquals(expectedAdId, flatIdentityMap.get("identityMap.GAID[0].id"));
-			assertEquals("ambiguous", flatIdentityMap.get("identityMap.GAID[0].authenticatedState"));
-		} else {
-			assertEquals(3, flatIdentityMap.size()); // ECID
-		}
-		assertEquals("false", flatIdentityMap.get("identityMap.ECID[0].primary"));
-		assertEquals(state.getIdentityProperties().getECID().toString(), flatIdentityMap.get("identityMap.ECID[0].id"));
-		assertEquals("ambiguous", flatIdentityMap.get("identityMap.ECID[0].authenticatedState"));
+		verifyFlatIdentityMap(expectedAdId, state.getIdentityProperties().getECID().toString(), flatIdentityMap);
 
 		// Verify shared state and properties
 		assertEquals(1, setXDMSharedEventStateCalledTimes);
@@ -811,17 +771,7 @@ public class IdentityStateTests {
 			.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), any(String.class));
 
 		final Map<String, String> flatIdentityMap = flattenMap(state.getIdentityProperties().toXDMData(false));
-		if (expectedAdId != null) {
-			assertEquals(6, flatIdentityMap.size()); // updated ad ID + ECID
-			assertEquals("false", flatIdentityMap.get("identityMap.GAID[0].primary"));
-			assertEquals(expectedAdId, flatIdentityMap.get("identityMap.GAID[0].id"));
-			assertEquals("ambiguous", flatIdentityMap.get("identityMap.GAID[0].authenticatedState"));
-		} else {
-			assertEquals(3, flatIdentityMap.size()); // ECID
-		}
-		assertEquals("false", flatIdentityMap.get("identityMap.ECID[0].primary"));
-		assertEquals(state.getIdentityProperties().getECID().toString(), flatIdentityMap.get("identityMap.ECID[0].id"));
-		assertEquals("ambiguous", flatIdentityMap.get("identityMap.ECID[0].authenticatedState"));
+		verifyFlatIdentityMap(expectedAdId, state.getIdentityProperties().getECID().toString(), flatIdentityMap);
 
 		// Verify shared state and properties
 		assertEquals(0, setXDMSharedEventStateCalledTimes);
@@ -849,5 +799,32 @@ public class IdentityStateTests {
 				}
 			)
 			.build();
+	}
+
+	/**
+	 * Verifies the flat map contains the required ad ID and ECID
+	 * Valid ECID string and flat identity map is always required
+	 * @param adId the ad ID to check, can be null if no ad ID should be present; then the absence of ad ID will be verified
+	 * @param ecid the ECID string to check; must not be null (since this is the booted state)
+	 * @param flatIdentityMap the flat identity map to check
+	 * @return true if identity map contains the required identity properties, false otherwise
+	 */
+	private void verifyFlatIdentityMap(
+		@Nullable final String adId,
+		@NonNull final String ecid,
+		@NonNull final Map<String, String> flatIdentityMap
+	) {
+		if (adId != null) {
+			assertEquals(6, flatIdentityMap.size()); // updated ad ID + ECID
+			assertEquals("false", flatIdentityMap.get("identityMap.GAID[0].primary"));
+			assertEquals(adId, flatIdentityMap.get("identityMap.GAID[0].id"));
+			assertEquals("ambiguous", flatIdentityMap.get("identityMap.GAID[0].authenticatedState"));
+		} else {
+			assertEquals(3, flatIdentityMap.size()); // ECID
+		}
+		assertEquals("false", flatIdentityMap.get("identityMap.ECID[0].primary"));
+		assertEquals(ecid, flatIdentityMap.get("identityMap.ECID[0].id"));
+		assertEquals("ambiguous", flatIdentityMap.get("identityMap.ECID[0].authenticatedState"));
+		return;
 	}
 }
