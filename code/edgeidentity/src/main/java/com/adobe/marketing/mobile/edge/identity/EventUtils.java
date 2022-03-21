@@ -173,6 +173,12 @@ final class EventUtils {
 		try {
 			adID = (String) data.get(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER);
 		} catch (ClassCastException e) {
+			MobileCore.log(
+					LoggingMode.DEBUG,
+					LOG_TAG,
+					"EventUtils - Failed to extract ad ID from event, expected String: " +
+							e.getLocalizedMessage()
+			);
 			return "";
 		}
 
