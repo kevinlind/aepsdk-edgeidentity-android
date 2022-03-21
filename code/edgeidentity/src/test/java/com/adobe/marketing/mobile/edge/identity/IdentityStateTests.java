@@ -568,13 +568,11 @@ public class IdentityStateTests {
 
 	// With consent change
 	@Test
-	public void testupdateAdvertisingIdentifier_notSetWhenExistingIsNull() {
+	public void testUpdateAdvertisingIdentifier_notSet_whenInitializingIdentityState() {
 		IdentityState state = new IdentityState(new IdentityProperties());
 		state.getIdentityProperties().setECID(new ECID());
 
-		state.updateLegacyExperienceCloudId(null);
-
-		assertNull(state.getIdentityProperties().getECIDSecondary());
+		assertNull(state.getIdentityProperties().getAdId());
 		verify(mockSharedPreferenceEditor, Mockito.times(0)).apply();
 	}
 
