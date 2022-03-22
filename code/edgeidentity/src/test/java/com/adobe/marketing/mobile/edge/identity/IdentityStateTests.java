@@ -602,13 +602,8 @@ public class IdentityStateTests {
 	}
 
 	@Test
-	public void testUpdateAdvertisingIdentifier_whenAllZeros_thenChangedToEmpty() throws Exception {
-		assertUpdateAdvertisingIdentifier_updatedWithConsentChange(
-			"oldAdId",
-			IdentityConstants.Default.ZERO_ADVERTISING_ID,
-			null,
-			"n"
-		);
+	public void testUpdateAdvertisingIdentifier_whenValid_thenChangedToNull() throws Exception {
+		assertUpdateAdvertisingIdentifier_updatedWithConsentChange("oldAdId", null, null, "n");
 	}
 
 	@Test
