@@ -578,74 +578,70 @@ public class IdentityStateTests {
 
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenNull_thenChangedToValid() throws Exception {
-		assertUpdateAdvertisingIdentifier_updatedWithConsentChange(null, "adID", "adID", "y");
+		assertUpdateAdvertisingIdentifier(null, "adId", "adId", "y", true);
 	}
 
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenEmpty_thenChangedToValid() throws Exception {
-		assertUpdateAdvertisingIdentifier_updatedWithConsentChange("", "adID", "adID", "y");
+		assertUpdateAdvertisingIdentifier("", "adId", "adId", "y", true);
 	}
 
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenValid_thenChangedToEmpty() throws Exception {
-		assertUpdateAdvertisingIdentifier_updatedWithConsentChange("oldAdId", "", null, "n");
+		assertUpdateAdvertisingIdentifier("oldAdId", "", null, "n", true);
 	}
 
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenValid_thenChangedToAllZeros() throws Exception {
-		assertUpdateAdvertisingIdentifier_updatedWithConsentChange(
-			"oldAdId",
-			IdentityConstants.Default.ZERO_ADVERTISING_ID,
-			null,
-			"n"
-		);
+		assertUpdateAdvertisingIdentifier("oldAdId", IdentityConstants.Default.ZERO_ADVERTISING_ID, null, "n", true);
 	}
 
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenValid_thenChangedToNull() throws Exception {
-		assertUpdateAdvertisingIdentifier_updatedWithConsentChange("oldAdId", null, null, "n");
+		assertUpdateAdvertisingIdentifier("oldAdId", null, null, "n", true);
 	}
 
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenAllZeros_thenSameValue() throws Exception {
-		assertUpdateAdvertisingIdentifier_updatedWithConsentChange(
+		assertUpdateAdvertisingIdentifier(
 			IdentityConstants.Default.ZERO_ADVERTISING_ID,
 			IdentityConstants.Default.ZERO_ADVERTISING_ID,
 			null,
-			"n"
+			"n",
+			true
 		);
 	}
 
 	// Without consent change
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenValid_thenDifferentValid() throws Exception {
-		assertUpdateAdvertisingIdentifier_updatedWithoutConsentChange("oldAdId", "adId", "adId");
+		assertUpdateAdvertisingIdentifier("oldAdId", "adId", "adId", null, true);
 	}
 
 	// Ad ID not updated
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenNull_thenEmpty() throws Exception {
-		assertUpdateAdvertisingIdentifier_notUpdated(null, "", null);
+		assertUpdateAdvertisingIdentifier(null, "", null, null, false);
 	}
 
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenNull_thenAllZeros() throws Exception {
-		assertUpdateAdvertisingIdentifier_notUpdated(null, IdentityConstants.Default.ZERO_ADVERTISING_ID, null);
+		assertUpdateAdvertisingIdentifier(null, IdentityConstants.Default.ZERO_ADVERTISING_ID, null, null, false);
 	}
 
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenEmpty_thenSame() throws Exception {
-		assertUpdateAdvertisingIdentifier_notUpdated("", "", null);
+		assertUpdateAdvertisingIdentifier("", "", null, null, false);
 	}
 
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenEmpty_thenAllZeros() throws Exception {
-		assertUpdateAdvertisingIdentifier_notUpdated("", IdentityConstants.Default.ZERO_ADVERTISING_ID, null);
+		assertUpdateAdvertisingIdentifier("", IdentityConstants.Default.ZERO_ADVERTISING_ID, null, null, false);
 	}
 
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenValid_thenSame() throws Exception {
-		assertUpdateAdvertisingIdentifier_notUpdated("adId", "adId", "adId");
+		assertUpdateAdvertisingIdentifier("adId", "adId", "adId", null, false);
 	}
 
 	// Check:
@@ -665,11 +661,25 @@ public class IdentityStateTests {
 	// - Exact text - values and case sensitivity
 	// - Hierarchy of event data object
 
-	private void assertUpdateAdvertisingIdentifier_updatedWithConsentChange(
+	/**
+	 * Main entrypoint for advertising identifier state checks
+	 *
+	 * @param persistedAdId the ad ID that should be pre-set in IdentityState
+	 * @param newAdId the ad ID that will be extracted from a generic Identity event to set the new ad ID
+	 * @param expectedAdId the ad ID value that should be set in IdentityState after the updateAdvertisingIdentifier flow
+	 * @param expectedConsent the consent value that should be dispatched after the updateAdvertisingIdentifier
+	 *                           flow; should be null if no consent event should be dispatched
+	 * @param isSharedStateUpdateExpected true if the shared state should be updated based on the
+	 *                                       perisitedAdId -> newAdId combination; this will check the
+	 *                                       persistent store, shared state, and identity map
+	 * @throws Exception
+	 */
+	private void assertUpdateAdvertisingIdentifier(
 		String persistedAdId,
 		String newAdId,
 		String expectedAdId,
-		String expectedConsent
+		String expectedConsent,
+		boolean isSharedStateUpdateExpected
 	) throws Exception {
 		// Setup
 		IdentityState state = new IdentityState((new IdentityProperties()));
@@ -696,78 +706,28 @@ public class IdentityStateTests {
 			assertEquals(expectedConsent, consentEventData.get("consents.adID.val"));
 		}
 
-		// Verify persistent store
-		final ArgumentCaptor<String> persistenceValueCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mockSharedPreferenceEditor, times(1))
-			.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), persistenceValueCaptor.capture());
-		Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(0));
-		verifyFlatIdentityMap(expectedAdId, state.getIdentityProperties().getECID().toString(), persistedData);
+		if (isSharedStateUpdateExpected) {
+			// Verify persistent store
+			final ArgumentCaptor<String> persistenceValueCaptor = ArgumentCaptor.forClass(String.class);
+			verify(mockSharedPreferenceEditor, times(1))
+				.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), persistenceValueCaptor.capture());
+			Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(0));
+			verifyFlatIdentityMap(expectedAdId, state.getIdentityProperties().getECID().toString(), persistedData);
 
+			// Verify shared state and properties
+			assertEquals(1, setXDMSharedEventStateCalledTimes);
+		} else {
+			// Verify persistent store
+			verify(mockSharedPreferenceEditor, never())
+				.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), any(String.class));
+
+			// Verify shared state and properties
+			assertEquals(0, setXDMSharedEventStateCalledTimes);
+		}
 		// Verify identity map
 		final Map<String, String> flatIdentityMap = flattenMap(state.getIdentityProperties().toXDMData(false));
 		verifyFlatIdentityMap(expectedAdId, state.getIdentityProperties().getECID().toString(), flatIdentityMap);
-
 		// Verify shared state and properties
-		assertEquals(1, setXDMSharedEventStateCalledTimes);
-		assertEquals(expectedAdId, state.getIdentityProperties().getAdId());
-	}
-
-	private void assertUpdateAdvertisingIdentifier_updatedWithoutConsentChange(
-		String persistedAdId,
-		String newAdId,
-		String expectedAdId
-	) throws Exception {
-		// Setup
-		IdentityState state = new IdentityState((new IdentityProperties()));
-		state.getIdentityProperties().setECID(new ECID());
-		state.getIdentityProperties().setAdId(persistedAdId);
-
-		Event event = fakeGenericIdentityEvent(newAdId);
-		state.updateAdvertisingIdentifier(event, mockSharedStateCallback);
-
-		// Verify consent event
-		PowerMockito.verifyStatic(MobileCore.class, Mockito.never());
-		MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
-
-		// Verify persistent store
-		final ArgumentCaptor<String> persistenceValueCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mockSharedPreferenceEditor, times(1))
-			.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), persistenceValueCaptor.capture());
-		Map<String, String> persistedData = flattenJSONString(persistenceValueCaptor.getAllValues().get(0));
-		verifyFlatIdentityMap(expectedAdId, state.getIdentityProperties().getECID().toString(), persistedData);
-
-		// Verify identity map
-		final Map<String, String> flatIdentityMap = flattenMap(state.getIdentityProperties().toXDMData(false));
-		verifyFlatIdentityMap(expectedAdId, state.getIdentityProperties().getECID().toString(), flatIdentityMap);
-
-		// Verify shared state and properties
-		assertEquals(1, setXDMSharedEventStateCalledTimes);
-		assertEquals(expectedAdId, state.getIdentityProperties().getAdId());
-	}
-
-	private void assertUpdateAdvertisingIdentifier_notUpdated(String persistedAdId, String newAdId, String expectedAdId)
-		throws Exception {
-		// Setup
-		IdentityState state = new IdentityState((new IdentityProperties()));
-		state.getIdentityProperties().setECID(new ECID());
-		state.getIdentityProperties().setAdId(persistedAdId);
-
-		Event event = fakeGenericIdentityEvent(newAdId);
-		state.updateAdvertisingIdentifier(event, mockSharedStateCallback);
-
-		// Verify consent event
-		PowerMockito.verifyStatic(MobileCore.class, Mockito.never());
-		MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
-
-		// Verify persistent store
-		verify(mockSharedPreferenceEditor, never())
-			.putString(eq(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES), any(String.class));
-
-		final Map<String, String> flatIdentityMap = flattenMap(state.getIdentityProperties().toXDMData(false));
-		verifyFlatIdentityMap(expectedAdId, state.getIdentityProperties().getECID().toString(), flatIdentityMap);
-
-		// Verify shared state and properties
-		assertEquals(0, setXDMSharedEventStateCalledTimes);
 		assertEquals(expectedAdId, state.getIdentityProperties().getAdId());
 	}
 
