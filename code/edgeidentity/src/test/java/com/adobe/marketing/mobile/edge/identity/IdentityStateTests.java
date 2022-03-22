@@ -712,7 +712,7 @@ public class IdentityStateTests {
 		assertEquals(expectedAdId, state.getIdentityProperties().getAdId());
 	}
 
-	void assertUpdateAdvertisingIdentifier_updatedWithoutConsentChange(
+	private void assertUpdateAdvertisingIdentifier_updatedWithoutConsentChange(
 		String persistedAdId,
 		String newAdId,
 		String expectedAdId
@@ -745,7 +745,7 @@ public class IdentityStateTests {
 		assertEquals(expectedAdId, state.getIdentityProperties().getAdId());
 	}
 
-	void assertUpdateAdvertisingIdentifier_notUpdated(String persistedAdId, String newAdId, String expectedAdId)
+	private void assertUpdateAdvertisingIdentifier_notUpdated(String persistedAdId, String newAdId, String expectedAdId)
 		throws Exception {
 		// Setup
 		IdentityState state = new IdentityState((new IdentityProperties()));
