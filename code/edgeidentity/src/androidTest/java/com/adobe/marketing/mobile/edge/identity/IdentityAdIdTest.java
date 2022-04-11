@@ -18,14 +18,17 @@ import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUti
 import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.createXDMIdentityMap;
 import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.flattenMap;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.ExtensionError;
+import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.TestHelper;
 import com.adobe.marketing.mobile.TestPersistenceHelper;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONObject;
@@ -58,7 +61,6 @@ public class IdentityAdIdTest {
 		// After sending mobile core event, give a wait time to allow for processing
 		TestHelper.waitForThreads(2000);
 		// Verify dispatched events
-		// Generic Identity event containing advertisingIdentifier should be dispatched
 		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
 		verifyDispatchedEvents(true, null);
 
@@ -75,8 +77,37 @@ public class IdentityAdIdTest {
 		verifyFlatIdentityMap(persistedMap, newAdId);
 	}
 
-	//TODO: how to dispatch a generic identity event with no ad ID key?
-	// for the whenValid_ThenNonAdIdEvent case
+	@Test
+	public void testGenericIdentityRequest_whenValidAdId_thenNonAdId() throws Exception {
+		// Test
+		String initialAdId = "fa181743-2520-4ebc-b125-626baf1e3db8";
+		setEdgeIdentityPersistence(
+			createXDMIdentityMap(
+				new IdentityTestUtil.TestItem("ECID", "primaryECID"),
+				new IdentityTestUtil.TestItem("GAID", initialAdId)
+			)
+		);
+		registerEdgeIdentityExtension();
+
+		dispatchGenericIdentityNonAdIdEvent();
+
+		TestHelper.waitForThreads(2000);
+		// Verify dispatched events
+		// Edge Consent event should not be dispatched; valid -> (unchanged) valid does not signal change in consent
+		verifyDispatchedEvents(false, null);
+
+		// Verify XDM shared state
+		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		verifyFlatIdentityMap(xdmSharedState, initialAdId);
+
+		// Verify persisted data
+		final String persistedJson = TestPersistenceHelper.readPersistedData(
+			IdentityConstants.DataStoreKey.DATASTORE_NAME,
+			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
+		);
+		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		verifyFlatIdentityMap(persistedMap, initialAdId);
+	}
 
 	@Test
 	public void testGenericIdentityRequest_whenValidAdId_thenSameValidAdId() throws Exception {
@@ -94,7 +125,6 @@ public class IdentityAdIdTest {
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		TestHelper.waitForThreads(2000);
 		// Verify dispatched events
-		// Generic Identity event containing advertisingIdentifier should be dispatched
 		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
 		verifyDispatchedEvents(true, null);
 
@@ -127,8 +157,7 @@ public class IdentityAdIdTest {
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		TestHelper.waitForThreads(2000);
 		// Verify dispatched events
-		// Generic Identity event containing advertisingIdentifier should be dispatched
-		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
+		// Edge Consent event should be dispatched; valid -> invalid signals change in consent
 		verifyDispatchedEvents(true, "n");
 
 		// Verify XDM shared state
@@ -160,8 +189,7 @@ public class IdentityAdIdTest {
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		TestHelper.waitForThreads(2000);
 		// Verify dispatched events
-		// Generic Identity event containing advertisingIdentifier should be dispatched
-		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
+		// Edge Consent event should be dispatched; valid -> invalid signals change in consent
 		verifyDispatchedEvents(true, "n");
 
 		// Verify XDM shared state
@@ -204,8 +232,31 @@ public class IdentityAdIdTest {
 		verifyFlatIdentityMap(persistedMap, newAdId);
 	}
 
-	// TODO: how to send generic identity event with no ad ID key for the case
-	// whenNoId_thenNonAdIdEvent?
+	@Test
+	public void testGenericIdentityRequest_whenNoAdId_thenNonAdId() throws Exception {
+		// Test
+		setEdgeIdentityPersistence(createXDMIdentityMap(new IdentityTestUtil.TestItem("ECID", "primaryECID")));
+		registerEdgeIdentityExtension();
+
+		dispatchGenericIdentityNonAdIdEvent();
+
+		TestHelper.waitForThreads(2000);
+		// Verify dispatched events
+		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
+		verifyDispatchedEvents(false, null);
+
+		// Verify XDM shared state
+		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		verifyFlatIdentityMap(xdmSharedState, null);
+
+		// Verify persisted data
+		final String persistedJson = TestPersistenceHelper.readPersistedData(
+			IdentityConstants.DataStoreKey.DATASTORE_NAME,
+			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
+		);
+		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		verifyFlatIdentityMap(persistedMap, null);
+	}
 
 	@Test
 	public void testGenericIdentityRequest_whenNoAdId_thenEmptyAdId() throws Exception {
@@ -217,8 +268,7 @@ public class IdentityAdIdTest {
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		TestHelper.waitForThreads(2000);
 		// Verify dispatched events
-		// Generic Identity event containing advertisingIdentifier should be dispatched
-		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
+		// Edge Consent event should not be dispatched; invalid -> invalid does not signal change in consent
 		verifyDispatchedEvents(true, null);
 
 		// Verify XDM shared state
@@ -244,8 +294,7 @@ public class IdentityAdIdTest {
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		TestHelper.waitForThreads(2000);
 		// Verify dispatched events
-		// Generic Identity event containing advertisingIdentifier should be dispatched
-		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
+		// Edge Consent event should not be dispatched; invalid -> invalid does not signal change in consent
 		verifyDispatchedEvents(true, null);
 
 		// Verify XDM shared state
@@ -271,8 +320,7 @@ public class IdentityAdIdTest {
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		TestHelper.waitForThreads(2000);
 		// Verify dispatched events
-		// Generic Identity event containing advertisingIdentifier should be dispatched
-		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
+		// Edge Consent event should not be dispatched; invalid -> invalid does not signal change in consent
 		verifyDispatchedEvents(true, null);
 
 		// Verify XDM shared state
@@ -293,8 +341,7 @@ public class IdentityAdIdTest {
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		TestHelper.waitForThreads(2000);
 		// Verify dispatched events
-		// Generic Identity event containing advertisingIdentifier should be dispatched
-		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
+		// Edge Consent event should not be dispatched; invalid -> invalid does not signal change in consent
 		verifyDispatchedEvents(true, null);
 
 		// Verify XDM shared state
@@ -310,7 +357,18 @@ public class IdentityAdIdTest {
 		verifyFlatIdentityMap(persistedMap2, null);
 	}
 
-	private void verifyDispatchedEvents(boolean isGenericIdentityEventExpected, String expectedConsentValue)
+	/**
+	 * Verifies that the expected events from the {@link MobileCore#setAdvertisingIdentifier(String)} or {@link MobileCore#dispatchEvent(Event, ExtensionErrorCallback)}
+	 * APIs are properly dispatched. Verifies:
+	 * 1. Event type and source
+	 * 2. Event data/properties as required for proper ad ID functionality
+	 * @param isGenericIdentityEventAdIdEvent true if the expected {@link com.adobe.marketing.mobile.edge.identity.IdentityConstants.EventType#GENERIC_IDENTITY}
+	 *                                           event should be an ad ID event, false otherwise
+	 * @param expectedConsentValue the expected consent value in the format {@link IdentityConstants.XDMKeys.Consent#YES}
+	 *                                or {@link IdentityConstants.XDMKeys.Consent#NO}; however, if consent event should not be dispatched, use null
+	 * @throws Exception
+	 */
+	private void verifyDispatchedEvents(boolean isGenericIdentityEventAdIdEvent, String expectedConsentValue)
 		throws Exception {
 		// Check the event type and source
 		List<Event> dispatchedGenericIdentityEvents = getDispatchedEventsWith(
@@ -318,11 +376,9 @@ public class IdentityAdIdTest {
 			IdentityConstants.EventSource.REQUEST_CONTENT
 		);
 		// Verify Generic Identity event
-		assertEquals(isGenericIdentityEventExpected ? 1 : 0, dispatchedGenericIdentityEvents.size());
-		if (isGenericIdentityEventExpected) {
-			Event genericIdentityEvent = dispatchedGenericIdentityEvents.get(0);
-			assertTrue(EventUtils.isAdIdEvent(genericIdentityEvent));
-		}
+		assertEquals(1, dispatchedGenericIdentityEvents.size());
+		Event genericIdentityEvent = dispatchedGenericIdentityEvents.get(0);
+		assertEquals(isGenericIdentityEventAdIdEvent ? true : false, EventUtils.isAdIdEvent(genericIdentityEvent));
 		// Verify Edge Consent event
 		List<Event> dispatchedConsentEvents = getDispatchedEventsWith(
 			IdentityConstants.EventType.EDGE_CONSENT,
@@ -330,7 +386,6 @@ public class IdentityAdIdTest {
 		);
 		assertEquals(Utils.isNullOrEmpty(expectedConsentValue) ? 0 : 1, dispatchedConsentEvents.size());
 		if (!Utils.isNullOrEmpty(expectedConsentValue)) {
-			// TODO: check for consent value here
 			Map<String, String> consentDataMap = flattenMap(dispatchedConsentEvents.get(0).getEventData());
 			assertEquals("GAID", consentDataMap.get("consents.adID.idType"));
 			assertEquals(expectedConsentValue, consentDataMap.get("consents.adID.val"));
@@ -361,5 +416,37 @@ public class IdentityAdIdTest {
 		assertEquals(expectedECID, flatIdentityMap.get("identityMap.ECID[0].id"));
 		assertEquals("ambiguous", flatIdentityMap.get("identityMap.ECID[0].authenticatedState"));
 		return;
+	}
+
+	/**
+	 * Dispatches an event using the MobileCore dispatchEvent API. Event has type {@link com.adobe.marketing.mobile.edge.identity.IdentityConstants.EventType#GENERIC_IDENTITY}
+	 * and source {@link com.adobe.marketing.mobile.edge.identity.IdentityConstants.EventSource#REQUEST_CONTENT}.
+	 * This is the combination of event type and source that the ad ID listener will capture, and this
+	 * method helps test that ad ID is not modified if the advertisingIdentifier property is not present
+	 * in the correct format
+	 */
+	private void dispatchGenericIdentityNonAdIdEvent() {
+		Event genericIdentityNonAdIdEvent = new Event.Builder(
+			"Test event",
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_CONTENT
+		)
+			.setEventData(
+				new HashMap<String, Object>() {
+					{
+						put("somekey", "somevalue");
+					}
+				}
+			)
+			.build();
+		MobileCore.dispatchEvent(
+			genericIdentityNonAdIdEvent,
+			new ExtensionErrorCallback<ExtensionError>() {
+				@Override
+				public void error(ExtensionError extensionError) {
+					Log.e("IdentityAdIdTest", "Failed to dispatch event." + extensionError.toString());
+				}
+			}
+		);
 	}
 }
