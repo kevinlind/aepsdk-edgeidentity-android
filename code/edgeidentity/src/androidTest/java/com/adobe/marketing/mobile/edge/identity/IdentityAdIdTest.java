@@ -422,8 +422,8 @@ public class IdentityAdIdTest {
 	 * Dispatches an event using the MobileCore dispatchEvent API. Event has type {@link com.adobe.marketing.mobile.edge.identity.IdentityConstants.EventType#GENERIC_IDENTITY}
 	 * and source {@link com.adobe.marketing.mobile.edge.identity.IdentityConstants.EventSource#REQUEST_CONTENT}.
 	 * This is the combination of event type and source that the ad ID listener will capture, and this
-	 * method helps test that ad ID is not modified if the advertisingIdentifier property is not present
-	 * in the correct format
+	 * method helps set up test cases that verify the ad ID is not modified if the advertisingIdentifier
+	 * property is not present in the correct format
 	 */
 	private void dispatchGenericIdentityNonAdIdEvent() {
 		Event genericIdentityNonAdIdEvent = new Event.Builder(
