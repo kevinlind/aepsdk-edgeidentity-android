@@ -601,17 +601,6 @@ public class IdentityStateTests {
 		assertUpdateAdvertisingIdentifier("oldAdId", null, null, "n", true);
 	}
 
-	@Test
-	public void testUpdateAdvertisingIdentifier_whenAllZeros_thenSameValue() throws Exception {
-		assertUpdateAdvertisingIdentifier(
-			IdentityConstants.Default.ZERO_ADVERTISING_ID,
-			IdentityConstants.Default.ZERO_ADVERTISING_ID,
-			null,
-			"n",
-			true
-		);
-	}
-
 	// Without consent change
 	@Test
 	public void testUpdateAdvertisingIdentifier_whenValid_thenDifferentValid() throws Exception {

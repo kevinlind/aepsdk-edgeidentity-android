@@ -261,6 +261,55 @@ public class IdentityAdIdTest {
 		verifyFlatIdentityMap(persistedMap, null);
 	}
 
+	@Test
+	public void testGenericIdentityRequest_whenNoAdId_thenAllZerosAdIdTwice() throws Exception {
+		// Test
+		String newAdId = "00000000-0000-0000-0000-000000000000";
+		setEdgeIdentityPersistence(createXDMIdentityMap(new IdentityTestUtil.TestItem("ECID", "primaryECID")));
+		registerEdgeIdentityExtension();
+
+		MobileCore.setAdvertisingIdentifier(newAdId);
+		TestHelper.waitForThreads(2000);
+		// Verify dispatched events
+		// Generic Identity event containing advertisingIdentifier should be dispatched
+		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
+		verifyDispatchedEvents(true, null);
+
+		// Verify XDM shared state
+		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		verifyFlatIdentityMap(xdmSharedState, null);
+
+		// Verify persisted data
+		final String persistedJson = TestPersistenceHelper.readPersistedData(
+			IdentityConstants.DataStoreKey.DATASTORE_NAME,
+			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
+		);
+		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		verifyFlatIdentityMap(persistedMap, null);
+
+		// Reset wildcard listener
+		TestHelper.resetTestExpectations();
+		// Test all zeros sent again
+		MobileCore.setAdvertisingIdentifier(newAdId);
+		TestHelper.waitForThreads(2000);
+		// Verify dispatched events
+		// Generic Identity event containing advertisingIdentifier should be dispatched
+		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
+		verifyDispatchedEvents(true, null);
+
+		// Verify XDM shared state
+		Map<String, String> xdmSharedState2 = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		verifyFlatIdentityMap(xdmSharedState2, null);
+
+		// Verify persisted data
+		final String persistedJson2 = TestPersistenceHelper.readPersistedData(
+			IdentityConstants.DataStoreKey.DATASTORE_NAME,
+			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
+		);
+		Map<String, String> persistedMap2 = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson2)));
+		verifyFlatIdentityMap(persistedMap2, null);
+	}
+
 	private void verifyDispatchedEvents(boolean isGenericIdentityEventExpected, String expectedConsentValue)
 		throws Exception {
 		// Check the event type and source
