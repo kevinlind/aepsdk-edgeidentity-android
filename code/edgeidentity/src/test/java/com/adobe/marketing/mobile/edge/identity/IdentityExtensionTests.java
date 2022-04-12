@@ -629,39 +629,48 @@ public class IdentityExtensionTests {
 	// ========================================================================================
 	// handleRequestContent
 	// ========================================================================================
-	// use callback to see if sharedstate is set properly
-	// similar to other ones where update identities
-	// if calling updateAdId directly, already passing in a callback
+
 	@Test
 	public void test_handleRequestContent_processesWhenBooted() {
-		Map<String, Object> identityXDM = createXDMIdentityMap(new TestItem("space", "moon"));
-		MockIdentityState mockIdentityState = new MockIdentityState(new IdentityProperties(identityXDM));
-		mockIdentityState.hasBooted = true;
-		extension.state = mockIdentityState;
-
-		// test
-		extension.processAddEvent(buildUpdateIdentityRequest(identityXDM));
-		extension.processAddEvent(buildRemoveIdentityRequest(identityXDM));
-		extension.processAddEvent(
-			new Event.Builder(
-				"Test event",
-				IdentityConstants.EventType.EDGE_IDENTITY,
-				IdentityConstants.EventSource.REQUEST_IDENTITY
+		// Setup
+		final Event event = new Event.Builder(
+			"Test Ad ID event",
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_CONTENT
+		)
+			.setEventData(
+				new HashMap<String, Object>() {
+					{
+						put(IdentityConstants.EventDataKeys.ADVERTISING_IDENTIFIER, "adId");
+					}
+				}
 			)
-				.build()
-		);
-		extension.processAddEvent(
-			new Event.Builder(
-				"Test event",
-				IdentityConstants.EventType.GENERIC_IDENTITY,
-				IdentityConstants.EventSource.REQUEST_RESET
-			)
-				.build()
-		);
+			.build();
 
-		// verify
-		verify(mockExtensionApi, times(3))
-			.setXDMSharedEventState(any(Map.class), any(Event.class), any(ExtensionErrorCallback.class)); // request identity does not update shared state
+		final ArgumentCaptor<Map> sharedStateCaptor = ArgumentCaptor.forClass(Map.class);
+		final ArgumentCaptor<Event> consentEventCaptor = ArgumentCaptor.forClass(Event.class);
+
+		// Test
+		extension.handleRequestContent(event);
+
+		// Verify - consent event should be dispatched
+		verify(mockExtensionApi, times(1))
+			.setXDMSharedEventState(sharedStateCaptor.capture(), eq(event), any(ExtensionErrorCallback.class));
+		PowerMockito.verifyStatic(MobileCore.class, Mockito.times(1));
+		MobileCore.dispatchEvent(consentEventCaptor.capture(), any(ExtensionErrorCallback.class));
+
+		// Verify shared state
+		Map<String, String> sharedState = flattenMap(sharedStateCaptor.getValue());
+		assertTrue(sharedState.get("identityMap.GAID[0].id").length() > 0);
+		assertEquals("adId", sharedState.get("identityMap.GAID[0].id"));
+		assertEquals("ambiguous", sharedState.get("identityMap.GAID[0].authenticatedState"));
+		assertEquals("false", sharedState.get("identityMap.GAID[0].primary"));
+
+		// Verify consent event
+		Event consentEvent = consentEventCaptor.getAllValues().get(0);
+		Map<String, String> consentEventData = flattenMap(consentEvent.getEventData());
+		assertEquals("GAID", consentEventData.get("consents.adID.idType"));
+		assertEquals("y", consentEventData.get("consents.adID.val"));
 	}
 
 	// ========================================================================================

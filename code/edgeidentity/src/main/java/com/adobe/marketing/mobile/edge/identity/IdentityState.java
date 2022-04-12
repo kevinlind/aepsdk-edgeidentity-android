@@ -174,7 +174,7 @@ class IdentityState {
 	 * @param callback {@link SharedStateCallback} used to create a shared state on the EventHub; should not be null
 	 */
 	void updateAdvertisingIdentifier(final Event event, final SharedStateCallback callback) {
-		final String newAdId = EventUtils.getAdID(event);
+		final String newAdId = EventUtils.getAdId(event);
 		if (identityProperties == null) {
 			identityProperties = new IdentityProperties();
 		}
@@ -334,7 +334,6 @@ class IdentityState {
 			.setEventData(consentData)
 			.build();
 
-		// Callback is not required because there is no response for this type of event
 		MobileCore.dispatchEvent(
 			consentEvent,
 			new ExtensionErrorCallback<ExtensionError>() {

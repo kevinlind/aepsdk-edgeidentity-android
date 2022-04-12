@@ -69,13 +69,12 @@ public class IdentityPropertiesTests {
 		// setup
 		IdentityProperties props = new IdentityProperties();
 		props.setECID(new ECID());
-		props.setAdId("");
 
 		// test
 		Map<String, Object> xdmMap = props.toXDMData(false);
 
+		// verify
 		assertEquals(props.getECID().toString(), flattenMap(xdmMap).get("identityMap.ECID[0].id"));
-		assertNull(flattenMap(xdmMap).get("identityMap.GAID[0].id"));
 	}
 
 	@Test
@@ -90,7 +89,7 @@ public class IdentityPropertiesTests {
 	}
 
 	@Test
-	public void text_toXDMData_OnlyAdID() {
+	public void text_toXDMData_OnlyAdId() {
 		// setup
 		IdentityProperties props = new IdentityProperties();
 		props.setAdId("test-ad-id");
@@ -101,6 +100,20 @@ public class IdentityPropertiesTests {
 		// verify
 		assertEquals("test-ad-id", props.getAdId());
 		assertEquals(props.getAdId(), flattenMap(xdmMap).get("identityMap.GAID[0].id"));
+	}
+
+	@Test
+	public void text_toXDMData_whenEmptyAdId_thenNoValue() {
+		// setup
+		IdentityProperties props = new IdentityProperties();
+		props.setAdId("");
+
+		// test
+		Map<String, Object> xdmMap = props.toXDMData(false);
+
+		// verify
+		assertNull(props.getAdId());
+		assertNull(flattenMap(xdmMap).get("identityMap.GAID[0].id"));
 	}
 
 	// ======================================================================================================================
@@ -279,10 +292,48 @@ public class IdentityPropertiesTests {
 		assertEquals("primaryAgain", flatMap.get("identityMap.ECID[0].id"));
 		assertEquals("secondary", flatMap.get("identityMap.ECID[1].id"));
 	}
-	// ======================================================================================================================
-	// Tests for method : setAdId(final String newAdId)
-	// ======================================================================================================================
 
+	// =============================================================================================
+	// Tests for setAdId() getAdId()
+	// =============================================================================================
+	@Test
+	public void test_getsetAdId_whenValid_thenValid() {
+		// Setup
+		IdentityProperties props = new IdentityProperties();
+		props.setAdId("adId");
+
+		// Test
+		final String advertisingIdentifier = props.getAdId();
+
+		// Verify
+		assertEquals("adId", advertisingIdentifier);
+	}
+
+	@Test
+	public void test_getsetAdId_whenNull_thenNull() {
+		// Setup
+		IdentityProperties props = new IdentityProperties();
+		props.setAdId(null);
+
+		// Test
+		final String advertisingIdentifier = props.getAdId();
+
+		// Verify
+		assertNull(advertisingIdentifier);
+	}
+
+	@Test
+	public void test_getsetAdId_whenEmpty_thenNull() {
+		// Setup
+		IdentityProperties props = new IdentityProperties();
+		props.setAdId("");
+
+		// Test
+		final String advertisingIdentifier = props.getAdId();
+
+		// Verify
+		assertNull(advertisingIdentifier);
+	}
 	// ======================================================================================================================
 	// Tests for "updateCustomerIdentifiers" is already covered in "handleUpdateRequest" tests in IdentityExtensionTests
 	// ======================================================================================================================
