@@ -285,32 +285,6 @@ public class IdentityAdIdTest {
 	}
 
 	@Test
-	public void testGenericIdentityRequest_whenNoAdId_thenAllZerosAdId() throws Exception {
-		// Test
-		String newAdId = "00000000-0000-0000-0000-000000000000";
-		setEdgeIdentityPersistence(createXDMIdentityMap(new IdentityTestUtil.TestItem("ECID", "primaryECID")));
-		registerEdgeIdentityExtension();
-
-		MobileCore.setAdvertisingIdentifier(newAdId);
-		TestHelper.waitForThreads(2000);
-		// Verify dispatched events
-		// Edge Consent event should not be dispatched; invalid -> invalid does not signal change in consent
-		verifyDispatchedEvents(true, null);
-
-		// Verify XDM shared state
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
-		verifyFlatIdentityMap(xdmSharedState, null);
-
-		// Verify persisted data
-		final String persistedJson = TestPersistenceHelper.readPersistedData(
-			IdentityConstants.DataStoreKey.DATASTORE_NAME,
-			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
-		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
-		verifyFlatIdentityMap(persistedMap, null);
-	}
-
-	@Test
 	public void testGenericIdentityRequest_whenNoAdId_thenAllZerosAdIdTwice() throws Exception {
 		// Test
 		String newAdId = "00000000-0000-0000-0000-000000000000";
