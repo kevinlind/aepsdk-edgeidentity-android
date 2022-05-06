@@ -12,6 +12,7 @@
 package com.adobe.marketing.edge.identity.app.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,10 +26,18 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.adobe.marketing.edge.identity.app.R
 import com.adobe.marketing.edge.identity.app.model.SharedViewModel
+import com.adobe.marketing.mobile.MobileCore
+import com.adobe.marketing.mobile.edge.consent.Consent
 import com.adobe.marketing.mobile.edge.identity.AuthenticatedState
 import com.adobe.marketing.mobile.edge.identity.Identity
 import com.adobe.marketing.mobile.edge.identity.IdentityItem
 import com.adobe.marketing.mobile.edge.identity.IdentityMap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+private const val LOG_TAG = "Custom_Identity_Fragment"
+private const val ZERO_ADVERTISING_ID = "00000000-0000-0000-0000-000000000000"
 
 class CustomIdentityFragment : Fragment() {
 
@@ -40,6 +49,12 @@ class CustomIdentityFragment : Fragment() {
         val sharedViewModel by activityViewModels<SharedViewModel>()
 
         val root = inflater.inflate(R.layout.fragment_custom_identity, container, false)
+
+        val adIdEditText = root.findViewById<EditText>(R.id.text_ad_id)
+        adIdEditText.setText(sharedViewModel.adId.value)
+        adIdEditText.doAfterTextChanged {
+            sharedViewModel.setAdId(it.toString())
+        }
 
         val identifierEditText = root.findViewById<EditText>(R.id.text_identifier)
         identifierEditText.setText(sharedViewModel.identifier.value)
@@ -91,6 +106,44 @@ class CustomIdentityFragment : Fragment() {
 
             val item = IdentityItem(identifier, authenticatedState, isPrimary)
             Identity.removeIdentity(item, namespace)
+        }
+
+        // Button for Set Ad ID behavior
+        // Sets the advertising identifier set in the corresponding textfield using the MobileCore API
+        root.findViewById<Button>(R.id.btn_set_ad_id).setOnClickListener {
+            val adId: String? = sharedViewModel.adId.value
+            MobileCore.setAdvertisingIdentifier(adId)
+        }
+
+        // For details on implementation tips and differences between Google Play Services Ads vs AndroidX Ads,
+        // please see the project Documentation -> AEPEdgeIdentity.md : Android Test App -> Testing tips with Android advertising identifier
+        root.findViewById<Button>(R.id.btn_get_gaid).setOnClickListener {
+            val context = context
+            Log.d(LOG_TAG, "context: $context, appContext: ${context?.applicationContext}")
+            if (context != null) {
+                // Create IO (background) coroutine scope to fetch ad ID value
+                val scope = CoroutineScope(Dispatchers.IO).launch {
+                    val adID = sharedViewModel.getGAID(context.applicationContext)
+                    Log.d(LOG_TAG, "Sending ad ID value: $adID to MobileCore.setAdvertisingIdentifier")
+                    MobileCore.setAdvertisingIdentifier(adID)
+                }
+            }
+        }
+
+        root.findViewById<Button>(R.id.btn_set_ad_id_null).setOnClickListener {
+            Log.d(LOG_TAG, "Setting advertising identifier to: null")
+            MobileCore.setAdvertisingIdentifier(null)
+        }
+
+        root.findViewById<Button>(R.id.btn_set_ad_id_all_zeros).setOnClickListener {
+            Log.d(LOG_TAG, "Setting advertising identifier to: $ZERO_ADVERTISING_ID")
+            MobileCore.setAdvertisingIdentifier(ZERO_ADVERTISING_ID)
+        }
+
+        root.findViewById<Button>(R.id.btn_get_consents).setOnClickListener {
+            Consent.getConsents { consents ->
+                Log.d(LOG_TAG, "Got Consents: $consents")
+            }
         }
 
         return root
