@@ -24,13 +24,10 @@ spotless {
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName rootProject.moduleVersion
 
         testInstrumentationRunner rootProject.ext.testInstrumentationRunner
         consumerProguardFiles "consumer-rules.pro"
@@ -46,7 +43,6 @@ android {
     buildTypes {
         debug {
             testCoverageEnabled true
-            debuggable true
         }
 
         release {
