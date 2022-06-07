@@ -10,10 +10,11 @@ The Adobe Experience Platform Edge Identity is a mobile extension for the [Adobe
 
 Integrate the Edge Identity extension into your app by including the following in your gradle file's `dependencies`:
 
-```
+```gradle
 implementation 'com.adobe.marketing.mobile:edgeidentity:1.+'
 implementation 'com.adobe.marketing.mobile:edge:1.+'
 implementation 'com.adobe.marketing.mobile:core:1.+'
+implementation 'com.adobe.marketing.mobile:edgeconsent:1.+' // Recommended when using the setAdvertisingIdentifier API
 ```
 
 ### Development
@@ -28,12 +29,15 @@ The test app needs to be configured with the following edge extensions before it
 - Mobile Core (installed by default)
 - [Edge](https://aep-sdks.gitbook.io/docs/foundation-extensions/experience-platform-extension)
 - [Edge Identity](https://aep-sdks.gitbook.io/docs/foundation-extensions/identity-for-edge-network)
+- [Edge Consent](https://aep-sdks.gitbook.io/docs/foundation-extensions/consent-for-edge-network) (recommended when using the setAdvertisingIdentifier API)
 
 **Run demo application**
 
-1. In the test app, set your ENVIRONMENT_FILE_ID in EdgeIdentityApplication.kt.
-2. Open `app/res/value/secrets.xml` and follow the instructions to set up the AdMob app ID. This is required for testing with advertising identifiers.
-3. Select the `app` runnable with your favorite simulator and run the program.
+1. In the test app, set your `ENVIRONMENT_FILE_ID` in `EdgeIdentityApplication.kt`.
+2. Select the `app` runnable with the desired emulator and run the program.
+
+> **Note**
+> To enable GAID related advertising identifier features, follow the [documentation](Documentation/README.md#advertising-identifier) for the required setup steps.
 
 **View the platform events with Assurance**
 
@@ -67,7 +71,7 @@ try setting the system property 'npm.exec' in the build process to override auto
 ```
 
 To address this: 
-- Update Android Studio to the latest version (Bumblebee Patch 1 should address this issue) 
+- Update Android Studio to the latest version (minimum version Bumblebee Patch 1 should address this issue) 
 - Update the Android Gradle Plugin to the latest version (7.x.x as of this writing)  
 
 If that does not address the issue, try installing node using the installer and not through homebrew: https://nodejs.org/en/download/ 
