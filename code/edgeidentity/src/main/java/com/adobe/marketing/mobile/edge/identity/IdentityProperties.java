@@ -49,6 +49,49 @@ class IdentityProperties {
 	}
 
 	/**
+	 * Retrieves the current advertising identifier
+	 *
+	 * @return current advertising identifier
+	 */
+	String getAdId() {
+		final List<IdentityItem> adIdItems = identityMap.getIdentityItemsForNamespace(
+			IdentityConstants.Namespaces.GAID
+		);
+		// Check that:
+		// 1. The returned list itself is valid
+		// 2. The list is not empty
+		// 3. The first item in the list exists (there should only be one match)
+		if (Utils.isNullOrEmpty(adIdItems) || adIdItems.get(0) == null) {
+			return null;
+		}
+		return adIdItems.get(0).getId();
+	}
+
+	/**
+	 * Sets the current advertising identifier
+	 *
+	 * @param newAdId the new advertising identifier to set
+	 */
+	void setAdId(final String newAdId) {
+		// Delete the existing ad ID from the identity map if it exists
+		final String currentAdId = getAdId();
+
+		// Remove current ad ID; create a temp IdentityItem to use the IdentityMap's remove item method
+		if (currentAdId != null && !currentAdId.equalsIgnoreCase(newAdId)) {
+			final IdentityItem previousAdIdItem = new IdentityItem(currentAdId);
+			identityMap.removeItem(previousAdIdItem, IdentityConstants.Namespaces.GAID);
+		}
+
+		if (Utils.isNullOrEmpty(newAdId)) {
+			return;
+		}
+
+		// Add new ad ID to Identity map
+		final IdentityItem newAdIdItem = new IdentityItem(newAdId, AuthenticatedState.AMBIGUOUS, false);
+		identityMap.addItem(newAdIdItem, IdentityConstants.Namespaces.GAID);
+	}
+
+	/**
 	 * Sets the current {@link ECID}
 	 *
 	 * @param newEcid the new {@code ECID}
@@ -200,14 +243,28 @@ class IdentityProperties {
 	private void removeIdentitiesWithReservedNamespaces(final IdentityMap identityMap) {
 		for (final String reservedNamespace : reservedNamespaces) {
 			if (identityMap.clearItemsForNamespace(reservedNamespace)) {
-				MobileCore.log(
-					LoggingMode.DEBUG,
-					LOG_TAG,
-					String.format(
-						"IdentityProperties - Updating/Removing identifiers in namespace %s is not allowed.",
-						reservedNamespace
-					)
-				);
+				if (
+					reservedNamespace.equalsIgnoreCase(IdentityConstants.Namespaces.GAID) ||
+					reservedNamespace.equalsIgnoreCase(IdentityConstants.Namespaces.IDFA)
+				) {
+					MobileCore.log(
+						LoggingMode.DEBUG,
+						LOG_TAG,
+						String.format(
+							"IdentityProperties - Operation not allowed for namespace %s; use MobileCore.setAdvertisingIdentifier instead.",
+							reservedNamespace
+						)
+					);
+				} else {
+					MobileCore.log(
+						LoggingMode.DEBUG,
+						LOG_TAG,
+						String.format(
+							"IdentityProperties - Updating/Removing identifiers in namespace %s is not allowed.",
+							reservedNamespace
+						)
+					);
+				}
 			}
 		}
 	}
