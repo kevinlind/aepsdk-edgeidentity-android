@@ -11,10 +11,18 @@
 
 package com.adobe.marketing.edge.identity.app.model
 
+import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.adobe.marketing.mobile.edge.identity.AuthenticatedState
+import com.google.android.gms.ads.identifier.AdvertisingIdClient
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException
+import com.google.android.gms.common.GooglePlayServicesRepairableException
+import java.io.IOException
+
+private const val LOG_TAG = "Shared_View_Model"
 
 class SharedViewModel : ViewModel() {
     companion object {
@@ -56,6 +64,9 @@ class SharedViewModel : ViewModel() {
 
     // Models for Update Identities View
 
+    private val _adId = MutableLiveData<String>("")
+    val adId: LiveData<String> = _adId
+
     private val _identifier = MutableLiveData<String>("")
     val identifier: LiveData<String> = _identifier
 
@@ -70,6 +81,13 @@ class SharedViewModel : ViewModel() {
 
     private val _authenticatedStateId = MutableLiveData<Int>(null)
     val authenticatedStateId: LiveData<Int> = _authenticatedStateId
+
+    fun setAdId(value: String) {
+        if (_adId.value == value) {
+            return
+        }
+        _adId.value = value
+    }
 
     fun setIdentifier(value: String) {
         if (_identifier.value == value) {
@@ -104,6 +122,35 @@ class SharedViewModel : ViewModel() {
             return
         }
         _authenticatedStateId.value = value
+    }
+
+    /**
+     * Async method that retrieves the ad ID from the `AdvertisingIdClient` (from Google's gms.ads SDK).
+     * Sanitizes ad ID disabled and exceptions to the empty string (`""`), for easy use with `MobileCore` ad ID APIs.
+     * Should *only* be called from a background thread/coroutine.
+     *
+     * @param applicationContext: The application context that has the advertising ID provider to obtain the ad ID from.
+     * @return ad ID string; ad ID value from the provider if available and tracking is allowed, empty string otherwise.
+     */
+    suspend fun getGAID(applicationContext: Context): String {
+        var adID = ""
+        try {
+            val idInfo = AdvertisingIdClient.getAdvertisingIdInfo(applicationContext)
+            if (idInfo.isLimitAdTrackingEnabled) {
+                Log.d(LOG_TAG, "Limit Ad Tracking is enabled by the user, setting ad ID to \"\"")
+                return adID
+            }
+            Log.d(LOG_TAG, "Limit Ad Tracking disabled; ad ID value: ${idInfo.id}")
+            adID = idInfo.id
+        } catch (e: GooglePlayServicesNotAvailableException) {
+            Log.d(LOG_TAG, "GooglePlayServicesNotAvailableException while retrieving the advertising identifier ${e.localizedMessage}")
+        } catch (e: GooglePlayServicesRepairableException) {
+            Log.d(LOG_TAG, "GooglePlayServicesRepairableException while retrieving the advertising identifier ${e.localizedMessage}")
+        } catch (e: IOException) {
+            Log.d(LOG_TAG, "IOException while retrieving the advertising identifier ${e.localizedMessage}")
+        }
+        Log.d(LOG_TAG, "Returning ad ID value: $adID")
+        return adID
     }
 
     // Models for Multiple Identities View

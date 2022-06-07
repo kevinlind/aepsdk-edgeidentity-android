@@ -6,16 +6,17 @@ Refer to the [Getting Started Guide](getting-started.md)
 
 ## API reference
 
-| APIs                                           |
-| ---------------------------------------------- |
-| [extensionVersion](#extensionVersion)          |
-| [getExperienceCloudId](#getExperienceCloudId)  |
-| [getIdentities](#getIdentities)                |
-| [getUrlVariables](#getUrlVariables)            |
-| [registerExtension](#registerExtension)        |
-| [removeIdentity](#removeIdentity)              |
-| [resetIdentities](#resetIdentities)            |
-| [updateIdentities](#updateIdentities)          |
+| APIs                                                  |
+| ----------------------------------------------------- |
+| [extensionVersion](#extensionVersion)                 |
+| [getExperienceCloudId](#getExperienceCloudId)         |
+| [getIdentities](#getIdentities)                       |
+| [getUrlVariables](#getUrlVariables)                   |
+| [registerExtension](#registerExtension)               |
+| [removeIdentity](#removeIdentity)                     |
+| [resetIdentities](#resetIdentities)                   |
+| [setAdvertisingIdentifier](#setAdvertisingIdentifier) |
+| [updateIdentities](#updateIdentities)                 |
 
 ------
 
@@ -40,6 +41,7 @@ String extensionVersion = Identity.extensionVersion();
 
 This API retrieves the Experience Cloud ID (ECID) that was generated when the app was initially launched. This ID is preserved between app upgrades, is saved and restored during the standard application backup process, and is removed at uninstall.
 
+> **Note**
 > The ECID value is returned via the `AdobeCallback`. When `AdobeCallbackWithError` is provided to this API, the timeout value is 500ms. If the operation times out or an unexpected error occurs, the `fail` method is called with the appropriate `AdobeError`.
 
 #### Java
@@ -67,6 +69,7 @@ Identity.getExperienceCloudId(new AdobeCallback<String>() {
 
 Get all the identities in the Identity for Edge Network extension, including customer identifiers which were previously added.
 
+> **Note**
 > When `AdobeCallbackWithError` is provided, and you are fetching the identities from the Mobile SDK, the timeout value is 500ms. If the operation times out or an unexpected error occurs, the `fail` method is called with the appropriate `AdobeError`.
 
 #### Java
@@ -90,7 +93,8 @@ Identity.getIdentities(new AdobeCallback<IdentityMap>() {
 ------
 
 ### getUrlVariables
-> :information_source: This API is available with version 1.1.0 and above.
+> **Note**
+> This API is available with version 1.1.0 and above.
 
 This API returns the identifiers in URL query parameter format for consumption in **hybrid mobile applications**. There is no leading & or ? punctuation as the caller is responsible for placing the variables in their resulting URL in the correct locations. If an error occurs while retrieving the URL variables, the callback handler will be called with a null value. Otherwise, the encoded string is returned, for example: `"adobe_mc=TS%3DTIMESTAMP_VALUE%7CMCMID%3DYOUR_ECID%7CMCORGID%3D9YOUR_EXPERIENCE_CLOUD_ID"`
 
@@ -99,7 +103,8 @@ This API returns the identifiers in URL query parameter format for consumption i
   * `MCORGID` - Experience Cloud Org ID
   * `TS` - A timestamp taken when this request was made
 
-> :memo: When `AdobeCallbackWithError` is provided, and you are fetching the url variables from the Mobile SDK, the timeout value is 500ms. If the operation times out or an unexpected error occurs, the `fail` method is called with the appropriate `AdobeError`.
+> **Note**
+> When `AdobeCallbackWithError` is provided, and you are fetching the url variables from the Mobile SDK, the timeout value is 500ms. If the operation times out or an unexpected error occurs, the `fail` method is called with the appropriate `AdobeError`.
 
 #### Java
 
@@ -129,7 +134,8 @@ Identity.getUrlVariables(new AdobeCallback<String>() {
 
 Registers the Identity for Edge Network extension with the Mobile Core extension.
 
-> :information_source: If your use-case covers both Edge Network and Adobe Experience Cloud Solutions extensions, you need to register Identity for Edge Network and Identity for Experience Cloud Identity Service from Mobile Core extensions. For more details, see the [frequently asked questions](https://aep-sdks.gitbook.io/docs/foundation-extensions/identity-for-edge-network/identity-faq#q-i-am-using-aep-edge-and-adobe-solutions-extensions-which-identity-extension-should-i-install-and-register).
+> **Note**
+> If your use-case covers both Edge Network and Adobe Experience Cloud Solutions extensions, you need to register Identity for Edge Network and Identity for Experience Cloud Identity Service from Mobile Core extensions. For more details, see the [frequently asked questions](https://aep-sdks.gitbook.io/docs/foundation-extensions/identity-for-edge-network/identity-faq#q-i-am-using-aep-edge-and-adobe-solutions-extensions-which-identity-extension-should-i-install-and-register).
 
 #### Java
 
@@ -190,7 +196,147 @@ This API is not recommended for:
 * Removing existing custom identifiers; use the [`removeIdentity`](#removeidentity) API instead.
 * Removing a previously synced advertising identifier after the advertising tracking settings were changed by the user; use the [`setAdvertisingIdentifier`](https://aep-sdks.gitbook.io/docs/foundation-extensions/mobile-core/identity/identity-api-reference#setadvertisingidentifier) API instead.
 
-> :warning: The Identity for Edge Network extension does not read the Mobile SDK's privacy status, and therefore setting the SDK's privacy status to opt-out will not automatically clear the identities from the Identity for Edge Network extension. See [`MobileCore.resetIdentities`](https://aep-sdks.gitbook.io/docs/foundation-extensions/mobile-core/mobile-core-api-reference#resetidentities) for more details.
+> **Warning**
+>The Identity for Edge Network extension does not read the Mobile SDK's privacy status, and therefore setting the SDK's privacy status to opt-out will not automatically clear the identities from the Identity for Edge Network extension. See [`MobileCore.resetIdentities`](https://aep-sdks.gitbook.io/docs/foundation-extensions/mobile-core/mobile-core-api-reference#resetidentities) for more details.
+
+------
+
+### setAdvertisingIdentifier
+
+When this API is called with a valid advertising identifier, the Identity for Edge Network extension includes the advertising identifier in the XDM Identity Map using the _GAID_ (Google Advertising ID) namespace. If the API is called with the empty string (`""`), `null`, or the all-zeros UUID string values, the GAID is removed from the XDM Identity Map (if previously set).
+
+The GAID is preserved between app upgrades, is saved and restored during the standard application backup process, and is removed at uninstall.
+
+> **Warning**  
+> In order to enable collection of the user's current advertising tracking authorization selection for the provided advertising identifier, you need to install and register the [AEPEdgeConsent](https://aep-sdks.gitbook.io/docs/foundation-extensions/consent-for-edge-network) extension and update the [AEPEdge](https://aep-sdks.gitbook.io/docs/foundation-extensions/experience-platform-extension) dependency to minimum 1.3.2.
+
+> **Note**  
+> These examples require Google Play Services to be configured in your mobile application, and use the Google Mobile Ads Lite SDK. For instructions on how to import the SDK and configure your `ApplicationManifest.xml` file, see [Google Mobile Ads Lite SDK setup](https://developers.google.com/admob/android/lite-sdk).
+
+> **Note**  
+> These are just implementation examples. For more information about advertising identifiers and how to handle them correctly in your mobile application, see [Google Play Services documentation about AdvertisingIdClient](https://developers.google.com/android/reference/com/google/android/gms/ads/identifier/AdvertisingIdClient).
+
+```java
+public static void setAdvertisingIdentifier(final String advertisingIdentifier);
+```
+- _advertisingIdentifier_ is an ID string that provides developers with a simple, standard system to continue to track ads throughout their apps.
+
+##### Example
+<details>
+  <summary><code>import ...</code></summary>
+
+```java
+import com.google.android.gms.ads.identifier.AdvertisingIdClient;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import java.io.IOException;
+import android.util.Log;
+```
+</details>
+
+```java
+...
+@Override
+public void onResume() {
+    super.onResume();
+    ...
+    new Thread(new Runnable() {
+        @Override
+        public void run() {
+            String advertisingIdentifier = null;
+
+            try {
+                AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(getApplicationContext());
+                if (adInfo != null) {
+                    if (!adInfo.isLimitAdTrackingEnabled()) {
+                        advertisingIdentifier = adInfo.getId();
+                    } else {
+                        Log.d("ExampleActivity", "Limit Ad Tracking is enabled by the user, cannot process the advertising identifier");
+                    }
+                }
+
+            } catch (IOException e) {
+                // Unrecoverable error connecting to Google Play services (e.g.,
+                // the old version of the service doesn't support getting AdvertisingId).
+                Log.e("ExampleActivity", "IOException while retrieving the advertising identifier " + e.getLocalizedMessage());
+            } catch (GooglePlayServicesNotAvailableException e) {
+                // Google Play services is not available entirely.
+                Log.e("ExampleActivity", "GooglePlayServicesNotAvailableException while retrieving the advertising identifier " + e.getLocalizedMessage());
+            } catch (GooglePlayServicesRepairableException e) {
+                // Google Play services is not installed, up-to-date, or enabled.
+                Log.e("ExampleActivity", "GooglePlayServicesRepairableException while retrieving the advertising identifier " + e.getLocalizedMessage());
+            }
+
+            MobileCore.setAdvertisingIdentifier(advertisingIdentifier);
+        }
+    }).start();
+}
+```
+
+#### Kotlin
+
+##### Syntax
+```kotlin
+public fun setAdvertisingIdentifier(advertisingIdentifier: String)
+```
+- _advertisingIdentifier_ is an ID string that provides developers with a simple, standard system to continue to track ads throughout their apps.
+
+##### Example
+<details>
+  <summary><code>import ...</code></summary>
+
+```kotlin
+import android.content.Context
+import com.google.android.gms.ads.identifier.AdvertisingIdClient
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException
+import com.google.android.gms.common.GooglePlayServicesRepairableException
+import java.io.IOException
+import android.util.Log
+```
+</details>
+
+```kotlin
+suspend fun getGAID(applicationContext: Context): String {
+    var adID = ""
+    try {
+        val idInfo = AdvertisingIdClient.getAdvertisingIdInfo(applicationContext)
+        if (idInfo.isLimitAdTrackingEnabled) {
+            Log.d("ExampleActivity", "Limit Ad Tracking is enabled by the user, setting ad ID to \"\"")
+            return adID
+        }
+        Log.d("ExampleActivity", "Limit Ad Tracking disabled; ad ID value: ${idInfo.id}")
+        adID = idInfo.id
+    } catch (e: GooglePlayServicesNotAvailableException) {
+        Log.e("ExampleActivity", "GooglePlayServicesNotAvailableException while retrieving the advertising identifier ${e.localizedMessage}")
+    } catch (e: GooglePlayServicesRepairableException) {
+        Log.e("ExampleActivity", "GooglePlayServicesRepairableException while retrieving the advertising identifier ${e.localizedMessage}")
+    } catch (e: IOException) {
+        Log.e("ExampleActivity", "IOException while retrieving the advertising identifier ${e.localizedMessage}")
+    }
+    Log.d("ExampleActivity", "Returning ad ID value: $adID")
+    return adID
+}
+```
+Call site:
+<details>
+  <summary><code>import ...</code></summary>
+
+```kotlin
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+```
+</details>
+
+```kotlin
+ // Create background coroutine scope to fetch ad ID value
+val scope = CoroutineScope(Dispatchers.IO).launch {
+    val adID = sharedViewModel.getGAID(context.applicationContext)
+    Log.d("ExampleActivity", "Sending ad ID value: $adID to MobileCore.setAdvertisingIdentifier")
+
+    MobileCore.setAdvertisingIdentifier(adID)
+}
+```
 
 ------
 

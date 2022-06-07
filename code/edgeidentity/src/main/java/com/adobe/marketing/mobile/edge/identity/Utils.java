@@ -38,6 +38,10 @@ class Utils {
 		return map == null || map.isEmpty();
 	}
 
+	static boolean isNullOrEmpty(final List<?> list) {
+		return list == null || list.isEmpty();
+	}
+
 	/**
 	 * Adds {@code key}/{@code value} to {@code map} if {@code value} is not null or an
 	 * empty collection.

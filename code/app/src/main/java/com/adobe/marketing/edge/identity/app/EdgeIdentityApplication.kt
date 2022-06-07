@@ -16,11 +16,12 @@ import com.adobe.marketing.mobile.Assurance
 import com.adobe.marketing.mobile.Edge
 import com.adobe.marketing.mobile.LoggingMode
 import com.adobe.marketing.mobile.MobileCore
+import com.adobe.marketing.mobile.edge.consent.Consent
 import com.adobe.marketing.mobile.edge.identity.Identity
 
 class EdgeIdentityApplication : Application() {
-    // Add your Launch Environment ID to configure the SDK from your Launch property
-    private var LAUNCH_ENVIRONMENT_ID: String = ""
+    // TODO: Set up the preferred Environment File ID from your mobile property configured in Data Collection UI
+    private var ENVIRONMENT_FILE_ID: String = "yourAppId"
 
     override fun onCreate() {
         super.onCreate()
@@ -29,12 +30,13 @@ class EdgeIdentityApplication : Application() {
         MobileCore.setApplication(this)
         MobileCore.setLogLevel(LoggingMode.VERBOSE)
 
+        Consent.registerExtension()
         Identity.registerExtension()
         Edge.registerExtension()
         Assurance.registerExtension()
 
         MobileCore.start {
-            MobileCore.configureWithAppID(LAUNCH_ENVIRONMENT_ID)
+            MobileCore.configureWithAppID(ENVIRONMENT_FILE_ID)
         }
     }
 }
