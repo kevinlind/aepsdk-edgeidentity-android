@@ -41,6 +41,7 @@ String extensionVersion = Identity.extensionVersion();
 
 This API retrieves the Experience Cloud ID (ECID) that was generated when the app was initially launched. This ID is preserved between app upgrades, is saved and restored during the standard application backup process, and is removed at uninstall.
 
+> **Note**
 > The ECID value is returned via the `AdobeCallback`. When `AdobeCallbackWithError` is provided to this API, the timeout value is 500ms. If the operation times out or an unexpected error occurs, the `fail` method is called with the appropriate `AdobeError`.
 
 #### Java
@@ -68,6 +69,7 @@ Identity.getExperienceCloudId(new AdobeCallback<String>() {
 
 Get all the identities in the Identity for Edge Network extension, including customer identifiers which were previously added.
 
+> **Note**
 > When `AdobeCallbackWithError` is provided, and you are fetching the identities from the Mobile SDK, the timeout value is 500ms. If the operation times out or an unexpected error occurs, the `fail` method is called with the appropriate `AdobeError`.
 
 #### Java
@@ -91,7 +93,8 @@ Identity.getIdentities(new AdobeCallback<IdentityMap>() {
 ------
 
 ### getUrlVariables
-> :information_source: This API is available with version 1.1.0 and above.
+> **Note**
+> This API is available with version 1.1.0 and above.
 
 This API returns the identifiers in URL query parameter format for consumption in **hybrid mobile applications**. There is no leading & or ? punctuation as the caller is responsible for placing the variables in their resulting URL in the correct locations. If an error occurs while retrieving the URL variables, the callback handler will be called with a null value. Otherwise, the encoded string is returned, for example: `"adobe_mc=TS%3DTIMESTAMP_VALUE%7CMCMID%3DYOUR_ECID%7CMCORGID%3D9YOUR_EXPERIENCE_CLOUD_ID"`
 
@@ -100,7 +103,8 @@ This API returns the identifiers in URL query parameter format for consumption i
   * `MCORGID` - Experience Cloud Org ID
   * `TS` - A timestamp taken when this request was made
 
-> :memo: When `AdobeCallbackWithError` is provided, and you are fetching the url variables from the Mobile SDK, the timeout value is 500ms. If the operation times out or an unexpected error occurs, the `fail` method is called with the appropriate `AdobeError`.
+> **Note**
+> When `AdobeCallbackWithError` is provided, and you are fetching the url variables from the Mobile SDK, the timeout value is 500ms. If the operation times out or an unexpected error occurs, the `fail` method is called with the appropriate `AdobeError`.
 
 #### Java
 
@@ -130,7 +134,8 @@ Identity.getUrlVariables(new AdobeCallback<String>() {
 
 Registers the Identity for Edge Network extension with the Mobile Core extension.
 
-> :information_source: If your use-case covers both Edge Network and Adobe Experience Cloud Solutions extensions, you need to register Identity for Edge Network and Identity for Experience Cloud Identity Service from Mobile Core extensions. For more details, see the [frequently asked questions](https://aep-sdks.gitbook.io/docs/foundation-extensions/identity-for-edge-network/identity-faq#q-i-am-using-aep-edge-and-adobe-solutions-extensions-which-identity-extension-should-i-install-and-register).
+> **Note**
+> If your use-case covers both Edge Network and Adobe Experience Cloud Solutions extensions, you need to register Identity for Edge Network and Identity for Experience Cloud Identity Service from Mobile Core extensions. For more details, see the [frequently asked questions](https://aep-sdks.gitbook.io/docs/foundation-extensions/identity-for-edge-network/identity-faq#q-i-am-using-aep-edge-and-adobe-solutions-extensions-which-identity-extension-should-i-install-and-register).
 
 #### Java
 
@@ -191,7 +196,8 @@ This API is not recommended for:
 * Removing existing custom identifiers; use the [`removeIdentity`](#removeidentity) API instead.
 * Removing a previously synced advertising identifier after the advertising tracking settings were changed by the user; use the [`setAdvertisingIdentifier`](https://aep-sdks.gitbook.io/docs/foundation-extensions/mobile-core/identity/identity-api-reference#setadvertisingidentifier) API instead.
 
-> :warning: The Identity for Edge Network extension does not read the Mobile SDK's privacy status, and therefore setting the SDK's privacy status to opt-out will not automatically clear the identities from the Identity for Edge Network extension. See [`MobileCore.resetIdentities`](https://aep-sdks.gitbook.io/docs/foundation-extensions/mobile-core/mobile-core-api-reference#resetidentities) for more details.
+> **Warning**
+>The Identity for Edge Network extension does not read the Mobile SDK's privacy status, and therefore setting the SDK's privacy status to opt-out will not automatically clear the identities from the Identity for Edge Network extension. See [`MobileCore.resetIdentities`](https://aep-sdks.gitbook.io/docs/foundation-extensions/mobile-core/mobile-core-api-reference#resetidentities) for more details.
 
 ------
 
@@ -327,7 +333,7 @@ import kotlinx.coroutines.launch
 val scope = CoroutineScope(Dispatchers.IO).launch {
     val adID = sharedViewModel.getGAID(context.applicationContext)
     Log.d("ExampleActivity", "Sending ad ID value: $adID to MobileCore.setAdvertisingIdentifier")
-    
+
     MobileCore.setAdvertisingIdentifier(adID)
 }
 ```
