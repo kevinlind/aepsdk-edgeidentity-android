@@ -11,15 +11,14 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
+import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
+
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
 /**
  * Defines a map containing a set of end user identities, keyed on either namespace integration
@@ -31,6 +30,7 @@ import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG
  */
 @SuppressWarnings("unused")
 public class IdentityMap {
+
 	private final Map<String, List<IdentityItem>> identityItems = new HashMap<>();
 
 	/**
@@ -40,7 +40,7 @@ public class IdentityMap {
 	 * @param namespace namespace for the list of identities to retrieve
 	 * @return IdentityItem for the namespace
 	 */
-	public List<IdentityItem>  getIdentityItemsForNamespace(final String namespace) {
+	public List<IdentityItem> getIdentityItemsForNamespace(final String namespace) {
 		final List<IdentityItem> copyItems = new ArrayList<>();
 
 		if (Utils.isNullOrEmpty(namespace)) {
@@ -88,13 +88,20 @@ public class IdentityMap {
 	 */
 	public void removeItem(final IdentityItem item, final String namespace) {
 		if (item == null) {
-			MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityMap remove item ignored as must contain a non-null IdentityItem.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"IdentityMap remove item ignored as must contain a non-null IdentityItem."
+			);
 			return;
 		}
 
 		if (Utils.isNullOrEmpty(namespace)) {
-			MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
-						   "IdentityMap remove item ignored as must contain a non-null/non-empty namespace.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"IdentityMap remove item ignored as must contain a non-null/non-empty namespace."
+			);
 			return;
 		}
 
@@ -146,19 +153,26 @@ public class IdentityMap {
 	 * Add an identity item which is used to clearly distinguish entities that are interacting
 	 * with digital experiences.
 	 *
-	 * @param item      {@link IdentityItem} to be added to the namespace
-	 * @param namespace the namespace integration code or namespace ID of the identity
+	 * @param item        {@link IdentityItem} to be added to the namespace
+	 * @param namespace   the namespace integration code or namespace ID of the identity
 	 * @param isFirstItem on {@code true} keeps the provided {@code IdentityItem} as the first element of the identity list for this namespace
 	 */
 	void addItem(final IdentityItem item, final String namespace, final boolean isFirstItem) {
 		if (item == null) {
-			MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityMap - add item ignored as must contain a non-null IdentityItem.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"IdentityMap - add item ignored as must contain a non-null IdentityItem."
+			);
 			return;
 		}
 
 		if (Utils.isNullOrEmpty(namespace)) {
-			MobileCore.log(LoggingMode.DEBUG, LOG_TAG,
-						   "IdentityMap - add item ignored as must contain a non-null/non-empty namespace.");
+			MobileCore.log(
+				LoggingMode.DEBUG,
+				LOG_TAG,
+				"IdentityMap - add item ignored as must contain a non-null/non-empty namespace."
+			);
 			return;
 		}
 
@@ -278,17 +292,30 @@ public class IdentityMap {
 			return null;
 		}
 
-		final Map<String, Object> identityMapDict = (HashMap<String, Object>) map.get(IdentityConstants.XDMKeys.IDENTITY_MAP);
+		Map<String, Object> identityMapDict = null;
+		try {
+			identityMapDict = (HashMap<String, Object>) map.get(IdentityConstants.XDMKeys.IDENTITY_MAP);
+		} catch (ClassCastException e) {
+			MobileCore.log(
+				LoggingMode.ERROR,
+				LOG_TAG,
+				String.format("Failed to create IdentityMap from data. Exception thrown: %s", e.getLocalizedMessage())
+			);
+		}
 
 		if (identityMapDict == null) {
 			return null;
 		}
 
 		final IdentityMap identityMap = new IdentityMap();
-
 		for (final String namespace : identityMapDict.keySet()) {
 			try {
-				final ArrayList<HashMap<String, Object>> idArr = (ArrayList<HashMap<String, Object>>) identityMapDict.get(namespace);
+				final ArrayList<HashMap<String, Object>> idArr = (ArrayList<HashMap<String, Object>>) identityMapDict.get(
+					namespace
+				);
+				if (idArr == null) {
+					continue;
+				}
 
 				for (Object idMap : idArr) {
 					final IdentityItem item = IdentityItem.fromData((Map<String, Object>) idMap);
@@ -298,7 +325,15 @@ public class IdentityMap {
 					}
 				}
 			} catch (ClassCastException e) {
-				MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Failed to create IdentityMap from data.");
+				MobileCore.log(
+					LoggingMode.ERROR,
+					LOG_TAG,
+					String.format(
+						"Failed to parse data for namespace (%s). Exception thrown: %s",
+						namespace,
+						e.getLocalizedMessage()
+					)
+				);
 			}
 		}
 

@@ -1,13 +1,13 @@
 /*
- Copyright 2021 Adobe. All rights reserved.
- This file is licensed to you under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License. You may obtain a copy
- of the License at http://www.apache.org/licenses/LICENSE-2.0
- Unless required by applicable law or agreed to in writing, software distributed under
- the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
- OF ANY KIND, either express or implied. See the License for the specific language
- governing permissions and limitations under the License.
- */
+  Copyright 2021 Adobe. All rights reserved.
+  This file is licensed to you under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License. You may obtain a copy
+  of the License at http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software distributed under
+  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+  OF ANY KIND, either express or implied. See the License for the specific language
+  governing permissions and limitations under the License.
+*/
 
 package com.adobe.marketing.edge.identity.app.ui
 
@@ -31,27 +31,44 @@ import java.util.concurrent.TimeUnit
 class GetIdentityFragment : Fragment() {
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         val sharedViewModel by activityViewModels<SharedViewModel>()
         val root = inflater.inflate(R.layout.fragment_get_identity, container, false)
 
         val ecidTextView = root.findViewById<TextView>(R.id.text_ecid)
-        sharedViewModel.ecidText.observe(viewLifecycleOwner, Observer {
-            ecidTextView.text = it
-        })
+        sharedViewModel.ecidText.observe(
+            viewLifecycleOwner,
+            Observer {
+                ecidTextView.text = it
+            }
+        )
 
         val ecidLegacyTextView = root.findViewById<TextView>(R.id.text_legacy_ecid)
-        sharedViewModel.ecidLegacyText.observe(viewLifecycleOwner, Observer {
-            ecidLegacyTextView.text = it
-        })
+        sharedViewModel.ecidLegacyText.observe(
+            viewLifecycleOwner,
+            Observer {
+                ecidLegacyTextView.text = it
+            }
+        )
+
+        val urlVariablesTextView = root.findViewById<TextView>(R.id.text_url_variables)
+        sharedViewModel.urlVariablesText.observe(
+            viewLifecycleOwner,
+            Observer {
+                urlVariablesTextView.text = it
+            }
+        )
 
         val identitiesTextView = root.findViewById<TextView>(R.id.text_identities)
-        sharedViewModel.identitiesText.observe(viewLifecycleOwner, Observer {
-            identitiesTextView.text = it
-        })
+        sharedViewModel.identitiesText.observe(
+            viewLifecycleOwner,
+            Observer {
+                identitiesTextView.text = it
+            }
+        )
 
         root.findViewById<Button>(R.id.btn_get_ecid).setOnClickListener {
             val latch = CountDownLatch(2)
@@ -74,6 +91,21 @@ class GetIdentityFragment : Fragment() {
 
             sharedViewModel.setEcidValue(if (resultPrimary != null) "ecid: $resultPrimary" else "ecid: not found")
             sharedViewModel.setEcidLegacyValue(if (resultSecondary != null) "legacy: $resultSecondary" else "")
+        }
+
+        root.findViewById<Button>(R.id.btn_get_url_variables).setOnClickListener {
+            val latch = CountDownLatch(2)
+            var resultUrlVariables: String? = null
+
+            com.adobe.marketing.mobile.edge.identity.Identity.getUrlVariables { urlVariables ->
+                Log.d("Home", "Got UrlVariables String: $urlVariables")
+                resultUrlVariables = urlVariables
+                latch.countDown()
+            }
+
+            latch.await(1, TimeUnit.SECONDS)
+
+            sharedViewModel.setUrlVariablesValue(if (resultUrlVariables != null) "urlVariablesString: $resultUrlVariables" else "urlVariablesString: not found")
         }
 
         root.findViewById<Button>(R.id.btn_get_identities).setOnClickListener {

@@ -11,23 +11,22 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.MobileCore;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.MobileCore;
+import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 public class ListenerEdgeIdentityRequestIdentityTests {
 
@@ -43,15 +42,51 @@ public class ListenerEdgeIdentityRequestIdentityTests {
 		mockIdentityExtension = Mockito.mock(IdentityExtension.class);
 		doReturn(testExecutor).when(mockIdentityExtension).getExecutor();
 		MobileCore.start(null);
-		listener = spy(new ListenerEdgeIdentityRequestIdentity(null, IdentityConstants.EventType.IDENTITY,
-					   IdentityConstants.EventSource.REQUEST_IDENTITY));
+		listener =
+			spy(
+				new ListenerEdgeIdentityRequestIdentity(
+					null,
+					IdentityConstants.EventType.IDENTITY,
+					IdentityConstants.EventSource.REQUEST_IDENTITY
+				)
+			);
 	}
 
 	@Test
 	public void testHear() throws Exception {
 		// setup
-		Event event = new Event.Builder("Request Identity", IdentityConstants.EventType.IDENTITY,
-										IdentityConstants.EventSource.REQUEST_IDENTITY).build();
+		Event event = new Event.Builder(
+			"Request Identity",
+			IdentityConstants.EventType.IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY
+		)
+			.build();
+		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
+
+		// test
+		listener.hear(event);
+
+		// verify
+		testExecutor.awaitTermination(100, TimeUnit.MILLISECONDS);
+		verify(mockIdentityExtension, times(1)).processAddEvent(event);
+	}
+
+	@Test
+	public void testHear_urlVariables() throws Exception {
+		// setup
+		Event event = new Event.Builder(
+			"Request Identity",
+			IdentityConstants.EventType.IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY
+		)
+			.setEventData(
+				new HashMap<String, Object>() {
+					{
+						put(IdentityConstants.EventDataKeys.URL_VARIABLES, true);
+					}
+				}
+			)
+			.build();
 		doReturn(mockIdentityExtension).when(listener).getIdentityExtension();
 
 		// test
@@ -65,8 +100,12 @@ public class ListenerEdgeIdentityRequestIdentityTests {
 	@Test
 	public void testHear_WhenParentExtensionNull() throws Exception {
 		// setup
-		Event event = new Event.Builder("Request Identity", IdentityConstants.EventType.IDENTITY,
-										IdentityConstants.EventSource.REQUEST_IDENTITY).build();
+		Event event = new Event.Builder(
+			"Request Identity",
+			IdentityConstants.EventType.IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY
+		)
+			.build();
 		doReturn(null).when(listener).getIdentityExtension();
 
 		// test
