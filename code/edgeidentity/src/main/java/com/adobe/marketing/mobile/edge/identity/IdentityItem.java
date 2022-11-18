@@ -13,8 +13,7 @@ package com.adobe.marketing.mobile.edge.identity;
 
 import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
-import com.adobe.marketing.mobile.LoggingMode;
-import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
 import com.adobe.marketing.mobile.util.DataReaderException;
 import java.util.HashMap;
@@ -28,6 +27,8 @@ import java.util.Objects;
  * @see <a href="https://github.com/adobe/xdm/blob/master/docs/reference/datatypes/identityitem.schema.md">Identity Item Schema</a>
  */
 public final class IdentityItem {
+
+	private static final String LOG_SOURCE = "IdentityItem";
 
 	private final String id;
 	private final AuthenticatedState authenticatedState;
@@ -182,7 +183,7 @@ public final class IdentityItem {
 
 			return new IdentityItem(id, authenticatedState, primary);
 		} catch (final DataReaderException e) {
-			MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityItem - Failed to create IdentityItem from data.");
+			Log.debug(LOG_TAG, LOG_SOURCE, "Failed to create IdentityItem from data.");
 			return null;
 		}
 	}

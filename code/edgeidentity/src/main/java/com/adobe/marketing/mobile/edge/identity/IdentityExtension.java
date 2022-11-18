@@ -18,11 +18,10 @@ import androidx.annotation.VisibleForTesting;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.Extension;
 import com.adobe.marketing.mobile.ExtensionApi;
-import com.adobe.marketing.mobile.LoggingMode;
-import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.SharedStateResolution;
 import com.adobe.marketing.mobile.SharedStateResult;
 import com.adobe.marketing.mobile.SharedStateStatus;
+import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.StringUtils;
 import com.adobe.marketing.mobile.util.TimeUtils;
 import java.util.HashMap;
@@ -190,7 +189,7 @@ class IdentityExtension extends Extension {
 			handleUrlVariableResponse(
 				event,
 				null,
-				"IdentityExtension - Cannot process getUrlVariables request Identity event, Experience Cloud Org ID not found in configuration."
+				"Cannot process getUrlVariables request Identity event, Experience Cloud Org ID not found in configuration."
 			);
 			return;
 		}
@@ -202,7 +201,7 @@ class IdentityExtension extends Extension {
 			handleUrlVariableResponse(
 				event,
 				null,
-				"IdentityExtension - Cannot process getUrlVariables request Identity event, ECID not found."
+				"Cannot process getUrlVariables request Identity event, ECID not found."
 			);
 			return;
 		}
@@ -250,7 +249,7 @@ class IdentityExtension extends Extension {
 			.build();
 
 		if (StringUtils.isNullOrEmpty(urlVariables) && !StringUtils.isNullOrEmpty(errorMsg)) {
-			MobileCore.log(LoggingMode.WARNING, LOG_TAG, errorMsg);
+			Log.warning(LOG_TAG, LOG_TAG, errorMsg);
 		}
 
 		getApi().dispatch(responseEvent);
@@ -269,11 +268,7 @@ class IdentityExtension extends Extension {
 		final IdentityMap map = IdentityMap.fromXDMMap(eventData);
 
 		if (map == null) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"IdentityExtension - Failed to update identifiers as no identifiers were found in the event data."
-			);
+			Log.debug(LOG_TAG, LOG_TAG, "Failed to update identifiers as no identifiers were found in the event data.");
 			return;
 		}
 
@@ -294,11 +289,7 @@ class IdentityExtension extends Extension {
 		final IdentityMap map = IdentityMap.fromXDMMap(eventData);
 
 		if (map == null) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"IdentityExtension - Failed to remove identifiers as no identifiers were found in the event data."
-			);
+			Log.debug(LOG_TAG, LOG_TAG, "Failed to remove identifiers as no identifiers were found in the event data.");
 			return;
 		}
 

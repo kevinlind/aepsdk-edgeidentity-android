@@ -15,10 +15,10 @@ import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG
 
 import androidx.annotation.VisibleForTesting;
 import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.SharedStateResult;
 import com.adobe.marketing.mobile.SharedStateStatus;
+import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +27,8 @@ import java.util.Map;
  * Manages the business logic of this Identity extension
  */
 class IdentityState {
+
+	private static final String LOG_SOURCE = "IdentityState";
 
 	private IdentityProperties identityProperties;
 	private boolean hasBooted;
@@ -97,12 +99,10 @@ class IdentityState {
 
 			if (directIdentityEcid != null) {
 				identityProperties.setECID(directIdentityEcid);
-				MobileCore.log(
-					LoggingMode.DEBUG,
+				Log.debug(
 					LOG_TAG,
-					"IdentityState -  On bootup Loading ECID from direct Identity extension '" +
-					directIdentityEcid +
-					"'"
+					LOG_SOURCE,
+					"On bootup Loading ECID from direct Identity extension '" + directIdentityEcid + "'"
 				);
 			}
 			// If direct Identity has no persisted ECID, check if direct Identity is registered with the SDK
@@ -115,10 +115,10 @@ class IdentityState {
 
 				// If there is no direct Identity shared state, abort boot-up and try again when direct Identity shares its state
 				if (sharedStateResult == null || sharedStateResult.getStatus() != SharedStateStatus.SET) {
-					MobileCore.log(
-						LoggingMode.DEBUG,
+					Log.debug(
 						LOG_TAG,
-						"IdentityState - On bootup direct Identity extension is registered, waiting for its state change."
+						LOG_SOURCE,
+						"On bootup direct Identity extension is registered, waiting for its state change."
 					);
 					return false;
 				}
@@ -129,10 +129,10 @@ class IdentityState {
 			// Generate a new ECID as the direct Identity extension is not registered with the SDK and there was no direct Identity persisted ECID
 			else {
 				identityProperties.setECID(new ECID());
-				MobileCore.log(
-					LoggingMode.DEBUG,
+				Log.debug(
 					LOG_TAG,
-					"IdentityState - Generating new ECID on bootup '" + identityProperties.getECID().toString() + "'"
+					LOG_SOURCE,
+					"Generating new ECID on bootup '" + identityProperties.getECID().toString() + "'"
 				);
 			}
 
@@ -140,7 +140,7 @@ class IdentityState {
 		}
 
 		hasBooted = true;
-		MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityState - Edge Identity has successfully booted up");
+		Log.debug(LOG_TAG, LOG_SOURCE, "Edge Identity has successfully booted up");
 		callback.createXDMSharedState(identityProperties.toXDMData(false), null);
 
 		return hasBooted;
@@ -238,10 +238,10 @@ class IdentityState {
 
 		identityProperties.setECIDSecondary(legacyEcid);
 		IdentityStorageService.savePropertiesToPersistence(identityProperties);
-		MobileCore.log(
-			LoggingMode.DEBUG,
+		Log.debug(
 			LOG_TAG,
-			"IdentityState - Identity direct ECID updated to '" + legacyEcid + "', updating the IdentityMap"
+			LOG_SOURCE,
+			"Identity direct ECID updated to '" + legacyEcid + "', updating the IdentityMap"
 		);
 		return true;
 	}
@@ -256,19 +256,17 @@ class IdentityState {
 	private void handleECIDFromIdentityDirect(final ECID legacyEcid) {
 		if (legacyEcid != null) {
 			identityProperties.setECID(legacyEcid); // migrate legacy ECID
-			MobileCore.log(
-				LoggingMode.DEBUG,
+			Log.debug(
 				LOG_TAG,
-				"IdentityState - Identity direct ECID '" +
-				legacyEcid +
-				"' was migrated to Edge Identity, updating the IdentityMap"
+				LOG_SOURCE,
+				"Identity direct ECID '" + legacyEcid + "' " + "was migrated to Edge Identity, updating the IdentityMap"
 			);
 		} else { // opt-out scenario or an unexpected state for Identity direct, generate new ECID
 			identityProperties.setECID(new ECID());
-			MobileCore.log(
-				LoggingMode.DEBUG,
+			Log.debug(
 				LOG_TAG,
-				"IdentityState - Identity direct ECID is null, generating new ECID '" +
+				LOG_SOURCE,
+				"Identity direct ECID is null, generating new ECID '" +
 				identityProperties.getECID() +
 				"', updating the IdentityMap"
 			);

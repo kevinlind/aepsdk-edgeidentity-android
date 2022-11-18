@@ -13,8 +13,7 @@ package com.adobe.marketing.mobile.edge.identity;
 
 import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
-import com.adobe.marketing.mobile.LoggingMode;
-import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
 import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.ArrayList;
@@ -32,6 +31,8 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class IdentityMap {
+
+	private static final String LOG_SOURCE = "IdentityMap";
 
 	private final Map<String, List<IdentityItem>> identityItems = new HashMap<>();
 
@@ -90,20 +91,12 @@ public class IdentityMap {
 	 */
 	public void removeItem(final IdentityItem item, final String namespace) {
 		if (item == null) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"IdentityMap remove item ignored as must contain a non-null IdentityItem."
-			);
+			Log.debug(LOG_TAG, LOG_SOURCE, "Remove item ignored as must contain a non-null IdentityItem.");
 			return;
 		}
 
 		if (StringUtils.isNullOrEmpty(namespace)) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"IdentityMap remove item ignored as must contain a non-null/non-empty namespace."
-			);
+			Log.debug(LOG_TAG, LOG_SOURCE, "Remove item ignored as must contain a non-null/non-empty namespace.");
 			return;
 		}
 
@@ -161,20 +154,12 @@ public class IdentityMap {
 	 */
 	void addItem(final IdentityItem item, final String namespace, final boolean isFirstItem) {
 		if (item == null) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"IdentityMap - add item ignored as must contain a non-null IdentityItem."
-			);
+			Log.debug(LOG_TAG, LOG_SOURCE, "Add item ignored as must contain a non-null IdentityItem.");
 			return;
 		}
 
 		if (StringUtils.isNullOrEmpty(namespace)) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"IdentityMap - add item ignored as must contain a non-null/non-empty namespace."
-			);
+			Log.debug(LOG_TAG, LOG_SOURCE, "Add item ignored as must contain a non-null/non-empty namespace.");
 			return;
 		}
 
