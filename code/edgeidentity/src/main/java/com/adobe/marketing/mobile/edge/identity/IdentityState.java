@@ -30,24 +30,18 @@ class IdentityState {
 
 	private static final String LOG_SOURCE = "IdentityState";
 
+	private final IdentityStorageManager identityStorageManager;
 	private IdentityProperties identityProperties;
 	private boolean hasBooted;
 
 	/**
 	 * Loads the persisted identities (if any) into {@link #identityProperties}
 	 */
-	IdentityState() {
-		this(IdentityStorageService.loadPropertiesFromPersistence());
-	}
+	IdentityState(final IdentityStorageManager identityStorageManager) {
+		this.identityStorageManager = identityStorageManager;
 
-	/**
-	 * Creates a new {@link IdentityState} with the given {@link IdentityProperties}
-	 *
-	 * @param identityProperties identity properties
-	 */
-	@VisibleForTesting
-	IdentityState(final IdentityProperties identityProperties) {
-		this.identityProperties = (identityProperties != null) ? identityProperties : new IdentityProperties();
+		final IdentityProperties persistedProperties = identityStorageManager.loadPropertiesFromPersistence();
+		this.identityProperties = (persistedProperties != null) ? persistedProperties : new IdentityProperties();
 	}
 
 	/**
@@ -95,7 +89,7 @@ class IdentityState {
 			}
 
 			// Attempt to get ECID from direct Identity persistence to migrate an existing ECID
-			final ECID directIdentityEcid = IdentityStorageService.loadEcidFromDirectIdentityPersistence();
+			final ECID directIdentityEcid = identityStorageManager.loadEcidFromDirectIdentityPersistence();
 
 			if (directIdentityEcid != null) {
 				identityProperties.setECID(directIdentityEcid);
@@ -136,7 +130,7 @@ class IdentityState {
 				);
 			}
 
-			IdentityStorageService.savePropertiesToPersistence(identityProperties);
+			identityStorageManager.savePropertiesToPersistence(identityProperties);
 		}
 
 		hasBooted = true;
@@ -153,7 +147,7 @@ class IdentityState {
 		identityProperties = new IdentityProperties();
 		identityProperties.setECID(new ECID());
 		identityProperties.setECIDSecondary(null);
-		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		identityStorageManager.savePropertiesToPersistence(identityProperties);
 	}
 
 	/**
@@ -163,7 +157,7 @@ class IdentityState {
 	 */
 	void updateCustomerIdentifiers(final IdentityMap map) {
 		identityProperties.updateCustomerIdentifiers(map);
-		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		identityStorageManager.savePropertiesToPersistence(identityProperties);
 	}
 
 	/**
@@ -173,7 +167,7 @@ class IdentityState {
 	 */
 	void removeCustomerIdentifiers(final IdentityMap map) {
 		identityProperties.removeCustomerIdentifiers(map);
-		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		identityStorageManager.savePropertiesToPersistence(identityProperties);
 	}
 
 	/**
@@ -212,7 +206,7 @@ class IdentityState {
 		}
 
 		// Save to persistence
-		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		identityStorageManager.savePropertiesToPersistence(identityProperties);
 		callback.createXDMSharedState(identityProperties.toXDMData(false), event);
 	}
 
@@ -237,7 +231,7 @@ class IdentityState {
 		}
 
 		identityProperties.setECIDSecondary(legacyEcid);
-		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		identityStorageManager.savePropertiesToPersistence(identityProperties);
 		Log.debug(
 			LOG_TAG,
 			LOG_SOURCE,

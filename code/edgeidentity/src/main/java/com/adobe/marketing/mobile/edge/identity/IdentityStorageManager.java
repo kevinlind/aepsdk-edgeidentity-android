@@ -13,11 +13,11 @@ package com.adobe.marketing.mobile.edge.identity;
 
 import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
-import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
-import com.adobe.marketing.mobile.MobileCore;
+import androidx.annotation.VisibleForTesting;
+import com.adobe.marketing.mobile.services.DataStoring;
 import com.adobe.marketing.mobile.services.Log;
+import com.adobe.marketing.mobile.services.NamedCollection;
+import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import java.util.Map;
 import org.json.JSONException;
@@ -26,30 +26,38 @@ import org.json.JSONObject;
 /**
  * Manages persistence for this Identity extension
  */
-class IdentityStorageService {
+class IdentityStorageManager {
 
 	private static final String LOG_SOURCE = "IdentityStorageService";
+	private final NamedCollection edgeIdentityStore;
+	private final NamedCollection directIdentityStore;
 
-	private IdentityStorageService() {}
+	IdentityStorageManager() {
+		this(ServiceProvider.getInstance().getDataStoreService());
+	}
+
+	@VisibleForTesting
+	IdentityStorageManager(final DataStoring dataStoreService) {
+		this.edgeIdentityStore = dataStoreService.getNamedCollection(IdentityConstants.DataStoreKey.DATASTORE_NAME);
+		this.directIdentityStore =
+			dataStoreService.getNamedCollection(IdentityConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE_NAME);
+	}
 
 	/**
 	 * Loads identity properties from local storage, returns null if not found.
 	 *
 	 * @return properties stored in local storage if present, otherwise null.
 	 */
-	static IdentityProperties loadPropertiesFromPersistence() {
-		final SharedPreferences sharedPreferences = getSharedPreference(IdentityConstants.DataStoreKey.DATASTORE_NAME);
-
-		if (sharedPreferences == null) {
+	IdentityProperties loadPropertiesFromPersistence() {
+		if (edgeIdentityStore == null) {
 			Log.debug(
 				LOG_TAG,
 				LOG_SOURCE,
-				"Shared Preference value is null. Unable to load saved identity properties from persistence."
+				"EdgeIdentity named collection is null. Unable to load saved identity properties from persistence."
 			);
 			return null;
 		}
-
-		final String jsonString = sharedPreferences.getString(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null);
+		final String jsonString = edgeIdentityStore.getString(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, null);
 
 		if (jsonString == null) {
 			Log.debug(
@@ -79,40 +87,25 @@ class IdentityStorageService {
 	 *
 	 * @param properties properties to be stored
 	 */
-	static void savePropertiesToPersistence(final IdentityProperties properties) {
-		final SharedPreferences sharedPreferences = getSharedPreference(IdentityConstants.DataStoreKey.DATASTORE_NAME);
-
-		if (sharedPreferences == null) {
+	void savePropertiesToPersistence(final IdentityProperties properties) {
+		if (edgeIdentityStore == null) {
 			Log.debug(
 				LOG_TAG,
 				LOG_SOURCE,
-				"Shared Preference value is null. Unable to write identity properties to persistence."
-			);
-			return;
-		}
-
-		final SharedPreferences.Editor editor = sharedPreferences.edit();
-
-		if (editor == null) {
-			Log.debug(
-				LOG_TAG,
-				LOG_SOURCE,
-				"Shared Preference Editor is null. Unable to write identity properties to persistence."
+				"EdgeIdentity named collection is null. Unable to write identity properties to persistence."
 			);
 			return;
 		}
 
 		if (properties == null) {
 			Log.debug(LOG_TAG, LOG_SOURCE, "Identity Properties are null, removing them from persistence.");
-			editor.remove(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
-			editor.apply();
+			edgeIdentityStore.remove(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES);
 			return;
 		}
 
 		final JSONObject jsonObject = new JSONObject(properties.toXDMData(false));
 		final String jsonString = jsonObject.toString();
-		editor.putString(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, jsonString);
-		editor.apply();
+		edgeIdentityStore.setString(IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES, jsonString);
 	}
 
 	/**
@@ -120,21 +113,17 @@ class IdentityStorageService {
 	 *
 	 * @return {@link ECID} stored in direct Identity extension's persistence, or null if no ECID value is stored.
 	 */
-	static ECID loadEcidFromDirectIdentityPersistence() {
-		final SharedPreferences sharedPreferences = getSharedPreference(
-			IdentityConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE_NAME
-		);
-
-		if (sharedPreferences == null) {
+	ECID loadEcidFromDirectIdentityPersistence() {
+		if (directIdentityStore == null) {
 			Log.debug(
 				LOG_TAG,
 				LOG_SOURCE,
-				"Shared Preference value is null. Unable to load saved direct identity ECID from persistence."
+				"Identity direct named collection is null. Unable to load ECID from Identity Direct persistence."
 			);
 			return null;
 		}
 
-		final String ecidString = sharedPreferences.getString(
+		final String ecidString = directIdentityStore.getString(
 			IdentityConstants.DataStoreKey.IDENTITY_DIRECT_ECID_KEY,
 			null
 		);
@@ -144,31 +133,5 @@ class IdentityStorageService {
 		}
 
 		return new ECID(ecidString);
-	}
-
-	/**
-	 * Getter for the applications {@link SharedPreferences}
-	 * <p>
-	 * Returns null if the app or app context is not available
-	 *
-	 * @param datastoreName the name of the data store to get
-	 * @return a {@code SharedPreferences} instance
-	 */
-	private static SharedPreferences getSharedPreference(final String datastoreName) {
-		final Application application = MobileCore.getApplication();
-
-		if (application == null) {
-			Log.debug(LOG_TAG, LOG_SOURCE, "Application value is null. Unable to read/write data from persistence.");
-			return null;
-		}
-
-		final Context context = application.getApplicationContext();
-
-		if (context == null) {
-			Log.debug(LOG_TAG, LOG_SOURCE, "Context value is null. Unable to read/write data from persistence.");
-			return null;
-		}
-
-		return context.getSharedPreferences(datastoreName, Context.MODE_PRIVATE);
 	}
 }

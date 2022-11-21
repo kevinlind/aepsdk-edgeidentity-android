@@ -54,7 +54,7 @@ class IdentityExtension extends Extension {
 	 * @param extensionApi {@link ExtensionApi} instance
 	 */
 	protected IdentityExtension(ExtensionApi extensionApi) {
-		this(extensionApi, new IdentityState());
+		this(extensionApi, new IdentityState(new IdentityStorageManager()));
 	}
 
 	@VisibleForTesting
