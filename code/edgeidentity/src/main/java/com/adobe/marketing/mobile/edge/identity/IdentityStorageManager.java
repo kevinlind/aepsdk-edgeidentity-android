@@ -19,6 +19,7 @@ import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.NamedCollection;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.JSONUtils;
+import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -128,10 +129,6 @@ class IdentityStorageManager {
 			null
 		);
 
-		if (ecidString == null || ecidString.isEmpty()) {
-			return null;
-		}
-
-		return new ECID(ecidString);
+		return StringUtils.isNullOrEmpty(ecidString) ? null : new ECID(ecidString);
 	}
 }
