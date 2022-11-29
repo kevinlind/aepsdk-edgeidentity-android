@@ -69,8 +69,8 @@ class Utils {
 			// Edge Network.
 			// TODO: Add/verify tests to check side effects of retaining nulls in the resulting Map
 			return JSONUtils.toMap(new JSONObject(map));
-		} catch (final JSONException e) {
-			Log.debug(LOG_TAG, LOG_SOURCE, "Unable to deep copy map, json string invalid.");
+		} catch (final JSONException | NullPointerException e) {
+			Log.debug(LOG_TAG, LOG_SOURCE, "Unable to deep copy map, json string is invalid.");
 		}
 
 		return null;

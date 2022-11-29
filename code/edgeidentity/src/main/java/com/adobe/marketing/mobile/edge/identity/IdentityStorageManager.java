@@ -83,7 +83,7 @@ class IdentityStorageManager {
 	}
 
 	/**
-	 * Saves the properties to local storage
+	 * Saves identity properties to local storage.
 	 *
 	 * @param properties properties to be stored
 	 */

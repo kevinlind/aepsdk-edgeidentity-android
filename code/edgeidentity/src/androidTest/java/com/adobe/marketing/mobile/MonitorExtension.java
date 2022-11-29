@@ -140,7 +140,7 @@ class MonitorExtension extends Extension {
 
 		EventSpec eventSpec = new EventSpec(event.getSource(), event.getType());
 
-		Log.debug(LOG_TAG, TAG, "Received and processing event " + eventSpec);
+		MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Received and processing event " + eventSpec);
 
 		if (!receivedEvents.containsKey(eventSpec)) {
 			receivedEvents.put(eventSpec, new ArrayList<Event>());
@@ -158,7 +158,7 @@ class MonitorExtension extends Extension {
 	 * @param event
 	 */
 	private void processUnregisterRequest(final Event event) {
-		Log.debug(LOG_TAG, TAG, "Unregistering the Monitor Extension.");
+		MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Unregistering the Monitor Extension.");
 		getApi().unregisterExtension();
 	}
 
