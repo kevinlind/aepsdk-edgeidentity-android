@@ -11,14 +11,15 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
+import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.createXDMIdentityMap;
+import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.getExperienceCloudIdSync;
 import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.*;
-import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.*;
 import static org.junit.Assert.*;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.MobilePrivacyStatus;
-import com.adobe.marketing.mobile.TestHelper;
+import com.adobe.marketing.mobile.edge.identity.util.TestHelper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -45,7 +46,10 @@ public class IdentityECIDHandlingTest {
 	public void testECID_loadedFromPersistence() throws Exception {
 		// setup
 		setEdgeIdentityPersistence(
-			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("ECID", "secondaryECID"))
+			createXDMIdentityMap(
+				new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID"),
+				new IdentityAndroidTestUtil.TestItem("ECID", "secondaryECID")
+			)
 		);
 		registerEdgeIdentityExtension();
 
@@ -58,7 +62,7 @@ public class IdentityECIDHandlingTest {
 	public void testECID_edgePersistenceTakesPreferenceOverDirectExtension() throws Exception {
 		// setup
 		setIdentityDirectPersistedECID("legacyECID");
-		setEdgeIdentityPersistence(CreateIdentityMap("ECID", "edgeECID").asXDMMap());
+		setEdgeIdentityPersistence(IdentityAndroidTestUtil.createIdentityMap("ECID", "edgeECID").asXDMMap());
 		registerEdgeIdentityExtension();
 
 		// verify
@@ -112,7 +116,10 @@ public class IdentityECIDHandlingTest {
 	public void testECID_onResetClearsOldECID() throws Exception {
 		// setup
 		setEdgeIdentityPersistence(
-			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("ECID", "secondaryECID"))
+			createXDMIdentityMap(
+				new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID"),
+				new IdentityAndroidTestUtil.TestItem("ECID", "secondaryECID")
+			)
 		);
 		registerEdgeIdentityExtension();
 
@@ -179,7 +186,7 @@ public class IdentityECIDHandlingTest {
 	public void testECID_DirectEcidIsRemovedOnPrivacyOptOut() throws Exception {
 		// setup
 		setIdentityDirectPersistedECID("legacyECID");
-		setEdgeIdentityPersistence(CreateIdentityMap("ECID", "edgeECID").asXDMMap());
+		setEdgeIdentityPersistence(IdentityAndroidTestUtil.createIdentityMap("ECID", "edgeECID").asXDMMap());
 		registerBothIdentityExtensions();
 
 		// verify ECID

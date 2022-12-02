@@ -11,9 +11,15 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
+import static com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants.LOG_TAG;
+
+import com.adobe.marketing.mobile.AdobeCallback;
+import com.adobe.marketing.mobile.AdobeCallbackWithError;
+import com.adobe.marketing.mobile.AdobeError;
 import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.LoggingMode;
-import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.edge.identity.util.ADBCountDownLatch;
+import com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants;
+import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,13 +33,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * Util class used by both Functional and Unit tests
  */
-class IdentityTestUtil {
+public class IdentityAndroidTestUtil {
+
+	private static final String LOG_SOURCE = "IdentityAndroidTestUtil";
 
 	/**
 	 * Helper method to create IdentityXDM Map using {@link TestItem}s
@@ -137,7 +146,7 @@ class IdentityTestUtil {
 			addKeys("", new ObjectMapper().readTree(jsonObject.toString()), payloadMap);
 			return payloadMap;
 		} catch (IOException e) {
-			MobileCore.log(LoggingMode.ERROR, "FunctionalTestUtils", "Failed to parse JSON object to tree structure.");
+			Log.error(LOG_TAG, LOG_SOURCE, "Failed to parse JSON object to tree structure.");
 		}
 
 		return Collections.emptyMap();
@@ -156,7 +165,7 @@ class IdentityTestUtil {
 	 * @param map         {@code Map<String, String>} instance to store flattened JSON result
 	 * @see <a href="https://stackoverflow.com/a/24150263">Stack Overflow post</a>
 	 */
-	private static void addKeys(String currentPath, JsonNode jsonNode, Map<String, String> map) {
+	static void addKeys(String currentPath, JsonNode jsonNode, Map<String, String> map) {
 		if (jsonNode.isObject()) {
 			ObjectNode objectNode = (ObjectNode) jsonNode;
 			Iterator<Map.Entry<String, JsonNode>> iter = objectNode.fields();
@@ -182,7 +191,7 @@ class IdentityTestUtil {
 	 * Class similar to {@link IdentityItem} for a specific namespace used for easier testing.
 	 * For simplicity this class does not involve authenticatedState and primary key
 	 */
-	public static class TestItem {
+	static class TestItem {
 
 		private final String namespace;
 		private final String id;
@@ -194,10 +203,101 @@ class IdentityTestUtil {
 		}
 	}
 
-	public static class TestECIDItem extends TestItem {
+	/**
+	 * Retrieves identities from Identity extension synchronously
+	 * @return a {@code Map<String, Object>} of identities if retrieved successfully;
+	 *          null in case of a failure to retrieve it within timeout.
+	 */
+	static Map<String, Object> getIdentitiesSync() {
+		try {
+			final HashMap<String, Object> getIdentityResponse = new HashMap<>();
+			final ADBCountDownLatch latch = new ADBCountDownLatch(1);
+			Identity.getIdentities(
+				new AdobeCallbackWithError<IdentityMap>() {
+					@Override
+					public void call(final IdentityMap identities) {
+						getIdentityResponse.put(IdentityTestConstants.GetIdentitiesHelper.VALUE, identities);
+						latch.countDown();
+					}
 
-		public TestECIDItem(final String ecid) {
-			super(IdentityConstants.Namespaces.ECID, ecid);
+					@Override
+					public void fail(final AdobeError adobeError) {
+						getIdentityResponse.put(IdentityTestConstants.GetIdentitiesHelper.ERROR, adobeError);
+						latch.countDown();
+					}
+				}
+			);
+			latch.await(2000, TimeUnit.MILLISECONDS);
+
+			return getIdentityResponse;
+		} catch (Exception exp) {
+			return null;
 		}
+	}
+
+	/**
+	 * Retrieves Experience Cloud Id from Identity extension synchronously
+	 * @return an ECID if retrieved successfully;
+	 *          null in case of a failure to retrieve it within timeout.
+	 */
+	static String getExperienceCloudIdSync() {
+		try {
+			final HashMap<String, String> getExperienceCloudIdResponse = new HashMap<>();
+			final ADBCountDownLatch latch = new ADBCountDownLatch(1);
+			Identity.getExperienceCloudId(
+				new AdobeCallback<String>() {
+					@Override
+					public void call(final String ecid) {
+						getExperienceCloudIdResponse.put(IdentityTestConstants.GetIdentitiesHelper.VALUE, ecid);
+						latch.countDown();
+					}
+				}
+			);
+			latch.await(2000, TimeUnit.MILLISECONDS);
+			return getExperienceCloudIdResponse.get(IdentityTestConstants.GetIdentitiesHelper.VALUE);
+		} catch (Exception exp) {
+			return null;
+		}
+	}
+
+	/**
+	 * Retrieves url variables from Identity extension synchronously
+	 * @return a url variable string if retrieved successfully;
+	 *          null in case of a failure to retrieve it within timeout.
+	 */
+	static String getUrlVariablesSync() {
+		try {
+			final HashMap<String, String> getUrlVariablesResponse = new HashMap<>();
+			final ADBCountDownLatch latch = new ADBCountDownLatch(1);
+			Identity.getUrlVariables(
+				new AdobeCallback<String>() {
+					@Override
+					public void call(final String urlVariables) {
+						getUrlVariablesResponse.put(IdentityTestConstants.GetIdentitiesHelper.VALUE, urlVariables);
+						latch.countDown();
+					}
+				}
+			);
+			latch.await(2000, TimeUnit.MILLISECONDS);
+			return getUrlVariablesResponse.get(IdentityTestConstants.GetIdentitiesHelper.VALUE);
+		} catch (Exception exp) {
+			return null;
+		}
+	}
+
+	static IdentityMap createIdentityMap(final String namespace, final String id) {
+		return createIdentityMap(namespace, id, AuthenticatedState.AMBIGUOUS, false);
+	}
+
+	static IdentityMap createIdentityMap(
+		final String namespace,
+		final String id,
+		final AuthenticatedState state,
+		final boolean isPrimary
+	) {
+		IdentityMap map = new IdentityMap();
+		IdentityItem item = new IdentityItem(id, state, isPrimary);
+		map.addItem(item, namespace);
+		return map;
 	}
 }

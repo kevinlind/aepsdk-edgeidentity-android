@@ -13,7 +13,6 @@ package com.adobe.marketing.mobile.edge.identity;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertNotEquals;
 
@@ -21,9 +20,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.junit.Assert;
 import org.junit.Test;
 
-@SuppressWarnings("unchecked")
 public class ECIDTests {
 
 	@Test
@@ -112,15 +111,15 @@ public class ECIDTests {
 		ECID a = new ECID();
 		ECID b = new ECID(a.toString());
 
-		assertTrue(a.equals(b));
-		assertTrue(b.equals(a));
-		assertTrue(a.equals(a));
-		assertTrue(b.equals(b));
+		Assert.assertEquals(a, b);
+		Assert.assertEquals(b, a);
+		Assert.assertEquals(a, a);
+		Assert.assertEquals(b, b);
 
-		assertFalse(a.equals(null));
-		assertFalse(a.equals(new ECID()));
+		Assert.assertNotNull(a);
+		assertNotEquals(a, new ECID());
 
-		assertFalse(a.equals(new NotECID(a.toString())));
+		assertNotEquals(a, new NotECID(a.toString()));
 	}
 
 	private class NotECID {

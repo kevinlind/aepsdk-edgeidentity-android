@@ -17,7 +17,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.adobe.marketing.mobile.Event;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import org.junit.Test;
 
 public class EventUtilsTests {
@@ -287,6 +289,96 @@ public class EventUtilsTests {
 		);
 
 		assertEquals("adId", EventUtils.getAdId(event));
+	}
+
+	// ======================================================================================================================
+	// Tests for method : isSharedStateUpdateFor(final String stateOwnerName, final Event event)
+	// ======================================================================================================================
+
+	@Test
+	public void test_isSharedStateUpdateFor_stateOwnerIsNull() {
+		final Event event = new Event.Builder(
+			"Shared state event",
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY
+		)
+			.setEventData(Collections.EMPTY_MAP)
+			.build();
+
+		assertFalse(EventUtils.isSharedStateUpdateFor(null, event));
+	}
+
+	@Test
+	public void test_isSharedStateUpdateFor_eventIsNull() {
+		assertFalse(EventUtils.isSharedStateUpdateFor(IdentityConstants.SharedState.Configuration.NAME, null));
+	}
+
+	@Test
+	public void test_isSharedStateUpdateFor_stateOwnerValueIsNull() {
+		final Event event = new Event.Builder(
+			"Shared state event",
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY
+		)
+			.setEventData(Collections.singletonMap(IdentityConstants.EventDataKeys.STATE_OWNER, null))
+			.build();
+
+		assertFalse(EventUtils.isSharedStateUpdateFor(IdentityConstants.EventType.GENERIC_IDENTITY, event));
+	}
+
+	@Test
+	public void test_isSharedStateUpdateFor_stateOwnerValueIsEmpty() {
+		final Event event = new Event.Builder(
+			"Shared state event",
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY
+		)
+			.setEventData(Collections.singletonMap(IdentityConstants.EventDataKeys.STATE_OWNER, ""))
+			.build();
+
+		assertFalse(EventUtils.isSharedStateUpdateFor(IdentityConstants.EXTENSION_NAME, event));
+	}
+
+	@Test
+	public void test_isSharedStateUpdateFor_stateOwnerValueExists() {
+		final Event event = new Event.Builder(
+			"Shared state event",
+			IdentityConstants.EventType.GENERIC_IDENTITY,
+			IdentityConstants.EventSource.REQUEST_IDENTITY
+		)
+			.setEventData(
+				Collections.singletonMap(IdentityConstants.EventDataKeys.STATE_OWNER, "com.adobe.module.configuration")
+			)
+			.build();
+
+		assertTrue(EventUtils.isSharedStateUpdateFor("com.adobe.module.configuration", event));
+		assertFalse(EventUtils.isSharedStateUpdateFor(IdentityConstants.EXTENSION_NAME, event));
+	}
+
+	// ======================================================================================================================
+	// Tests for method : getECID(final Map<String, Object> identityDirectSharedState)
+	// ======================================================================================================================
+	@Test
+	public void test_getECID_valueExists() {
+		final Map<String, Object> identityDirectState = Collections.singletonMap(
+			IdentityConstants.SharedState.IdentityDirect.ECID,
+			"SomeRandomECID"
+		);
+		assertEquals("SomeRandomECID", EventUtils.getECID(identityDirectState).toString());
+	}
+
+	@Test
+	public void test_getECID_valueDoesNotExist() {
+		assertNull(EventUtils.getECID(Collections.EMPTY_MAP));
+	}
+
+	@Test
+	public void test_getECID_valueIsNull() {
+		final Map<String, Object> identityDirectState = Collections.singletonMap(
+			IdentityConstants.SharedState.IdentityDirect.ECID,
+			null
+		);
+		assertNull(EventUtils.getECID(identityDirectState));
 	}
 
 	// Test helpers

@@ -11,16 +11,22 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.TestHelper.*;
+import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.createIdentityMap;
+import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.flattenMap;
+import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.getExperienceCloudIdSync;
+import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.getIdentitiesSync;
+import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.getUrlVariablesSync;
 import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.registerEdgeIdentityExtension;
 import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.setupConfiguration;
-import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.*;
+import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.*;
 import static org.junit.Assert.*;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.TestHelper;
-import com.adobe.marketing.mobile.TestPersistenceHelper;
+import com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants;
+import com.adobe.marketing.mobile.edge.identity.util.TestHelper;
+import com.adobe.marketing.mobile.edge.identity.util.TestPersistenceHelper;
+import com.adobe.marketing.mobile.util.JSONUtils;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONObject;
@@ -63,11 +69,11 @@ public class IdentityPublicAPITest {
 	@Test
 	public void testRegisterExtensionAPI() throws InterruptedException {
 		// test
-		// Consent.registerExtension() is called in the setup method
+		// Identity.registerExtension() is called in the setup method
 
 		// verify that the extension is registered with the correct version details
 		Map<String, String> sharedStateMap = flattenMap(
-			getSharedStateFor(IdentityTestConstants.SharedStateName.EVENT_HUB, 1000)
+			getSharedStateFor(IdentityTestConstants.SharedStateName.EVENT_HUB, 5000)
 		);
 		assertEquals(
 			IdentityConstants.EXTENSION_VERSION,
@@ -83,7 +89,7 @@ public class IdentityPublicAPITest {
 	public void testUpdateIdentitiesAPI() throws Exception {
 		// test
 		Identity.updateIdentities(
-			CreateIdentityMap("Email", "example@email.com", AuthenticatedState.AUTHENTICATED, true)
+			createIdentityMap("Email", "example@email.com", AuthenticatedState.AUTHENTICATED, true)
 		);
 		TestHelper.waitForThreads(2000);
 
@@ -99,7 +105,7 @@ public class IdentityPublicAPITest {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(6, persistedMap.size()); // 3 for ECID and 3 for Email
 		assertEquals("example@email.com", persistedMap.get("identityMap.Email[0].id"));
 		assertEquals("true", persistedMap.get("identityMap.Email[0].primary"));
@@ -147,12 +153,12 @@ public class IdentityPublicAPITest {
 	@Test
 	public void testUpdateAPI_shouldReplaceExistingIdentities() throws Exception {
 		// test
-		Identity.updateIdentities(CreateIdentityMap("Email", "example@email.com"));
+		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("Email", "example@email.com"));
 		Identity.updateIdentities(
-			CreateIdentityMap("Email", "example@email.com", AuthenticatedState.AUTHENTICATED, true)
+			createIdentityMap("Email", "example@email.com", AuthenticatedState.AUTHENTICATED, true)
 		);
 		Identity.updateIdentities(
-			CreateIdentityMap("Email", "example@email.com", AuthenticatedState.LOGGED_OUT, false)
+			createIdentityMap("Email", "example@email.com", AuthenticatedState.LOGGED_OUT, false)
 		);
 		TestHelper.waitForThreads(2000);
 
@@ -168,7 +174,7 @@ public class IdentityPublicAPITest {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(6, persistedMap.size()); // 3 for ECID and 3 for Email
 		assertEquals("example@email.com", persistedMap.get("identityMap.Email[0].id"));
 		assertEquals("false", persistedMap.get("identityMap.Email[0].primary"));
@@ -178,13 +184,13 @@ public class IdentityPublicAPITest {
 	@Test
 	public void testUpdateAPI_withReservedNamespaces() throws Exception {
 		// test
-		Identity.updateIdentities(CreateIdentityMap("ECID", "newECID"));
-		Identity.updateIdentities(CreateIdentityMap("GAID", "<gaid>"));
-		Identity.updateIdentities(CreateIdentityMap("IDFA", "<idfa>"));
-		Identity.updateIdentities(CreateIdentityMap("IDFa", "<newIdfa>"));
-		Identity.updateIdentities(CreateIdentityMap("gaid", "<newgaid>"));
-		Identity.updateIdentities(CreateIdentityMap("ecid", "<newecid>"));
-		Identity.updateIdentities(CreateIdentityMap("idfa", "<newidfa>"));
+		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("ECID", "newECID"));
+		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("GAID", "<gaid>"));
+		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("IDFA", "<idfa>"));
+		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("IDFa", "<newIdfa>"));
+		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("gaid", "<newgaid>"));
+		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("ecid", "<newecid>"));
+		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("idfa", "<newidfa>"));
 		TestHelper.waitForThreads(2000);
 
 		// verify xdm shared state does not get updated
@@ -197,7 +203,7 @@ public class IdentityPublicAPITest {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(3, persistedMap.size()); // 3 for ECID
 		assertNotEquals("newECID", persistedMap.get("identityMap.ECID[0].id")); // ECID doesn't get replaced by API
 	}
@@ -226,7 +232,7 @@ public class IdentityPublicAPITest {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(15, persistedMap.size()); // 3 for ECID + 12 for new identities
 		assertEquals("primary@email.com", persistedMap.get("identityMap.Email[0].id"));
 		assertEquals("secondary@email.com", persistedMap.get("identityMap.Email[1].id"));
@@ -254,7 +260,7 @@ public class IdentityPublicAPITest {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(9, persistedMap.size()); // 3 for ECID + 6 for new identities
 		assertEquals("primary@email.com", persistedMap.get("identityMap.Email[0].id"));
 		assertEquals("secondary@email.com", persistedMap.get("identityMap.email[0].id"));
@@ -381,7 +387,7 @@ public class IdentityPublicAPITest {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(3, persistedMap.size()); // 3 for ECID
 	}
 
@@ -401,7 +407,7 @@ public class IdentityPublicAPITest {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(3, persistedMap.size()); // 3 for ECID
 	}
 
@@ -409,7 +415,7 @@ public class IdentityPublicAPITest {
 	public void testRemoveIdentity_nameSpaceCaseSensitive() throws Exception {
 		// setup
 		// update Identities through API
-		Identity.updateIdentities(CreateIdentityMap("Email", "example@email.com"));
+		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("Email", "example@email.com"));
 
 		// test
 		Identity.removeIdentity(new IdentityItem("example@email.com"), "email");
@@ -425,7 +431,7 @@ public class IdentityPublicAPITest {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(6, persistedMap.size()); // 3 for ECID +  3 for  Email
 	}
 
@@ -433,7 +439,7 @@ public class IdentityPublicAPITest {
 	public void testRemoveIdentity_nonExistentItem() throws Exception {
 		// setup
 		// update Identities through API
-		Identity.updateIdentities(CreateIdentityMap("Email", "example@email.com"));
+		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("Email", "example@email.com"));
 
 		// test
 		Identity.removeIdentity(new IdentityItem("secondary@email.com"), "Email");
@@ -449,7 +455,7 @@ public class IdentityPublicAPITest {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(6, persistedMap.size()); // 3 for ECID +  3 for  Email
 	}
 
@@ -472,7 +478,7 @@ public class IdentityPublicAPITest {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(3, persistedMap.size()); // 3 for ECID that still exists
 	}
 }

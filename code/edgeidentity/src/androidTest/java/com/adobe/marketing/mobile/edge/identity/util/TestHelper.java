@@ -9,8 +9,9 @@
   governing permissions and limitations under the License.
 */
 
-package com.adobe.marketing.mobile;
+package com.adobe.marketing.mobile.edge.identity.util;
 
+import static com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants.LOG_TAG;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -19,8 +20,14 @@ import android.app.Application;
 import android.app.Instrumentation;
 import android.content.Context;
 import androidx.test.platform.app.InstrumentationRegistry;
-import com.adobe.marketing.mobile.MonitorExtension.EventSpec;
-import com.adobe.marketing.mobile.edge.identity.ADBCountDownLatch;
+import com.adobe.marketing.mobile.AdobeCallbackWithError;
+import com.adobe.marketing.mobile.AdobeError;
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.LoggingMode;
+import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.MobileCoreHelper;
+import com.adobe.marketing.mobile.edge.identity.util.MonitorExtension.EventSpec;
+import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +46,7 @@ import org.junit.runners.model.Statement;
  */
 public class TestHelper {
 
-	private static final String TAG = "TestHelper";
+	private static final String LOG_SOURCE = "TestHelper";
 	static final int WAIT_TIMEOUT_MS = 1000;
 	static final int WAIT_EVENT_TIMEOUT_MS = 2000;
 	static Application defaultApplication;
@@ -81,24 +88,14 @@ public class TestHelper {
 					try {
 						base.evaluate();
 					} catch (Throwable e) {
-						MobileCore.log(LoggingMode.DEBUG, "SetupCoreRule", "Wait after test failure.");
+						Log.debug(LOG_TAG, "SetupCoreRule", "Wait after test failure.");
 						throw e; // rethrow test failure
 					} finally {
 						// After test execution
-						MobileCore.log(
-							LoggingMode.DEBUG,
-							"SetupCoreRule",
-							"Finished '" + description.getMethodName() + "'"
-						);
+						Log.debug(LOG_TAG, "SetupCoreRule", "Finished '" + description.getMethodName() + "'");
 						waitForThreads(5000); // wait to allow thread to run after test execution
-						Core core = MobileCore.getCore();
 
-						if (core != null && core.eventHub != null) {
-							core.eventHub.shutdown();
-							core.eventHub = null;
-						}
-
-						MobileCore.setCore(null);
+						MobileCoreHelper.resetSDK();
 						TestPersistenceHelper.resetKnownPersistence();
 						resetTestExpectations();
 					}
@@ -157,16 +154,12 @@ public class TestHelper {
 		Set<Thread> threadSet = getEligibleThreads();
 
 		while (threadSet.size() > 0 && ((System.currentTimeMillis() - startTime) < timeoutTestMillis)) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				TAG,
-				"waitForThreads - Still waiting for " + threadSet.size() + " thread(s)"
-			);
+			Log.debug(LOG_TAG, LOG_SOURCE, "waitForThreads - Still waiting for " + threadSet.size() + " thread(s)");
 
 			for (Thread t : threadSet) {
-				MobileCore.log(
-					LoggingMode.DEBUG,
-					TAG,
+				Log.debug(
+					LOG_TAG,
+					LOG_SOURCE,
 					"waitForThreads - Waiting for thread " + t.getName() + " (" + t.getId() + ")"
 				);
 				boolean done = false;
@@ -189,15 +182,15 @@ public class TestHelper {
 				}
 
 				if (timedOut) {
-					MobileCore.log(
-						LoggingMode.DEBUG,
-						TAG,
+					Log.debug(
+						LOG_TAG,
+						LOG_SOURCE,
 						"waitForThreads - Timeout out waiting for thread " + t.getName() + " (" + t.getId() + ")"
 					);
 				} else {
-					MobileCore.log(
-						LoggingMode.DEBUG,
-						TAG,
+					Log.debug(
+						LOG_TAG,
+						LOG_SOURCE,
 						"waitForThreads - Done waiting for thread " + t.getName() + " (" + t.getId() + ")"
 					);
 				}
@@ -206,7 +199,7 @@ public class TestHelper {
 			threadSet = getEligibleThreads();
 		}
 
-		MobileCore.log(LoggingMode.DEBUG, TAG, "waitForThreads - All known threads are terminated.");
+		Log.debug(LOG_TAG, LOG_SOURCE, "waitForThreads - All known threads are terminated.");
 	}
 
 	/**
@@ -257,7 +250,7 @@ public class TestHelper {
 	 * Resets the network and event test expectations.
 	 */
 	public static void resetTestExpectations() {
-		MobileCore.log(LoggingMode.DEBUG, TAG, "Resetting functional test expectations for events");
+		Log.debug(LOG_TAG, LOG_SOURCE, "Resetting functional test expectations for events");
 		MonitorExtension.reset();
 	}
 
@@ -376,9 +369,9 @@ public class TestHelper {
 						receivedEvent.getValue().size()
 					)
 				);
-				MobileCore.log(
-					LoggingMode.DEBUG,
-					TAG,
+				Log.debug(
+					LOG_TAG,
+					LOG_SOURCE,
 					String.format(
 						"Received unexpected event with type: %s source: %s",
 						receivedEvent.getKey().type,
@@ -477,7 +470,13 @@ public class TestHelper {
 		final Map<String, Object> sharedState = new HashMap<>();
 		MobileCore.dispatchEventWithResponseCallback(
 			event,
-			new AdobeCallback<Event>() {
+			5000L,
+			new AdobeCallbackWithError<Event>() {
+				@Override
+				public void fail(AdobeError adobeError) {
+					Log.error(LOG_TAG, LOG_SOURCE, "Failed to get shared state for " + stateOwner + ": " + adobeError);
+				}
+
 				@Override
 				public void call(Event event) {
 					if (event.getEventData() != null) {
@@ -485,16 +484,6 @@ public class TestHelper {
 					}
 
 					latch.countDown();
-				}
-			},
-			new ExtensionErrorCallback<ExtensionError>() {
-				@Override
-				public void error(ExtensionError extensionError) {
-					MobileCore.log(
-						LoggingMode.ERROR,
-						TAG,
-						"Failed to get shared state for " + stateOwner + ": " + extensionError
-					);
 				}
 			}
 		);
@@ -532,7 +521,13 @@ public class TestHelper {
 		final Map<String, Object> sharedState = new HashMap<>();
 		MobileCore.dispatchEventWithResponseCallback(
 			event,
-			new AdobeCallback<Event>() {
+			5000L,
+			new AdobeCallbackWithError<Event>() {
+				@Override
+				public void fail(AdobeError adobeError) {
+					Log.debug(LOG_TAG, LOG_SOURCE, "Failed to get shared state for " + stateOwner + ": " + adobeError);
+				}
+
 				@Override
 				public void call(Event event) {
 					if (event.getEventData() != null) {
@@ -540,16 +535,6 @@ public class TestHelper {
 					}
 
 					latch.countDown();
-				}
-			},
-			new ExtensionErrorCallback<ExtensionError>() {
-				@Override
-				public void error(ExtensionError extensionError) {
-					MobileCore.log(
-						LoggingMode.ERROR,
-						TAG,
-						"Failed to get shared state for " + stateOwner + ": " + extensionError
-					);
 				}
 			}
 		);

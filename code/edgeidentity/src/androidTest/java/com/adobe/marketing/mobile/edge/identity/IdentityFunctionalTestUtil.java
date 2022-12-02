@@ -11,17 +11,21 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.TestHelper.getXDMSharedStateFor;
-import static com.adobe.marketing.mobile.TestHelper.resetTestExpectations;
-import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.flattenMap;
-import static com.adobe.marketing.mobile.edge.identity.IdentityTestUtil.getExperienceCloudIdSync;
+import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.flattenMap;
+import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.getExperienceCloudIdSync;
+import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.getXDMSharedStateFor;
+import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.resetTestExpectations;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.TestHelper;
-import com.adobe.marketing.mobile.TestPersistenceHelper;
+import com.adobe.marketing.mobile.edge.identity.util.ADBCountDownLatch;
+import com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants;
+import com.adobe.marketing.mobile.edge.identity.util.TestHelper;
+import com.adobe.marketing.mobile.edge.identity.util.TestPersistenceHelper;
+import com.adobe.marketing.mobile.util.JSONUtils;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -33,46 +37,8 @@ public class IdentityFunctionalTestUtil {
 	 * Register's Edge Identity Extension and start the Core
 	 */
 	static void registerEdgeIdentityExtension() throws InterruptedException {
-		com.adobe.marketing.mobile.edge.identity.Identity.registerExtension();
-
 		final ADBCountDownLatch latch = new ADBCountDownLatch(1);
-		MobileCore.start(
-			new AdobeCallback() {
-				@Override
-				public void call(Object o) {
-					latch.countDown();
-				}
-			}
-		);
-
-		latch.await(1000, TimeUnit.MILLISECONDS);
-		TestHelper.waitForThreads(2000);
-		resetTestExpectations();
-	}
-
-	/**
-	 * Register's Identity Direct Extension and start the Core
-	 */
-	static void registerIdentityDirectExtension() throws Exception {
-		HashMap<String, Object> config = new HashMap<String, Object>() {
-			{
-				put("global.privacy", "optedin");
-				put("experienceCloud.org", "testOrg@AdobeOrg");
-				put("experienceCloud.server", "notaserver");
-			}
-		};
-		MobileCore.updateConfiguration(config);
-		com.adobe.marketing.mobile.Identity.registerExtension();
-
-		final ADBCountDownLatch latch = new ADBCountDownLatch(1);
-		MobileCore.start(
-			new AdobeCallback() {
-				@Override
-				public void call(Object o) {
-					latch.countDown();
-				}
-			}
-		);
+		MobileCore.registerExtensions(Arrays.asList(Identity.EXTENSION), o -> latch.countDown());
 
 		latch.await(1000, TimeUnit.MILLISECONDS);
 		TestHelper.waitForThreads(2000);
@@ -92,17 +58,10 @@ public class IdentityFunctionalTestUtil {
 		};
 		MobileCore.updateConfiguration(config);
 
-		com.adobe.marketing.mobile.edge.identity.Identity.registerExtension();
-		com.adobe.marketing.mobile.Identity.registerExtension();
-
 		final ADBCountDownLatch latch = new ADBCountDownLatch(1);
-		MobileCore.start(
-			new AdobeCallback() {
-				@Override
-				public void call(Object o) {
-					latch.countDown();
-				}
-			}
+		MobileCore.registerExtensions(
+			Arrays.asList(Identity.EXTENSION, com.adobe.marketing.mobile.Identity.EXTENSION),
+			o -> latch.countDown()
 		);
 
 		latch.await();
@@ -206,7 +165,7 @@ public class IdentityFunctionalTestUtil {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(primaryECID, persistedMap.get("identityMap.ECID[0].id"));
 	}
 
@@ -224,7 +183,7 @@ public class IdentityFunctionalTestUtil {
 			IdentityConstants.DataStoreKey.DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
-		Map<String, String> persistedMap = flattenMap(IdentityTestUtil.toMap(new JSONObject(persistedJson)));
+		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(secondaryECID, persistedMap.get("identityMap.ECID[1].id"));
 	}
 }
