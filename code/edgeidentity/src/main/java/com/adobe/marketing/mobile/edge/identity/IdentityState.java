@@ -18,6 +18,7 @@ import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.SharedStateResult;
 import com.adobe.marketing.mobile.SharedStateStatus;
+import com.adobe.marketing.mobile.services.DataStoring;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
 import java.util.HashMap;
@@ -34,9 +35,14 @@ class IdentityState {
 	private IdentityProperties identityProperties;
 	private boolean hasBooted;
 
+	IdentityState(final DataStoring dataStoreService) {
+		this(new IdentityStorageManager(dataStoreService));
+	}
+
 	/**
 	 * Loads the persisted identities (if any) into {@link #identityProperties}
 	 */
+	@VisibleForTesting
 	IdentityState(final IdentityStorageManager identityStorageManager) {
 		this.identityStorageManager = identityStorageManager;
 

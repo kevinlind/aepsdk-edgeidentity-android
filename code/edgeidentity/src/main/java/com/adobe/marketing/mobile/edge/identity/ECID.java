@@ -11,6 +11,8 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
+import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
+
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.Locale;
@@ -45,7 +47,7 @@ final class ECID {
 	ECID(final String ecidString) {
 		if (StringUtils.isNullOrEmpty(ecidString)) {
 			Log.debug(
-				IdentityConstants.LOG_TAG,
+				LOG_TAG,
 				LOG_SOURCE,
 				"Creating an ECID with null or empty ecidString is not allowed, generating a new ECID."
 			);

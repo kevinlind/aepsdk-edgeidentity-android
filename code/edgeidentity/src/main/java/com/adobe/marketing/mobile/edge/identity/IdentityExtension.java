@@ -22,12 +22,15 @@ import com.adobe.marketing.mobile.SharedStateResolution;
 import com.adobe.marketing.mobile.SharedStateResult;
 import com.adobe.marketing.mobile.SharedStateStatus;
 import com.adobe.marketing.mobile.services.Log;
+import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.StringUtils;
 import com.adobe.marketing.mobile.util.TimeUtils;
 import java.util.HashMap;
 import java.util.Map;
 
 class IdentityExtension extends Extension {
+
+	private static final String LOG_SOURCE = "IdentityExtension";
 
 	/**
 	 * A {@code SharedStateCallback} to retrieve the last set state of an extension and to
@@ -54,7 +57,7 @@ class IdentityExtension extends Extension {
 	 * @param extensionApi {@link ExtensionApi} instance
 	 */
 	protected IdentityExtension(ExtensionApi extensionApi) {
-		this(extensionApi, new IdentityState(new IdentityStorageManager()));
+		this(extensionApi, new IdentityState(ServiceProvider.getInstance().getDataStoreService()));
 	}
 
 	@VisibleForTesting
@@ -249,7 +252,7 @@ class IdentityExtension extends Extension {
 			.build();
 
 		if (StringUtils.isNullOrEmpty(urlVariables) && !StringUtils.isNullOrEmpty(errorMsg)) {
-			Log.warning(LOG_TAG, LOG_TAG, errorMsg);
+			Log.warning(LOG_TAG, LOG_SOURCE, errorMsg);
 		}
 
 		getApi().dispatch(responseEvent);
@@ -263,12 +266,19 @@ class IdentityExtension extends Extension {
 	void handleUpdateIdentities(@NonNull final Event event) {
 		final Map<String, Object> eventData = event.getEventData();
 
-		if (eventData == null) return; // TODO: Add log message when logging changes are made
+		if (eventData == null) {
+			Log.debug(LOG_TAG, LOG_SOURCE, "Cannot update identifiers, event data is null.");
+			return;
+		}
 
 		final IdentityMap map = IdentityMap.fromXDMMap(eventData);
 
 		if (map == null) {
-			Log.debug(LOG_TAG, LOG_TAG, "Failed to update identifiers as no identifiers were found in the event data.");
+			Log.debug(
+				LOG_TAG,
+				LOG_SOURCE,
+				"Failed to update identifiers as no identifiers were found in the event data."
+			);
 			return;
 		}
 
@@ -284,12 +294,19 @@ class IdentityExtension extends Extension {
 	void handleRemoveIdentity(@NonNull final Event event) {
 		final Map<String, Object> eventData = event.getEventData();
 
-		if (eventData == null) return; // TODO: Add log message when logging changes are made
+		if (eventData == null) {
+			Log.debug(LOG_TAG, LOG_SOURCE, "Cannot remove identifiers, event data is null.");
+			return;
+		}
 
 		final IdentityMap map = IdentityMap.fromXDMMap(eventData);
 
 		if (map == null) {
-			Log.debug(LOG_TAG, LOG_TAG, "Failed to remove identifiers as no identifiers were found in the event data.");
+			Log.debug(
+				LOG_TAG,
+				LOG_SOURCE,
+				"Failed to remove identifiers as no identifiers were found in the event data."
+			);
 			return;
 		}
 

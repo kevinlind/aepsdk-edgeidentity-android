@@ -1,5 +1,5 @@
 /*
-  Copyright 2021 Adobe. All rights reserved.
+  Copyright 2022 Adobe. All rights reserved.
   This file is licensed to you under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License. You may obtain a copy
   of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -13,11 +13,9 @@ package com.adobe.marketing.mobile.edge.identity;
 
 import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
-import androidx.annotation.VisibleForTesting;
 import com.adobe.marketing.mobile.services.DataStoring;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.NamedCollection;
-import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.Map;
@@ -29,15 +27,10 @@ import org.json.JSONObject;
  */
 class IdentityStorageManager {
 
-	private static final String LOG_SOURCE = "IdentityStorageService";
+	private static final String LOG_SOURCE = "IdentityStorageManager";
 	private final NamedCollection edgeIdentityStore;
 	private final NamedCollection directIdentityStore;
 
-	IdentityStorageManager() {
-		this(ServiceProvider.getInstance().getDataStoreService());
-	}
-
-	@VisibleForTesting
 	IdentityStorageManager(final DataStoring dataStoreService) {
 		this.edgeIdentityStore = dataStoreService.getNamedCollection(IdentityConstants.DataStoreKey.DATASTORE_NAME);
 		this.directIdentityStore =
@@ -47,11 +40,13 @@ class IdentityStorageManager {
 	/**
 	 * Loads identity properties from local storage, returns null if not found.
 	 *
-	 * @return properties stored in local storage if present, otherwise null.
+	 * @return {@code IdentityProperties} stored in local storage if present;
+	 *         null - if the content cannot be loaded from persistence or, if the content cannot be
+	 *         serialized to a {@code JSONObject}
 	 */
 	IdentityProperties loadPropertiesFromPersistence() {
 		if (edgeIdentityStore == null) {
-			Log.debug(
+			Log.warning(
 				LOG_TAG,
 				LOG_SOURCE,
 				"EdgeIdentity named collection is null. Unable to load saved identity properties from persistence."
@@ -90,7 +85,7 @@ class IdentityStorageManager {
 	 */
 	void savePropertiesToPersistence(final IdentityProperties properties) {
 		if (edgeIdentityStore == null) {
-			Log.debug(
+			Log.warning(
 				LOG_TAG,
 				LOG_SOURCE,
 				"EdgeIdentity named collection is null. Unable to write identity properties to persistence."
