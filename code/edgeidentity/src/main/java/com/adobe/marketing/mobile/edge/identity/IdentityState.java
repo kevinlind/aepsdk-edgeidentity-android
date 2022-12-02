@@ -20,6 +20,7 @@ import com.adobe.marketing.mobile.SharedStateResult;
 import com.adobe.marketing.mobile.SharedStateStatus;
 import com.adobe.marketing.mobile.services.DataStoring;
 import com.adobe.marketing.mobile.services.Log;
+import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.DataReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +36,8 @@ class IdentityState {
 	private IdentityProperties identityProperties;
 	private boolean hasBooted;
 
-	IdentityState(final DataStoring dataStoreService) {
-		this(new IdentityStorageManager(dataStoreService));
+	IdentityState() {
+		this(new IdentityStorageManager(ServiceProvider.getInstance().getDataStoreService()));
 	}
 
 	/**
@@ -294,7 +295,7 @@ class IdentityState {
 		final Map<String, Object> identityDirectInfo = DataReader.optTypedMap(
 			Object.class,
 			extensions,
-			IdentityConstants.SharedState.Hub.EXTENSIONS,
+			IdentityConstants.SharedState.IdentityDirect.NAME,
 			null
 		);
 

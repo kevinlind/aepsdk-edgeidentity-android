@@ -57,7 +57,7 @@ class IdentityExtension extends Extension {
 	 * @param extensionApi {@link ExtensionApi} instance
 	 */
 	protected IdentityExtension(ExtensionApi extensionApi) {
-		this(extensionApi, new IdentityState(ServiceProvider.getInstance().getDataStoreService()));
+		this(extensionApi, new IdentityState());
 	}
 
 	@VisibleForTesting
@@ -267,7 +267,7 @@ class IdentityExtension extends Extension {
 		final Map<String, Object> eventData = event.getEventData();
 
 		if (eventData == null) {
-			Log.debug(LOG_TAG, LOG_SOURCE, "Cannot update identifiers, event data is null.");
+			Log.trace(LOG_TAG, LOG_SOURCE, "Cannot update identifiers, event data is null.");
 			return;
 		}
 
@@ -295,7 +295,7 @@ class IdentityExtension extends Extension {
 		final Map<String, Object> eventData = event.getEventData();
 
 		if (eventData == null) {
-			Log.debug(LOG_TAG, LOG_SOURCE, "Cannot remove identifiers, event data is null.");
+			Log.trace(LOG_TAG, LOG_SOURCE, "Cannot remove identifiers, event data is null.");
 			return;
 		}
 
