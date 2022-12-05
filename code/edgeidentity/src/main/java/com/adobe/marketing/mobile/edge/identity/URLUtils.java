@@ -11,8 +11,9 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import com.adobe.marketing.mobile.LoggingMode;
-import com.adobe.marketing.mobile.MobileCore;
+import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
+
+import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.StringUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -20,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 class URLUtils {
 
-	static final String LOG_TAG = "URLUtils";
+	private static final String LOG_SOURCE = "URLUtils";
 
 	/**
 	 * Helper function to generate url variables in format acceptable by the AEP web SDKs
@@ -56,7 +57,7 @@ class URLUtils {
 				urlFragment.append(URLEncoder.encode(theIdString, StandardCharsets.UTF_8.toString()));
 			}
 		} catch (UnsupportedEncodingException e) {
-			MobileCore.log(LoggingMode.DEBUG, LOG_TAG, String.format("Failed to encode urlVariable string: %s", e));
+			Log.debug(LOG_TAG, LOG_SOURCE, String.format("Failed to encode urlVariable string: %s", e));
 		}
 		return urlFragment.toString();
 	}

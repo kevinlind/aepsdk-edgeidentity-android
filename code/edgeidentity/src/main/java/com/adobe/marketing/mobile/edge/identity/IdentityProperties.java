@@ -13,10 +13,9 @@ package com.adobe.marketing.mobile.edge.identity;
 
 import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
-import com.adobe.marketing.mobile.LoggingMode;
-import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.StringUtils;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -25,13 +24,12 @@ import java.util.Map;
  */
 class IdentityProperties {
 
-	private static final List<String> reservedNamespaces = new ArrayList<String>() {
-		{
-			add(IdentityConstants.Namespaces.ECID);
-			add(IdentityConstants.Namespaces.GAID);
-			add(IdentityConstants.Namespaces.IDFA);
-		}
-	};
+	private static final String LOG_SOURCE = "IdentityProperties";
+	private static final List<String> reservedNamespaces = Arrays.asList(
+		IdentityConstants.Namespaces.ECID,
+		IdentityConstants.Namespaces.GAID,
+		IdentityConstants.Namespaces.IDFA
+	);
 
 	private final IdentityMap identityMap;
 
@@ -155,7 +153,7 @@ class IdentityProperties {
 
 		// do not set secondary ECID if primary ECID is not set
 		if (getECID() == null) {
-			MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Cannot set secondary ECID value as no primary ECID exists.");
+			Log.debug(LOG_TAG, LOG_SOURCE, "Cannot set secondary ECID value as no primary ECID exists.");
 			return;
 		}
 
@@ -248,20 +246,20 @@ class IdentityProperties {
 					reservedNamespace.equalsIgnoreCase(IdentityConstants.Namespaces.GAID) ||
 					reservedNamespace.equalsIgnoreCase(IdentityConstants.Namespaces.IDFA)
 				) {
-					MobileCore.log(
-						LoggingMode.DEBUG,
+					Log.debug(
 						LOG_TAG,
+						LOG_SOURCE,
 						String.format(
-							"IdentityProperties - Operation not allowed for namespace %s; use MobileCore.setAdvertisingIdentifier instead.",
+							"Operation not allowed for namespace %s; use MobileCore.setAdvertisingIdentifier instead.",
 							reservedNamespace
 						)
 					);
 				} else {
-					MobileCore.log(
-						LoggingMode.DEBUG,
+					Log.debug(
 						LOG_TAG,
+						LOG_SOURCE,
 						String.format(
-							"IdentityProperties - Updating/Removing identifiers in namespace %s is not allowed.",
+							"Updating/Removing identifiers in namespace %s is not allowed.",
 							reservedNamespace
 						)
 					);

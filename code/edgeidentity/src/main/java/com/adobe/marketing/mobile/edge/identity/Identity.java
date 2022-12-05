@@ -20,8 +20,8 @@ import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.Extension;
 import com.adobe.marketing.mobile.ExtensionError;
 import com.adobe.marketing.mobile.ExtensionErrorCallback;
-import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
 import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.HashMap;
@@ -35,6 +35,8 @@ public class Identity {
 
 	public static final Class<? extends Extension> EXTENSION = IdentityExtension.class;
 	private static final long CALLBACK_TIMEOUT_MILLIS = 500L;
+
+	private static final String LOG_SOURCE = "Identity";
 
 	private Identity() {}
 
@@ -59,11 +61,10 @@ public class Identity {
 			new ExtensionErrorCallback<ExtensionError>() {
 				@Override
 				public void error(ExtensionError extensionError) {
-					MobileCore.log(
-						LoggingMode.ERROR,
+					Log.error(
 						LOG_TAG,
-						"Identity - There was an error registering the Edge Identity extension: " +
-						extensionError.getErrorName()
+						LOG_SOURCE,
+						"There was an error registering the Edge Identity extension: " + extensionError.getErrorName()
 					);
 				}
 			}
@@ -79,11 +80,7 @@ public class Identity {
 	 */
 	public static void getExperienceCloudId(final AdobeCallback<String> callback) {
 		if (callback == null) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"Identity - Unexpected null callback, provide a callback to retrieve current ECID."
-			);
+			Log.debug(LOG_TAG, LOG_SOURCE, "Unexpected null callback, provide a callback to retrieve current ECID.");
 			return;
 		}
 
@@ -105,10 +102,10 @@ public class Identity {
 				final IdentityMap identityMap = IdentityMap.fromXDMMap(responseEvent.getEventData());
 
 				if (identityMap == null) {
-					MobileCore.log(
-						LoggingMode.DEBUG,
+					Log.debug(
 						LOG_TAG,
-						"Identity - Failed to read IdentityMap from response event, invoking error callback with AdobeError.UNEXPECTED_ERROR"
+						LOG_SOURCE,
+						"Failed to read IdentityMap from response event, invoking error callback with AdobeError.UNEXPECTED_ERROR"
 					);
 					returnError(callback, AdobeError.UNEXPECTED_ERROR);
 					return;
@@ -128,11 +125,11 @@ public class Identity {
 			@Override
 			public void fail(AdobeError adobeError) {
 				returnError(callback, adobeError);
-				MobileCore.log(
-					LoggingMode.DEBUG,
+				Log.debug(
 					LOG_TAG,
+					LOG_SOURCE,
 					String.format(
-						"Identity - Failed to dispatch %s event: Error : %s.",
+						"Failed to dispatch %s event: Error : %s.",
 						IdentityConstants.EventNames.IDENTITY_REQUEST_IDENTITY_ECID,
 						adobeError.getErrorName()
 					)
@@ -162,10 +159,10 @@ public class Identity {
 	 */
 	public static void getUrlVariables(final AdobeCallback<String> callback) {
 		if (callback == null) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
+			Log.debug(
 				LOG_TAG,
-				"Identity - Unexpected null callback, provide a callback to retrieve current visitor identifiers (URLVariables) query string."
+				LOG_SOURCE,
+				"Unexpected null callback, provide a callback to retrieve current visitor identifiers (URLVariables) query string."
 			);
 			return;
 		}
@@ -209,11 +206,11 @@ public class Identity {
 			@Override
 			public void fail(final AdobeError adobeError) {
 				returnError(callback, adobeError);
-				MobileCore.log(
-					LoggingMode.DEBUG,
+				Log.debug(
 					LOG_TAG,
+					LOG_SOURCE,
 					String.format(
-						"Identity - Failed to dispatch %s event: Error : %s.",
+						"Failed to dispatch %s event: Error : %s.",
 						IdentityConstants.EventNames.IDENTITY_REQUEST_URL_VARIABLES,
 						adobeError.getErrorName()
 					)
@@ -234,11 +231,7 @@ public class Identity {
 	 */
 	public static void updateIdentities(final IdentityMap identityMap) {
 		if (identityMap == null || identityMap.isEmpty()) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"Identity - Unable to updateIdentities, IdentityMap is null or empty"
-			);
+			Log.debug(LOG_TAG, LOG_SOURCE, "Unable to updateIdentities, IdentityMap is null or empty");
 			return;
 		}
 
@@ -262,16 +255,12 @@ public class Identity {
 	 */
 	public static void removeIdentity(final IdentityItem item, final String namespace) {
 		if (StringUtils.isNullOrEmpty(namespace)) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"Identity - Unable to removeIdentity, namespace is null or empty"
-			);
+			Log.debug(LOG_TAG, LOG_SOURCE, "Unable to removeIdentity, namespace is null or empty");
 			return;
 		}
 
 		if (item == null) {
-			MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "Identity - Unable to removeIdentity, IdentityItem is null");
+			Log.debug(LOG_TAG, LOG_SOURCE, "Unable to removeIdentity, IdentityItem is null");
 			return;
 		}
 
@@ -297,10 +286,10 @@ public class Identity {
 	 */
 	public static void getIdentities(final AdobeCallback<IdentityMap> callback) {
 		if (callback == null) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
+			Log.debug(
 				LOG_TAG,
-				"Identity - Unexpected null callback, provide a callback to retrieve current IdentityMap."
+				LOG_SOURCE,
+				"Unexpected null callback, provide a callback to retrieve current IdentityMap."
 			);
 			return;
 		}
@@ -323,10 +312,10 @@ public class Identity {
 				final IdentityMap identityMap = IdentityMap.fromXDMMap(responseEvent.getEventData());
 
 				if (identityMap == null) {
-					MobileCore.log(
-						LoggingMode.DEBUG,
+					Log.debug(
 						LOG_TAG,
-						"Identity - Failed to read IdentityMap from response event, invoking error callback with AdobeError.UNEXPECTED_ERROR"
+						LOG_SOURCE,
+						"Failed to read IdentityMap from response event, invoking error callback with AdobeError.UNEXPECTED_ERROR"
 					);
 					returnError(callback, AdobeError.UNEXPECTED_ERROR);
 					return;
@@ -338,11 +327,11 @@ public class Identity {
 			@Override
 			public void fail(final AdobeError adobeError) {
 				returnError(callback, adobeError);
-				MobileCore.log(
-					LoggingMode.DEBUG,
+				Log.debug(
 					LOG_TAG,
+					LOG_SOURCE,
 					String.format(
-						"Identity - Failed to dispatch %s event: Error : %s.",
+						"Failed to dispatch %s event: Error : %s.",
 						IdentityConstants.EventNames.REQUEST_IDENTITIES,
 						adobeError.getErrorName()
 					)

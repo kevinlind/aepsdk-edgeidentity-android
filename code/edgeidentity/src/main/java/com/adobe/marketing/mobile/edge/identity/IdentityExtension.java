@@ -18,17 +18,19 @@ import androidx.annotation.VisibleForTesting;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.Extension;
 import com.adobe.marketing.mobile.ExtensionApi;
-import com.adobe.marketing.mobile.LoggingMode;
-import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.SharedStateResolution;
 import com.adobe.marketing.mobile.SharedStateResult;
 import com.adobe.marketing.mobile.SharedStateStatus;
+import com.adobe.marketing.mobile.services.Log;
+import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.StringUtils;
 import com.adobe.marketing.mobile.util.TimeUtils;
 import java.util.HashMap;
 import java.util.Map;
 
 class IdentityExtension extends Extension {
+
+	private static final String LOG_SOURCE = "IdentityExtension";
 
 	/**
 	 * A {@code SharedStateCallback} to retrieve the last set state of an extension and to
@@ -190,7 +192,7 @@ class IdentityExtension extends Extension {
 			handleUrlVariableResponse(
 				event,
 				null,
-				"IdentityExtension - Cannot process getUrlVariables request Identity event, Experience Cloud Org ID not found in configuration."
+				"Cannot process getUrlVariables request Identity event, Experience Cloud Org ID not found in configuration."
 			);
 			return;
 		}
@@ -202,7 +204,7 @@ class IdentityExtension extends Extension {
 			handleUrlVariableResponse(
 				event,
 				null,
-				"IdentityExtension - Cannot process getUrlVariables request Identity event, ECID not found."
+				"Cannot process getUrlVariables request Identity event, ECID not found."
 			);
 			return;
 		}
@@ -250,7 +252,7 @@ class IdentityExtension extends Extension {
 			.build();
 
 		if (StringUtils.isNullOrEmpty(urlVariables) && !StringUtils.isNullOrEmpty(errorMsg)) {
-			MobileCore.log(LoggingMode.WARNING, LOG_TAG, errorMsg);
+			Log.warning(LOG_TAG, LOG_SOURCE, errorMsg);
 		}
 
 		getApi().dispatch(responseEvent);
@@ -264,15 +266,18 @@ class IdentityExtension extends Extension {
 	void handleUpdateIdentities(@NonNull final Event event) {
 		final Map<String, Object> eventData = event.getEventData();
 
-		if (eventData == null) return; // TODO: Add log message when logging changes are made
+		if (eventData == null) {
+			Log.trace(LOG_TAG, LOG_SOURCE, "Cannot update identifiers, event data is null.");
+			return;
+		}
 
 		final IdentityMap map = IdentityMap.fromXDMMap(eventData);
 
 		if (map == null) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
+			Log.debug(
 				LOG_TAG,
-				"IdentityExtension - Failed to update identifiers as no identifiers were found in the event data."
+				LOG_SOURCE,
+				"Failed to update identifiers as no identifiers were found in the event data."
 			);
 			return;
 		}
@@ -289,15 +294,18 @@ class IdentityExtension extends Extension {
 	void handleRemoveIdentity(@NonNull final Event event) {
 		final Map<String, Object> eventData = event.getEventData();
 
-		if (eventData == null) return; // TODO: Add log message when logging changes are made
+		if (eventData == null) {
+			Log.trace(LOG_TAG, LOG_SOURCE, "Cannot remove identifiers, event data is null.");
+			return;
+		}
 
 		final IdentityMap map = IdentityMap.fromXDMMap(eventData);
 
 		if (map == null) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
+			Log.debug(
 				LOG_TAG,
-				"IdentityExtension - Failed to remove identifiers as no identifiers were found in the event data."
+				LOG_SOURCE,
+				"Failed to remove identifiers as no identifiers were found in the event data."
 			);
 			return;
 		}

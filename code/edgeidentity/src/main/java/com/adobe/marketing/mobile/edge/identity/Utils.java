@@ -13,8 +13,7 @@ package com.adobe.marketing.mobile.edge.identity;
 
 import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
-import com.adobe.marketing.mobile.LoggingMode;
-import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +22,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 class Utils {
+
+	private static final String LOG_SOURCE = "Utils";
 
 	private Utils() {}
 
@@ -69,11 +70,7 @@ class Utils {
 			// TODO: Add/verify tests to check side effects of retaining nulls in the resulting Map
 			return JSONUtils.toMap(new JSONObject(map));
 		} catch (final JSONException | NullPointerException e) {
-			MobileCore.log(
-				LoggingMode.DEBUG,
-				LOG_TAG,
-				"Utils(deepCopy) - Unable to deep copy map, json string invalid."
-			);
+			Log.debug(LOG_TAG, LOG_SOURCE, "Unable to deep copy map, json string is invalid.");
 		}
 
 		return null;

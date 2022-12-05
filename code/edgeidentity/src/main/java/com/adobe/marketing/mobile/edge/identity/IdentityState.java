@@ -15,10 +15,12 @@ import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG
 
 import androidx.annotation.VisibleForTesting;
 import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.SharedStateResult;
 import com.adobe.marketing.mobile.SharedStateStatus;
+import com.adobe.marketing.mobile.services.DataStoring;
+import com.adobe.marketing.mobile.services.Log;
+import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.DataReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,24 +30,25 @@ import java.util.Map;
  */
 class IdentityState {
 
+	private static final String LOG_SOURCE = "IdentityState";
+
+	private final IdentityStorageManager identityStorageManager;
 	private IdentityProperties identityProperties;
 	private boolean hasBooted;
+
+	IdentityState() {
+		this(new IdentityStorageManager(ServiceProvider.getInstance().getDataStoreService()));
+	}
 
 	/**
 	 * Loads the persisted identities (if any) into {@link #identityProperties}
 	 */
-	IdentityState() {
-		this(IdentityStorageService.loadPropertiesFromPersistence());
-	}
-
-	/**
-	 * Creates a new {@link IdentityState} with the given {@link IdentityProperties}
-	 *
-	 * @param identityProperties identity properties
-	 */
 	@VisibleForTesting
-	IdentityState(final IdentityProperties identityProperties) {
-		this.identityProperties = (identityProperties != null) ? identityProperties : new IdentityProperties();
+	IdentityState(final IdentityStorageManager identityStorageManager) {
+		this.identityStorageManager = identityStorageManager;
+
+		final IdentityProperties persistedProperties = identityStorageManager.loadPropertiesFromPersistence();
+		this.identityProperties = (persistedProperties != null) ? persistedProperties : new IdentityProperties();
 	}
 
 	/**
@@ -93,16 +96,14 @@ class IdentityState {
 			}
 
 			// Attempt to get ECID from direct Identity persistence to migrate an existing ECID
-			final ECID directIdentityEcid = IdentityStorageService.loadEcidFromDirectIdentityPersistence();
+			final ECID directIdentityEcid = identityStorageManager.loadEcidFromDirectIdentityPersistence();
 
 			if (directIdentityEcid != null) {
 				identityProperties.setECID(directIdentityEcid);
-				MobileCore.log(
-					LoggingMode.DEBUG,
+				Log.debug(
 					LOG_TAG,
-					"IdentityState -  On bootup Loading ECID from direct Identity extension '" +
-					directIdentityEcid +
-					"'"
+					LOG_SOURCE,
+					"On bootup Loading ECID from direct Identity extension '" + directIdentityEcid + "'"
 				);
 			}
 			// If direct Identity has no persisted ECID, check if direct Identity is registered with the SDK
@@ -115,10 +116,10 @@ class IdentityState {
 
 				// If there is no direct Identity shared state, abort boot-up and try again when direct Identity shares its state
 				if (sharedStateResult == null || sharedStateResult.getStatus() != SharedStateStatus.SET) {
-					MobileCore.log(
-						LoggingMode.DEBUG,
+					Log.debug(
 						LOG_TAG,
-						"IdentityState - On bootup direct Identity extension is registered, waiting for its state change."
+						LOG_SOURCE,
+						"On bootup direct Identity extension is registered, waiting for its state change."
 					);
 					return false;
 				}
@@ -129,18 +130,18 @@ class IdentityState {
 			// Generate a new ECID as the direct Identity extension is not registered with the SDK and there was no direct Identity persisted ECID
 			else {
 				identityProperties.setECID(new ECID());
-				MobileCore.log(
-					LoggingMode.DEBUG,
+				Log.debug(
 					LOG_TAG,
-					"IdentityState - Generating new ECID on bootup '" + identityProperties.getECID().toString() + "'"
+					LOG_SOURCE,
+					"Generating new ECID on bootup '" + identityProperties.getECID().toString() + "'"
 				);
 			}
 
-			IdentityStorageService.savePropertiesToPersistence(identityProperties);
+			identityStorageManager.savePropertiesToPersistence(identityProperties);
 		}
 
 		hasBooted = true;
-		MobileCore.log(LoggingMode.DEBUG, LOG_TAG, "IdentityState - Edge Identity has successfully booted up");
+		Log.debug(LOG_TAG, LOG_SOURCE, "Edge Identity has successfully booted up");
 		callback.createXDMSharedState(identityProperties.toXDMData(false), null);
 
 		return hasBooted;
@@ -153,7 +154,7 @@ class IdentityState {
 		identityProperties = new IdentityProperties();
 		identityProperties.setECID(new ECID());
 		identityProperties.setECIDSecondary(null);
-		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		identityStorageManager.savePropertiesToPersistence(identityProperties);
 	}
 
 	/**
@@ -163,7 +164,7 @@ class IdentityState {
 	 */
 	void updateCustomerIdentifiers(final IdentityMap map) {
 		identityProperties.updateCustomerIdentifiers(map);
-		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		identityStorageManager.savePropertiesToPersistence(identityProperties);
 	}
 
 	/**
@@ -173,7 +174,7 @@ class IdentityState {
 	 */
 	void removeCustomerIdentifiers(final IdentityMap map) {
 		identityProperties.removeCustomerIdentifiers(map);
-		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		identityStorageManager.savePropertiesToPersistence(identityProperties);
 	}
 
 	/**
@@ -212,7 +213,7 @@ class IdentityState {
 		}
 
 		// Save to persistence
-		IdentityStorageService.savePropertiesToPersistence(identityProperties);
+		identityStorageManager.savePropertiesToPersistence(identityProperties);
 		callback.createXDMSharedState(identityProperties.toXDMData(false), event);
 	}
 
@@ -237,11 +238,11 @@ class IdentityState {
 		}
 
 		identityProperties.setECIDSecondary(legacyEcid);
-		IdentityStorageService.savePropertiesToPersistence(identityProperties);
-		MobileCore.log(
-			LoggingMode.DEBUG,
+		identityStorageManager.savePropertiesToPersistence(identityProperties);
+		Log.debug(
 			LOG_TAG,
-			"IdentityState - Identity direct ECID updated to '" + legacyEcid + "', updating the IdentityMap"
+			LOG_SOURCE,
+			"Identity direct ECID updated to '" + legacyEcid + "', updating the IdentityMap"
 		);
 		return true;
 	}
@@ -256,19 +257,17 @@ class IdentityState {
 	private void handleECIDFromIdentityDirect(final ECID legacyEcid) {
 		if (legacyEcid != null) {
 			identityProperties.setECID(legacyEcid); // migrate legacy ECID
-			MobileCore.log(
-				LoggingMode.DEBUG,
+			Log.debug(
 				LOG_TAG,
-				"IdentityState - Identity direct ECID '" +
-				legacyEcid +
-				"' was migrated to Edge Identity, updating the IdentityMap"
+				LOG_SOURCE,
+				"Identity direct ECID '" + legacyEcid + "' " + "was migrated to Edge Identity, updating the IdentityMap"
 			);
 		} else { // opt-out scenario or an unexpected state for Identity direct, generate new ECID
 			identityProperties.setECID(new ECID());
-			MobileCore.log(
-				LoggingMode.DEBUG,
+			Log.debug(
 				LOG_TAG,
-				"IdentityState - Identity direct ECID is null, generating new ECID '" +
+				LOG_SOURCE,
+				"Identity direct ECID is null, generating new ECID '" +
 				identityProperties.getECID() +
 				"', updating the IdentityMap"
 			);
@@ -296,7 +295,7 @@ class IdentityState {
 		final Map<String, Object> identityDirectInfo = DataReader.optTypedMap(
 			Object.class,
 			extensions,
-			IdentityConstants.SharedState.Hub.EXTENSIONS,
+			IdentityConstants.SharedState.IdentityDirect.NAME,
 			null
 		);
 
