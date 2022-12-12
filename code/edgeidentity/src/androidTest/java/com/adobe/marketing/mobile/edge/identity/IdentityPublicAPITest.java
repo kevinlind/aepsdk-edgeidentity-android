@@ -11,11 +11,11 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.createIdentityMap;
-import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.flattenMap;
-import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.getExperienceCloudIdSync;
-import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.getIdentitiesSync;
-import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.getUrlVariablesSync;
+import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.createIdentityMap;
+import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.flattenMap;
+import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.getExperienceCloudIdSync;
+import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.getIdentitiesSync;
+import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.getUrlVariablesSync;
 import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.registerEdgeIdentityExtension;
 import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.setupConfiguration;
 import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.*;
@@ -153,7 +153,7 @@ public class IdentityPublicAPITest {
 	@Test
 	public void testUpdateAPI_shouldReplaceExistingIdentities() throws Exception {
 		// test
-		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("Email", "example@email.com"));
+		Identity.updateIdentities(createIdentityMap("Email", "example@email.com"));
 		Identity.updateIdentities(
 			createIdentityMap("Email", "example@email.com", AuthenticatedState.AUTHENTICATED, true)
 		);
@@ -184,13 +184,13 @@ public class IdentityPublicAPITest {
 	@Test
 	public void testUpdateAPI_withReservedNamespaces() throws Exception {
 		// test
-		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("ECID", "newECID"));
-		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("GAID", "<gaid>"));
-		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("IDFA", "<idfa>"));
-		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("IDFa", "<newIdfa>"));
-		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("gaid", "<newgaid>"));
-		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("ecid", "<newecid>"));
-		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("idfa", "<newidfa>"));
+		Identity.updateIdentities(createIdentityMap("ECID", "newECID"));
+		Identity.updateIdentities(createIdentityMap("GAID", "<gaid>"));
+		Identity.updateIdentities(createIdentityMap("IDFA", "<idfa>"));
+		Identity.updateIdentities(createIdentityMap("IDFa", "<newIdfa>"));
+		Identity.updateIdentities(createIdentityMap("gaid", "<newgaid>"));
+		Identity.updateIdentities(createIdentityMap("ecid", "<newecid>"));
+		Identity.updateIdentities(createIdentityMap("idfa", "<newidfa>"));
 		TestHelper.waitForThreads(2000);
 
 		// verify xdm shared state does not get updated
@@ -415,7 +415,7 @@ public class IdentityPublicAPITest {
 	public void testRemoveIdentity_nameSpaceCaseSensitive() throws Exception {
 		// setup
 		// update Identities through API
-		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("Email", "example@email.com"));
+		Identity.updateIdentities(createIdentityMap("Email", "example@email.com"));
 
 		// test
 		Identity.removeIdentity(new IdentityItem("example@email.com"), "email");
@@ -439,7 +439,7 @@ public class IdentityPublicAPITest {
 	public void testRemoveIdentity_nonExistentItem() throws Exception {
 		// setup
 		// update Identities through API
-		Identity.updateIdentities(IdentityAndroidTestUtil.createIdentityMap("Email", "example@email.com"));
+		Identity.updateIdentities(createIdentityMap("Email", "example@email.com"));
 
 		// test
 		Identity.removeIdentity(new IdentityItem("secondary@email.com"), "Email");

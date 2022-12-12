@@ -11,32 +11,48 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.flattenMap;
-import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.getExperienceCloudIdSync;
+import static com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants.LOG_TAG;
 import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.getXDMSharedStateFor;
 import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.resetTestExpectations;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import com.adobe.marketing.mobile.AdobeCallback;
+import com.adobe.marketing.mobile.AdobeCallbackWithError;
+import com.adobe.marketing.mobile.AdobeError;
+import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.edge.identity.util.ADBCountDownLatch;
 import com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants;
 import com.adobe.marketing.mobile.edge.identity.util.TestHelper;
 import com.adobe.marketing.mobile.edge.identity.util.TestPersistenceHelper;
+import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.JSONUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class IdentityFunctionalTestUtil {
 
+	private static final String LOG_SOURCE = "IdentityFunctionalTestUtil";
+
 	/**
 	 * Register's Edge Identity Extension and start the Core
 	 */
-	static void registerEdgeIdentityExtension() throws InterruptedException {
+	public static void registerEdgeIdentityExtension() throws InterruptedException {
 		final ADBCountDownLatch latch = new ADBCountDownLatch(1);
 		MobileCore.registerExtensions(Arrays.asList(Identity.EXTENSION), o -> latch.countDown());
 
@@ -48,7 +64,7 @@ public class IdentityFunctionalTestUtil {
 	/**
 	 * Register's Identity Direct and Edge Identity Extension. And then starts the MobileCore
 	 */
-	static void registerBothIdentityExtensions() throws Exception {
+	public static void registerBothIdentityExtensions() throws Exception {
 		HashMap<String, Object> config = new HashMap<String, Object>() {
 			{
 				put("global.privacy", "optedin");
@@ -72,7 +88,7 @@ public class IdentityFunctionalTestUtil {
 	/**
 	 * Updates configuration shared state with an orgId
 	 */
-	static void setupConfiguration() throws Exception {
+	public static void setupConfiguration() throws Exception {
 		HashMap<String, Object> config = new HashMap<String, Object>() {
 			{
 				put("experienceCloud.org", "testOrg@AdobeOrg");
@@ -85,7 +101,7 @@ public class IdentityFunctionalTestUtil {
 	/**
 	 * Set the ECID in persistence for Identity Direct extension.
 	 */
-	static void setIdentityDirectPersistedECID(final String legacyECID) {
+	public static void setIdentityDirectPersistedECID(final String legacyECID) {
 		TestPersistenceHelper.updatePersistence(
 			IdentityConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE_NAME,
 			IdentityConstants.DataStoreKey.IDENTITY_DIRECT_ECID_KEY,
@@ -96,7 +112,7 @@ public class IdentityFunctionalTestUtil {
 	/**
 	 * Set the persistence data for Edge Identity extension.
 	 */
-	static void setEdgeIdentityPersistence(final Map<String, Object> persistedData) {
+	public static void setEdgeIdentityPersistence(final Map<String, Object> persistedData) {
 		if (persistedData != null) {
 			final JSONObject persistedJSON = new JSONObject(persistedData);
 			TestPersistenceHelper.updatePersistence(
@@ -110,7 +126,7 @@ public class IdentityFunctionalTestUtil {
 	/**
 	 * Method to get the ECID from Identity Direct extension synchronously.
 	 */
-	static String getIdentityDirectECIDSync() {
+	public static String getIdentityDirectECIDSync() {
 		try {
 			final HashMap<String, String> getExperienceCloudIdResponse = new HashMap<>();
 			final ADBCountDownLatch latch = new ADBCountDownLatch(1);
@@ -131,6 +147,263 @@ public class IdentityFunctionalTestUtil {
 		}
 	}
 
+	/**
+	 * Helper method to create IdentityXDM Map using {@link TestItem}s
+	 */
+	public static Map<String, Object> createXDMIdentityMap(TestItem... items) {
+		final Map<String, List<Map<String, Object>>> allItems = new HashMap<>();
+
+		for (TestItem item : items) {
+			final Map<String, Object> itemMap = new HashMap<>();
+			itemMap.put(IdentityConstants.XDMKeys.ID, item.id);
+			itemMap.put(IdentityConstants.XDMKeys.AUTHENTICATED_STATE, "ambiguous");
+			itemMap.put(IdentityConstants.XDMKeys.PRIMARY, item.isPrimary);
+			List<Map<String, Object>> nameSpaceItems = allItems.get(item.namespace);
+
+			if (nameSpaceItems == null) {
+				nameSpaceItems = new ArrayList<>();
+			}
+
+			nameSpaceItems.add(itemMap);
+			allItems.put(item.namespace, nameSpaceItems);
+		}
+
+		final Map<String, Object> identityMapDict = new HashMap<>();
+		identityMapDict.put(IdentityConstants.XDMKeys.IDENTITY_MAP, allItems);
+		return identityMapDict;
+	}
+
+	/**
+	 * Helper method to build remove identity request event with XDM formatted Identity jsonString
+	 */
+	public static Event buildRemoveIdentityRequestWithJSONString(final String jsonStr) throws Exception {
+		final JSONObject jsonObject = new JSONObject(jsonStr);
+		final Map<String, Object> xdmData = JSONUtils.toMap(jsonObject);
+		return buildRemoveIdentityRequest(xdmData);
+	}
+
+	/**
+	 * Helper method to build remove identity request event with XDM formatted Identity map
+	 */
+	public static Event buildRemoveIdentityRequest(final Map<String, Object> map) {
+		return new Event.Builder(
+			"Remove Identity Event",
+			IdentityConstants.EventType.EDGE_IDENTITY,
+			IdentityConstants.EventSource.REMOVE_IDENTITY
+		)
+			.setEventData(map)
+			.build();
+	}
+
+	/**
+	 * Helper method to build update identity request event with XDM formatted Identity jsonString
+	 */
+	public static Event buildUpdateIdentityRequestJSONString(final String jsonStr) throws Exception {
+		final JSONObject jsonObject = new JSONObject(jsonStr);
+		final Map<String, Object> xdmData = JSONUtils.toMap(jsonObject);
+		return buildUpdateIdentityRequest(xdmData);
+	}
+
+	/**
+	 * Helper method to build update identity request event with XDM formatted Identity map
+	 */
+	public static Event buildUpdateIdentityRequest(final Map<String, Object> map) {
+		return new Event.Builder(
+			"Update Identity Event",
+			IdentityConstants.EventType.EDGE_IDENTITY,
+			IdentityConstants.EventSource.UPDATE_IDENTITY
+		)
+			.setEventData(map)
+			.build();
+	}
+
+	/**
+	 * Serialize the given {@code jsonString} to a JSON Object, then flattens to {@code Map<String, String>}.
+	 * If the provided string is not in JSON structure an {@link JSONException} is thrown.
+	 *
+	 * @param jsonString the string in JSON structure to flatten
+	 * @return new map with flattened structure
+	 */
+	public static Map<String, String> flattenJSONString(final String jsonString) throws JSONException {
+		JSONObject jsonObject = new JSONObject(jsonString);
+		Map<String, Object> persistenceValueMap = JSONUtils.toMap(jsonObject);
+		return flattenMap(persistenceValueMap);
+	}
+
+	/**
+	 * Serialize the given {@code map} to a JSON Object, then flattens to {@code Map<String, String>}.
+	 * For example, a JSON such as "{xdm: {stitchId: myID, eventType: myType}}" is flattened
+	 * to two map elements "xdm.stitchId" = "myID" and "xdm.eventType" = "myType".
+	 *
+	 * @param map map with JSON structure to flatten
+	 * @return new map with flattened structure
+	 */
+	public static Map<String, String> flattenMap(final Map<String, Object> map) {
+		if (map == null || map.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		try {
+			JSONObject jsonObject = new JSONObject(map);
+			Map<String, String> payloadMap = new HashMap<>();
+			addKeys("", new ObjectMapper().readTree(jsonObject.toString()), payloadMap);
+			return payloadMap;
+		} catch (IOException e) {
+			Log.error(LOG_TAG, LOG_SOURCE, "Failed to parse JSON object to tree structure.");
+		}
+
+		return Collections.emptyMap();
+	}
+
+	/**
+	 * Deserialize {@code JsonNode} and flatten to provided {@code map}.
+	 * For example, a JSON such as "{xdm: {stitchId: myID, eventType: myType}}" is flattened
+	 * to two map elements "xdm.stitchId" = "myID" and "xdm.eventType" = "myType".
+	 * <p>
+	 * Method is called recursively. To use, call with an empty path such as
+	 * {@code addKeys("", new ObjectMapper().readTree(JsonNodeAsString), map);}
+	 *
+	 * @param currentPath the path in {@code JsonNode} to process
+	 * @param jsonNode    {@link JsonNode} to deserialize
+	 * @param map         {@code Map<String, String>} instance to store flattened JSON result
+	 * @see <a href="https://stackoverflow.com/a/24150263">Stack Overflow post</a>
+	 */
+	public static void addKeys(String currentPath, JsonNode jsonNode, Map<String, String> map) {
+		if (jsonNode.isObject()) {
+			ObjectNode objectNode = (ObjectNode) jsonNode;
+			Iterator<Map.Entry<String, JsonNode>> iter = objectNode.fields();
+			String pathPrefix = currentPath.isEmpty() ? "" : currentPath + ".";
+
+			while (iter.hasNext()) {
+				Map.Entry<String, JsonNode> entry = iter.next();
+				addKeys(pathPrefix + entry.getKey(), entry.getValue(), map);
+			}
+		} else if (jsonNode.isArray()) {
+			ArrayNode arrayNode = (ArrayNode) jsonNode;
+
+			for (int i = 0; i < arrayNode.size(); i++) {
+				addKeys(currentPath + "[" + i + "]", arrayNode.get(i), map);
+			}
+		} else if (jsonNode.isValueNode()) {
+			ValueNode valueNode = (ValueNode) jsonNode;
+			map.put(currentPath, valueNode.asText());
+		}
+	}
+
+	/**
+	 * Class similar to {@link IdentityItem} for a specific namespace used for easier testing.
+	 * For simplicity this class does not involve authenticatedState and primary key
+	 */
+	public static class TestItem {
+
+		private final String namespace;
+		private final String id;
+		private final boolean isPrimary = false;
+
+		public TestItem(String namespace, String id) {
+			this.namespace = namespace;
+			this.id = id;
+		}
+	}
+
+	/**
+	 * Retrieves identities from Identity extension synchronously
+	 * @return a {@code Map<String, Object>} of identities if retrieved successfully;
+	 *          null in case of a failure to retrieve it within timeout.
+	 */
+	public static Map<String, Object> getIdentitiesSync() {
+		try {
+			final HashMap<String, Object> getIdentityResponse = new HashMap<>();
+			final ADBCountDownLatch latch = new ADBCountDownLatch(1);
+			Identity.getIdentities(
+				new AdobeCallbackWithError<IdentityMap>() {
+					@Override
+					public void call(final IdentityMap identities) {
+						getIdentityResponse.put(IdentityTestConstants.GetIdentitiesHelper.VALUE, identities);
+						latch.countDown();
+					}
+
+					@Override
+					public void fail(final AdobeError adobeError) {
+						getIdentityResponse.put(IdentityTestConstants.GetIdentitiesHelper.ERROR, adobeError);
+						latch.countDown();
+					}
+				}
+			);
+			latch.await(2000, TimeUnit.MILLISECONDS);
+
+			return getIdentityResponse;
+		} catch (Exception exp) {
+			return null;
+		}
+	}
+
+	/**
+	 * Retrieves Experience Cloud Id from Identity extension synchronously
+	 * @return an ECID if retrieved successfully;
+	 *          null in case of a failure to retrieve it within timeout.
+	 */
+	public static String getExperienceCloudIdSync() {
+		try {
+			final HashMap<String, String> getExperienceCloudIdResponse = new HashMap<>();
+			final ADBCountDownLatch latch = new ADBCountDownLatch(1);
+			Identity.getExperienceCloudId(
+				new AdobeCallback<String>() {
+					@Override
+					public void call(final String ecid) {
+						getExperienceCloudIdResponse.put(IdentityTestConstants.GetIdentitiesHelper.VALUE, ecid);
+						latch.countDown();
+					}
+				}
+			);
+			latch.await(2000, TimeUnit.MILLISECONDS);
+			return getExperienceCloudIdResponse.get(IdentityTestConstants.GetIdentitiesHelper.VALUE);
+		} catch (Exception exp) {
+			return null;
+		}
+	}
+
+	/**
+	 * Retrieves url variables from Identity extension synchronously
+	 * @return a url variable string if retrieved successfully;
+	 *          null in case of a failure to retrieve it within timeout.
+	 */
+	public static String getUrlVariablesSync() {
+		try {
+			final HashMap<String, String> getUrlVariablesResponse = new HashMap<>();
+			final ADBCountDownLatch latch = new ADBCountDownLatch(1);
+			Identity.getUrlVariables(
+				new AdobeCallback<String>() {
+					@Override
+					public void call(final String urlVariables) {
+						getUrlVariablesResponse.put(IdentityTestConstants.GetIdentitiesHelper.VALUE, urlVariables);
+						latch.countDown();
+					}
+				}
+			);
+			latch.await(2000, TimeUnit.MILLISECONDS);
+			return getUrlVariablesResponse.get(IdentityTestConstants.GetIdentitiesHelper.VALUE);
+		} catch (Exception exp) {
+			return null;
+		}
+	}
+
+	public static IdentityMap createIdentityMap(final String namespace, final String id) {
+		return createIdentityMap(namespace, id, AuthenticatedState.AMBIGUOUS, false);
+	}
+
+	public static IdentityMap createIdentityMap(
+		final String namespace,
+		final String id,
+		final AuthenticatedState state,
+		final boolean isPrimary
+	) {
+		IdentityMap map = new IdentityMap();
+		IdentityItem item = new IdentityItem(id, state, isPrimary);
+		map.addItem(item, namespace);
+		return map;
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// Verifiers
 	// --------------------------------------------------------------------------------------------
@@ -139,7 +412,7 @@ public class IdentityFunctionalTestUtil {
 	 * Verifies that primary ECID is not null for the Edge Identity extension.
 	 * This method checks for the data in shared state, persistence and through getExperienceCloudId API.
 	 */
-	static void verifyPrimaryECIDNotNull() throws InterruptedException {
+	public static void verifyPrimaryECIDNotNull() throws InterruptedException {
 		String ecid = getExperienceCloudIdSync();
 		assertNotNull(ecid);
 
@@ -152,7 +425,7 @@ public class IdentityFunctionalTestUtil {
 	 * Verifies that primary ECID for the Edge Identity Extension is equal to the value provided.
 	 * This method checks for the data in shared state, persistence and through getExperienceCloudId API.
 	 */
-	static void verifyPrimaryECID(final String primaryECID) throws Exception {
+	public static void verifyPrimaryECID(final String primaryECID) throws Exception {
 		String ecid = getExperienceCloudIdSync();
 		assertEquals(primaryECID, ecid);
 
@@ -173,7 +446,7 @@ public class IdentityFunctionalTestUtil {
 	 * Verifies that secondary ECID for the Edge Identity Extension is equal to the value provided
 	 * This method checks for the data in shared state and persistence.
 	 */
-	static void verifySecondaryECID(final String secondaryECID) throws Exception {
+	public static void verifySecondaryECID(final String secondaryECID) throws Exception {
 		// verify xdm shared state is has correct secondary ECID
 		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
 		assertEquals(secondaryECID, xdmSharedState.get("identityMap.ECID[1].id"));

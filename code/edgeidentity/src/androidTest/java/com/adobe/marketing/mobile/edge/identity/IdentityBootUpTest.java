@@ -11,8 +11,6 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.createXDMIdentityMap;
-import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.flattenMap;
 import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.*;
 import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.getXDMSharedStateFor;
 import static org.junit.Assert.assertEquals;
@@ -42,10 +40,10 @@ public class IdentityBootUpTest {
 		// test
 		setEdgeIdentityPersistence(
 			createXDMIdentityMap(
-				new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID"),
-				new IdentityAndroidTestUtil.TestItem("ECID", "secondaryECID"),
-				new IdentityAndroidTestUtil.TestItem("Email", "example@email.com"),
-				new IdentityAndroidTestUtil.TestItem("UserId", "JohnDoe")
+				new TestItem("ECID", "primaryECID"),
+				new TestItem("ECID", "secondaryECID"),
+				new TestItem("Email", "example@email.com"),
+				new TestItem("UserId", "JohnDoe")
 			)
 		);
 		registerEdgeIdentityExtension();

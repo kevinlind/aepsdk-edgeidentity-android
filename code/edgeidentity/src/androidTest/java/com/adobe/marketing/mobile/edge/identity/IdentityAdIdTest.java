@@ -11,8 +11,8 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.createXDMIdentityMap;
-import static com.adobe.marketing.mobile.edge.identity.IdentityAndroidTestUtil.flattenMap;
+import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.createXDMIdentityMap;
+import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.flattenMap;
 import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.registerEdgeIdentityExtension;
 import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.setEdgeIdentityPersistence;
 import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.getDispatchedEventsWith;
@@ -50,8 +50,8 @@ public class IdentityAdIdTest {
 		String newAdId = "8d9ca5ff-7e74-44ac-bbcd-7aee7baf4f6c";
 		setEdgeIdentityPersistence(
 			createXDMIdentityMap(
-				new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID"),
-				new IdentityAndroidTestUtil.TestItem("GAID", initialAdId)
+				new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"),
+				new IdentityFunctionalTestUtil.TestItem("GAID", initialAdId)
 			)
 		);
 
@@ -83,8 +83,8 @@ public class IdentityAdIdTest {
 		String initialAdId = "fa181743-2520-4ebc-b125-626baf1e3db8";
 		setEdgeIdentityPersistence(
 			createXDMIdentityMap(
-				new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID"),
-				new IdentityAndroidTestUtil.TestItem("GAID", initialAdId)
+				new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"),
+				new IdentityFunctionalTestUtil.TestItem("GAID", initialAdId)
 			)
 		);
 		registerEdgeIdentityExtension();
@@ -116,8 +116,8 @@ public class IdentityAdIdTest {
 		String newAdId = "fa181743-2520-4ebc-b125-626baf1e3db8";
 		setEdgeIdentityPersistence(
 			createXDMIdentityMap(
-				new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID"),
-				new IdentityAndroidTestUtil.TestItem("GAID", initialAdId)
+				new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"),
+				new IdentityFunctionalTestUtil.TestItem("GAID", initialAdId)
 			)
 		);
 		registerEdgeIdentityExtension();
@@ -148,8 +148,8 @@ public class IdentityAdIdTest {
 		String newAdId = "";
 		setEdgeIdentityPersistence(
 			createXDMIdentityMap(
-				new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID"),
-				new IdentityAndroidTestUtil.TestItem("GAID", initialAdId)
+				new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"),
+				new IdentityFunctionalTestUtil.TestItem("GAID", initialAdId)
 			)
 		);
 		registerEdgeIdentityExtension();
@@ -180,8 +180,8 @@ public class IdentityAdIdTest {
 		String newAdId = "00000000-0000-0000-0000-000000000000";
 		setEdgeIdentityPersistence(
 			createXDMIdentityMap(
-				new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID"),
-				new IdentityAndroidTestUtil.TestItem("GAID", initialAdId)
+				new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"),
+				new IdentityFunctionalTestUtil.TestItem("GAID", initialAdId)
 			)
 		);
 		registerEdgeIdentityExtension();
@@ -209,7 +209,9 @@ public class IdentityAdIdTest {
 	public void testGenericIdentityRequest_whenNoAdId_thenNewValidAdId() throws Exception {
 		// Test
 		String newAdId = "8d9ca5ff-7e74-44ac-bbcd-7aee7baf4f6c";
-		setEdgeIdentityPersistence(createXDMIdentityMap(new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID")));
+		setEdgeIdentityPersistence(
+			createXDMIdentityMap(new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"))
+		);
 		registerEdgeIdentityExtension();
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
@@ -235,7 +237,9 @@ public class IdentityAdIdTest {
 	@Test
 	public void testGenericIdentityRequest_whenNoAdId_thenNonAdId() throws Exception {
 		// Test
-		setEdgeIdentityPersistence(createXDMIdentityMap(new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID")));
+		setEdgeIdentityPersistence(
+			createXDMIdentityMap(new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"))
+		);
 		registerEdgeIdentityExtension();
 
 		dispatchGenericIdentityNonAdIdEvent();
@@ -262,7 +266,9 @@ public class IdentityAdIdTest {
 	public void testGenericIdentityRequest_whenNoAdId_thenEmptyAdId() throws Exception {
 		// Test
 		String newAdId = "";
-		setEdgeIdentityPersistence(createXDMIdentityMap(new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID")));
+		setEdgeIdentityPersistence(
+			createXDMIdentityMap(new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"))
+		);
 		registerEdgeIdentityExtension();
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
@@ -288,7 +294,9 @@ public class IdentityAdIdTest {
 	public void testGenericIdentityRequest_whenNoAdId_thenAllZerosAdIdTwice() throws Exception {
 		// Test
 		String newAdId = "00000000-0000-0000-0000-000000000000";
-		setEdgeIdentityPersistence(createXDMIdentityMap(new IdentityAndroidTestUtil.TestItem("ECID", "primaryECID")));
+		setEdgeIdentityPersistence(
+			createXDMIdentityMap(new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"))
+		);
 		registerEdgeIdentityExtension();
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
