@@ -96,7 +96,7 @@ public class IdentityStateTests {
 	}
 
 	@Test
-	public void testBootUpIfReady_waitsForHubSharedState_hubStateIsPending() {
+	public void testBootUpIfReady_waitsForHubSharedState_hubStateStatusIsPending() {
 		final IdentityState identityState = new IdentityState(mockIdentityStorageManager);
 		when(mockSharedStateCallback.getSharedState(IdentityConstants.SharedState.Hub.NAME, null))
 			.thenReturn(new SharedStateResult(SharedStateStatus.PENDING, Collections.EMPTY_MAP));
@@ -105,7 +105,7 @@ public class IdentityStateTests {
 	}
 
 	@Test
-	public void testBootUpIfReady_waitsForHubSharedState_hubStateIsSet() {
+	public void testBootUpIfReady_waitsForHubSharedState_hubStateStatusIsSet() {
 		final IdentityState identityState = new IdentityState(mockIdentityStorageManager);
 		when(mockSharedStateCallback.getSharedState(IdentityConstants.SharedState.Hub.NAME, null))
 			.thenReturn(new SharedStateResult(SharedStateStatus.SET, Collections.EMPTY_MAP));
@@ -209,7 +209,7 @@ public class IdentityStateTests {
 	}
 
 	@Test
-	public void testBootUpIfReady_waitsForIdentityDirectStateIfRegistered_stateIsNone() {
+	public void testBootUpIfReady_waitsForIdentityDirectStateIfRegistered_stateStatusIsNone() {
 		final IdentityState identityState = new IdentityState(mockIdentityStorageManager);
 		final Map<String, Object> hubSharedState = new HashMap<>();
 		hubSharedState.put(
@@ -241,7 +241,7 @@ public class IdentityStateTests {
 	}
 
 	@Test
-	public void testBootUpIfReady_waitsForIdentityDirectStateIfRegistered_stateIsPending() {
+	public void testBootUpIfReady_waitsForIdentityDirectStateIfRegistered() {
 		final IdentityState identityState = new IdentityState(mockIdentityStorageManager);
 		final Map<String, Object> hubSharedState = new HashMap<>();
 		hubSharedState.put(
@@ -273,7 +273,7 @@ public class IdentityStateTests {
 	}
 
 	@Test
-	public void testBootUpIfReady_waitsForPendingIdentityDirectStateIfRegistered_stateIsNull() {
+	public void testBootUpIfReady_waitsForPendingIdentityDirectStateIfRegistered() {
 		final IdentityState identityState = new IdentityState(mockIdentityStorageManager);
 		final Map<String, Object> hubSharedState = new HashMap<>();
 		hubSharedState.put(
@@ -338,7 +338,7 @@ public class IdentityStateTests {
 	}
 
 	@Test
-	public void testBootUpIfReady_generatesNewECIDWhenDirectStateAndPersistedStateUnavailable() {
+	public void testBootUpIfReady_generatesNewECIDWhenDirectStateAndPersistedStateAreUnavailable() {
 		// No persisted properties
 		final IdentityProperties persistedProperties = new IdentityProperties();
 		when(mockIdentityStorageManager.loadPropertiesFromPersistence()).thenReturn(persistedProperties);

@@ -49,6 +49,7 @@ public class TestHelper {
 	private static final String LOG_SOURCE = "TestHelper";
 	static final int WAIT_TIMEOUT_MS = 1000;
 	static final int WAIT_EVENT_TIMEOUT_MS = 2000;
+	static final long WAIT_SHARED_STATE_MS = 5000;
 	static Application defaultApplication;
 
 	// List of threads to wait for after test execution
@@ -470,7 +471,7 @@ public class TestHelper {
 		final Map<String, Object> sharedState = new HashMap<>();
 		MobileCore.dispatchEventWithResponseCallback(
 			event,
-			5000L,
+			WAIT_SHARED_STATE_MS,
 			new AdobeCallbackWithError<Event>() {
 				@Override
 				public void fail(AdobeError adobeError) {
@@ -521,7 +522,7 @@ public class TestHelper {
 		final Map<String, Object> sharedState = new HashMap<>();
 		MobileCore.dispatchEventWithResponseCallback(
 			event,
-			5000L,
+			WAIT_SHARED_STATE_MS,
 			new AdobeCallbackWithError<Event>() {
 				@Override
 				public void fail(AdobeError adobeError) {

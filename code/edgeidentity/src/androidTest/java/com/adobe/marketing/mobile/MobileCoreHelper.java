@@ -12,8 +12,8 @@
 package com.adobe.marketing.mobile;
 
 /**
- * Helper class that exists as a to access test helper methods provided in core
- * within  the package com.adobe.marketing.mobile
+ * Helper class that exists as a way to access test helper methods provided in core
+ * within the package com.adobe.marketing.mobile
  */
 public class MobileCoreHelper {
 
