@@ -11,20 +11,13 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.createIdentityMap;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.flattenMap;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.getExperienceCloudIdSync;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.getIdentitiesSync;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.getUrlVariablesSync;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.registerEdgeIdentityExtension;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.setupConfiguration;
+import static com.adobe.marketing.mobile.edge.identity.util.IdentityFunctionalTestUtil.*;
 import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.*;
 import static org.junit.Assert.*;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants;
-import com.adobe.marketing.mobile.edge.identity.util.TestHelper;
 import com.adobe.marketing.mobile.edge.identity.util.TestPersistenceHelper;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import java.util.List;
@@ -40,9 +33,7 @@ import org.junit.runner.RunWith;
 public class IdentityPublicAPITest {
 
 	@Rule
-	public RuleChain rule = RuleChain
-		.outerRule(new TestHelper.SetupCoreRule())
-		.around(new TestHelper.RegisterMonitorExtensionRule());
+	public RuleChain rule = RuleChain.outerRule(new SetupCoreRule()).around(new RegisterMonitorExtensionRule());
 
 	// --------------------------------------------------------------------------------------------
 	// Setup
@@ -91,7 +82,7 @@ public class IdentityPublicAPITest {
 		Identity.updateIdentities(
 			createIdentityMap("Email", "example@email.com", AuthenticatedState.AUTHENTICATED, true)
 		);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify xdm shared state
 		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
@@ -116,7 +107,7 @@ public class IdentityPublicAPITest {
 	public void testUpdateAPI_nullData() throws Exception {
 		// test
 		Identity.updateIdentities(null);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify no shares state change event dispatched
 		List<Event> dispatchedEvents = getDispatchedEventsWith(
@@ -135,7 +126,7 @@ public class IdentityPublicAPITest {
 	public void testUpdateAPI_emptyData() throws Exception {
 		// test
 		Identity.updateIdentities(new IdentityMap());
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify no shares state change event dispatched
 		List<Event> dispatchedEvents = getDispatchedEventsWith(
@@ -160,7 +151,7 @@ public class IdentityPublicAPITest {
 		Identity.updateIdentities(
 			createIdentityMap("Email", "example@email.com", AuthenticatedState.LOGGED_OUT, false)
 		);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify the final xdm shared state
 		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
@@ -191,7 +182,7 @@ public class IdentityPublicAPITest {
 		Identity.updateIdentities(createIdentityMap("gaid", "<newgaid>"));
 		Identity.updateIdentities(createIdentityMap("ecid", "<newecid>"));
 		Identity.updateIdentities(createIdentityMap("idfa", "<newidfa>"));
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify xdm shared state does not get updated
 		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
@@ -217,7 +208,7 @@ public class IdentityPublicAPITest {
 		map.addItem(new IdentityItem("zzzyyyxxx"), "UserId");
 		map.addItem(new IdentityItem("John Doe"), "UserName");
 		Identity.updateIdentities(map);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify xdm shared state
 		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
@@ -247,7 +238,7 @@ public class IdentityPublicAPITest {
 		map.addItem(new IdentityItem("primary@email.com"), "Email");
 		map.addItem(new IdentityItem("secondary@email.com"), "email");
 		Identity.updateIdentities(map);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify xdm shared state
 		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
@@ -329,7 +320,7 @@ public class IdentityPublicAPITest {
 
 		// test
 		Map<String, Object> getIdentitiesResponse = getIdentitiesSync();
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify
 		IdentityMap responseMap = (IdentityMap) getIdentitiesResponse.get(
@@ -367,7 +358,7 @@ public class IdentityPublicAPITest {
 
 		// test
 		Identity.removeIdentity(new IdentityItem("primary@email.com"), "Email");
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify xdm shared state
 		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
@@ -376,7 +367,7 @@ public class IdentityPublicAPITest {
 
 		// test again
 		Identity.removeIdentity(new IdentityItem("secondary@email.com"), "Email");
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify xdm shared state
 		xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
@@ -395,7 +386,7 @@ public class IdentityPublicAPITest {
 	public void testRemoveIdentity_nonExistentNamespace() throws Exception {
 		// test
 		Identity.removeIdentity(new IdentityItem("primary@email.com"), "Email");
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify item is not removed
 		// verify xdm shared state
@@ -419,7 +410,7 @@ public class IdentityPublicAPITest {
 
 		// test
 		Identity.removeIdentity(new IdentityItem("example@email.com"), "email");
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify item is not removed
 		// verify xdm shared state
@@ -443,7 +434,7 @@ public class IdentityPublicAPITest {
 
 		// test
 		Identity.removeIdentity(new IdentityItem("secondary@email.com"), "Email");
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// verify item is not removed
 		// verify xdm shared state
@@ -466,7 +457,7 @@ public class IdentityPublicAPITest {
 
 		// attempt to remove ECID
 		Identity.removeIdentity(new IdentityItem(currentECID), "ECID");
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 
 		// ECID is a reserved namespace and should not be removed
 		// verify xdm shared state

@@ -11,15 +11,12 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.flattenMap;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.getExperienceCloudIdSync;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.registerEdgeIdentityExtension;
+import static com.adobe.marketing.mobile.edge.identity.util.IdentityFunctionalTestUtil.*;
 import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.*;
 import static org.junit.Assert.*;
 
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.edge.identity.util.TestHelper;
 import com.adobe.marketing.mobile.edge.identity.util.TestPersistenceHelper;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import java.util.List;
@@ -33,9 +30,7 @@ import org.junit.rules.RuleChain;
 public class IdentityResetHandlingTest {
 
 	@Rule
-	public RuleChain rule = RuleChain
-		.outerRule(new TestHelper.SetupCoreRule())
-		.around(new TestHelper.RegisterMonitorExtensionRule());
+	public RuleChain rule = RuleChain.outerRule(new SetupCoreRule()).around(new RegisterMonitorExtensionRule());
 
 	// --------------------------------------------------------------------------------------------
 	// Setup

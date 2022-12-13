@@ -11,7 +11,7 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.*;
+import static com.adobe.marketing.mobile.edge.identity.util.IdentityFunctionalTestUtil.*;
 import static org.junit.Assert.*;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;

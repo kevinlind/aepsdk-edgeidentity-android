@@ -83,8 +83,8 @@ public class MonitorExtension extends Extension {
 	public static void unregisterExtension() {
 		Event event = new Event.Builder(
 			"Unregister Monitor Extension Request",
-			TestConstants.EventType.MONITOR,
-			TestConstants.EventSource.UNREGISTER
+			IdentityTestConstants.EventType.MONITOR,
+			IdentityTestConstants.EventSource.UNREGISTER
 		)
 			.build();
 		MobileCore.dispatchEvent(event);
@@ -128,12 +128,12 @@ public class MonitorExtension extends Extension {
 	 * @param event the event to be processed
 	 */
 	public void wildcardProcessor(final Event event) {
-		if (TestConstants.EventType.MONITOR.equalsIgnoreCase(event.getType())) {
-			if (TestConstants.EventSource.SHARED_STATE_REQUEST.equalsIgnoreCase(event.getSource())) {
+		if (IdentityTestConstants.EventType.MONITOR.equalsIgnoreCase(event.getType())) {
+			if (IdentityTestConstants.EventSource.SHARED_STATE_REQUEST.equalsIgnoreCase(event.getSource())) {
 				processSharedStateRequest(event);
-			} else if (TestConstants.EventSource.XDM_SHARED_STATE_REQUEST.equalsIgnoreCase(event.getSource())) {
+			} else if (IdentityTestConstants.EventSource.XDM_SHARED_STATE_REQUEST.equalsIgnoreCase(event.getSource())) {
 				processXDMSharedStateRequest(event);
-			} else if (TestConstants.EventSource.UNREGISTER.equalsIgnoreCase(event.getSource())) {
+			} else if (IdentityTestConstants.EventSource.UNREGISTER.equalsIgnoreCase(event.getSource())) {
 				processUnregisterRequest(event);
 			}
 
@@ -176,7 +176,7 @@ public class MonitorExtension extends Extension {
 			return;
 		}
 
-		final String stateOwner = DataReader.optString(eventData, TestConstants.EventDataKey.STATE_OWNER, null);
+		final String stateOwner = DataReader.optString(eventData, IdentityTestConstants.EventDataKey.STATE_OWNER, null);
 
 		if (stateOwner == null) {
 			return;
@@ -187,8 +187,8 @@ public class MonitorExtension extends Extension {
 
 		Event responseEvent = new Event.Builder(
 			"Get Shared State Response",
-			TestConstants.EventType.MONITOR,
-			TestConstants.EventSource.XDM_SHARED_STATE_RESPONSE
+			IdentityTestConstants.EventType.MONITOR,
+			IdentityTestConstants.EventSource.XDM_SHARED_STATE_RESPONSE
 		)
 			.setEventData(sharedStateResult == null ? null : sharedStateResult.getValue())
 			.inResponseToEvent(event)
@@ -209,7 +209,7 @@ public class MonitorExtension extends Extension {
 			return;
 		}
 
-		final String stateOwner = DataReader.optString(eventData, TestConstants.EventDataKey.STATE_OWNER, null);
+		final String stateOwner = DataReader.optString(eventData, IdentityTestConstants.EventDataKey.STATE_OWNER, null);
 
 		if (stateOwner == null) {
 			return;
@@ -220,8 +220,8 @@ public class MonitorExtension extends Extension {
 
 		Event responseEvent = new Event.Builder(
 			"Get Shared State Response",
-			TestConstants.EventType.MONITOR,
-			TestConstants.EventSource.SHARED_STATE_RESPONSE
+			IdentityTestConstants.EventType.MONITOR,
+			IdentityTestConstants.EventSource.SHARED_STATE_RESPONSE
 		)
 			.setEventData(sharedStateResult == null ? null : sharedStateResult.getValue())
 			.inResponseToEvent(event)

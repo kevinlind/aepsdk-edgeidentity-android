@@ -11,7 +11,7 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.*;
+import static com.adobe.marketing.mobile.edge.identity.util.IdentityFunctionalTestUtil.*;
 import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.getXDMSharedStateFor;
 import static org.junit.Assert.assertEquals;
 

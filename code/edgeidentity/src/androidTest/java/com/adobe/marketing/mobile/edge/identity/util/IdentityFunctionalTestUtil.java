@@ -9,11 +9,10 @@
   governing permissions and limitations under the License.
 */
 
-package com.adobe.marketing.mobile.edge.identity;
+package com.adobe.marketing.mobile.edge.identity.util;
 
 import static com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants.LOG_TAG;
-import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.getXDMSharedStateFor;
-import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.resetTestExpectations;
+import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -21,11 +20,13 @@ import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.AdobeCallbackWithError;
 import com.adobe.marketing.mobile.AdobeError;
 import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.EventSource;
+import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.edge.identity.util.ADBCountDownLatch;
-import com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants;
-import com.adobe.marketing.mobile.edge.identity.util.TestHelper;
-import com.adobe.marketing.mobile.edge.identity.util.TestPersistenceHelper;
+import com.adobe.marketing.mobile.edge.identity.AuthenticatedState;
+import com.adobe.marketing.mobile.edge.identity.Identity;
+import com.adobe.marketing.mobile.edge.identity.IdentityItem;
+import com.adobe.marketing.mobile.edge.identity.IdentityMap;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -103,8 +104,8 @@ public class IdentityFunctionalTestUtil {
 	 */
 	public static void setIdentityDirectPersistedECID(final String legacyECID) {
 		TestPersistenceHelper.updatePersistence(
-			IdentityConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE_NAME,
-			IdentityConstants.DataStoreKey.IDENTITY_DIRECT_ECID_KEY,
+			IdentityTestConstants.DataStoreKey.IDENTITY_DIRECT_DATASTORE,
+			IdentityTestConstants.DataStoreKey.IDENTITY_DIRECT_ECID_KEY,
 			legacyECID
 		);
 	}
@@ -116,8 +117,8 @@ public class IdentityFunctionalTestUtil {
 		if (persistedData != null) {
 			final JSONObject persistedJSON = new JSONObject(persistedData);
 			TestPersistenceHelper.updatePersistence(
-				IdentityConstants.DataStoreKey.DATASTORE_NAME,
-				IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES,
+				IdentityTestConstants.DataStoreKey.IDENTITY_DATASTORE,
+				IdentityTestConstants.DataStoreKey.IDENTITY_PROPERTIES,
 				persistedJSON.toString()
 			);
 		}
@@ -155,9 +156,9 @@ public class IdentityFunctionalTestUtil {
 
 		for (TestItem item : items) {
 			final Map<String, Object> itemMap = new HashMap<>();
-			itemMap.put(IdentityConstants.XDMKeys.ID, item.id);
-			itemMap.put(IdentityConstants.XDMKeys.AUTHENTICATED_STATE, "ambiguous");
-			itemMap.put(IdentityConstants.XDMKeys.PRIMARY, item.isPrimary);
+			itemMap.put(IdentityTestConstants.XDMKeys.ID, item.id);
+			itemMap.put(IdentityTestConstants.XDMKeys.AUTHENTICATED_STATE, "ambiguous");
+			itemMap.put(IdentityTestConstants.XDMKeys.PRIMARY, item.isPrimary);
 			List<Map<String, Object>> nameSpaceItems = allItems.get(item.namespace);
 
 			if (nameSpaceItems == null) {
@@ -169,7 +170,7 @@ public class IdentityFunctionalTestUtil {
 		}
 
 		final Map<String, Object> identityMapDict = new HashMap<>();
-		identityMapDict.put(IdentityConstants.XDMKeys.IDENTITY_MAP, allItems);
+		identityMapDict.put(IdentityTestConstants.XDMKeys.IDENTITY_MAP, allItems);
 		return identityMapDict;
 	}
 
@@ -188,8 +189,8 @@ public class IdentityFunctionalTestUtil {
 	public static Event buildRemoveIdentityRequest(final Map<String, Object> map) {
 		return new Event.Builder(
 			"Remove Identity Event",
-			IdentityConstants.EventType.EDGE_IDENTITY,
-			IdentityConstants.EventSource.REMOVE_IDENTITY
+			EventType.EDGE_IDENTITY,
+			"om.adobe.eventSource.updateIdentity"
 		)
 			.setEventData(map)
 			.build();
@@ -208,11 +209,7 @@ public class IdentityFunctionalTestUtil {
 	 * Helper method to build update identity request event with XDM formatted Identity map
 	 */
 	public static Event buildUpdateIdentityRequest(final Map<String, Object> map) {
-		return new Event.Builder(
-			"Update Identity Event",
-			IdentityConstants.EventType.EDGE_IDENTITY,
-			IdentityConstants.EventSource.UPDATE_IDENTITY
-		)
+		return new Event.Builder("Update Identity Event", EventType.EDGE_IDENTITY, EventSource.UPDATE_IDENTITY)
 			.setEventData(map)
 			.build();
 	}
@@ -417,7 +414,9 @@ public class IdentityFunctionalTestUtil {
 		assertNotNull(ecid);
 
 		// verify xdm shared state is has ECID
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		Map<String, String> xdmSharedState = flattenMap(
+			getXDMSharedStateFor(IdentityTestConstants.EXTENSION_NAME, 1000)
+		);
 		assertNotNull(xdmSharedState.get("identityMap.ECID[0].id"));
 	}
 
@@ -430,13 +429,15 @@ public class IdentityFunctionalTestUtil {
 		assertEquals(primaryECID, ecid);
 
 		// verify xdm shared state is has correct primary ECID
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		Map<String, String> xdmSharedState = flattenMap(
+			getXDMSharedStateFor(IdentityTestConstants.EXTENSION_NAME, 1000)
+		);
 		assertEquals(primaryECID, xdmSharedState.get("identityMap.ECID[0].id"));
 
 		// verify primary ECID in persistence
 		final String persistedJson = TestPersistenceHelper.readPersistedData(
-			IdentityConstants.DataStoreKey.DATASTORE_NAME,
-			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
+			IdentityTestConstants.DataStoreKey.IDENTITY_DATASTORE,
+			IdentityTestConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
 		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(primaryECID, persistedMap.get("identityMap.ECID[0].id"));
@@ -448,13 +449,15 @@ public class IdentityFunctionalTestUtil {
 	 */
 	public static void verifySecondaryECID(final String secondaryECID) throws Exception {
 		// verify xdm shared state is has correct secondary ECID
-		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
+		Map<String, String> xdmSharedState = flattenMap(
+			getXDMSharedStateFor(IdentityTestConstants.EXTENSION_NAME, 1000)
+		);
 		assertEquals(secondaryECID, xdmSharedState.get("identityMap.ECID[1].id"));
 
 		// verify secondary ECID in persistence
 		final String persistedJson = TestPersistenceHelper.readPersistedData(
-			IdentityConstants.DataStoreKey.DATASTORE_NAME,
-			IdentityConstants.DataStoreKey.IDENTITY_PROPERTIES
+			IdentityTestConstants.DataStoreKey.IDENTITY_DATASTORE,
+			IdentityTestConstants.DataStoreKey.IDENTITY_PROPERTIES
 		);
 		Map<String, String> persistedMap = flattenMap(JSONUtils.toMap(new JSONObject(persistedJson)));
 		assertEquals(secondaryECID, persistedMap.get("identityMap.ECID[1].id"));

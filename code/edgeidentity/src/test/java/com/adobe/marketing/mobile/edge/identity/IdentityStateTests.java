@@ -399,19 +399,25 @@ public class IdentityStateTests {
 		state.getIdentityProperties().setAdId("adID");
 		final ECID existingEcid = state.getIdentityProperties().getECID();
 
-		// test
-		state.resetIdentifiers();
+		try (MockedStatic<MobileCore> mockedStaticCore = Mockito.mockStatic(MobileCore.class)) {
+			// test
+			state.resetIdentifiers();
 
-		// verify
-		assertNotEquals(existingEcid, state.getIdentityProperties().getECID()); // ECID should be regenerated
-		assertFalse(state.getIdentityProperties().getECID().toString().isEmpty()); // ECID should not be empty
-		assertNull(state.getIdentityProperties().getECIDSecondary()); // should be cleared
-		assertNull(state.getIdentityProperties().getAdId()); // should be cleared
-		verify(mockIdentityStorageManager, times(1)).savePropertiesToPersistence(state.getIdentityProperties()); // should save to data store
-		// Verify consent event not sent (or any event). Consent should not be dispatched by resetIdentifiers
+			// verify
+			assertNotEquals(existingEcid, state.getIdentityProperties().getECID()); // ECID should be regenerated
+			assertFalse(state.getIdentityProperties().getECID().toString().isEmpty()); // ECID should not be empty
+			assertNull(state.getIdentityProperties().getECIDSecondary()); // should be cleared
+			assertNull(state.getIdentityProperties().getAdId()); // should be cleared
+			verify(mockIdentityStorageManager, times(1)).savePropertiesToPersistence(state.getIdentityProperties()); // should save to data store
 
-		//		PowerMockito.verifyStatic(MobileCore.class, Mockito.never());
-		//		MobileCore.dispatchEvent(any(Event.class), any(ExtensionErrorCallback.class));
+			// Verify consent event not sent (or any event). Consent should not be dispatched by resetIdentifiers
+			mockedStaticCore.verify(
+				() -> {
+					MobileCore.dispatchEvent(any());
+				},
+				never()
+			);
+		}
 	}
 
 	// ======================================================================================================================

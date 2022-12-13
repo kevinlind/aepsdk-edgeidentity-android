@@ -454,13 +454,13 @@ public class TestHelper {
 		throws InterruptedException {
 		Event event = new Event.Builder(
 			"Get Shared State Request",
-			TestConstants.EventType.MONITOR,
-			TestConstants.EventSource.SHARED_STATE_REQUEST
+			IdentityTestConstants.EventType.MONITOR,
+			IdentityTestConstants.EventSource.SHARED_STATE_REQUEST
 		)
 			.setEventData(
 				new HashMap<String, Object>() {
 					{
-						put(TestConstants.EventDataKey.STATE_OWNER, stateOwner);
+						put(IdentityTestConstants.EventDataKey.STATE_OWNER, stateOwner);
 					}
 				}
 			)
@@ -505,13 +505,13 @@ public class TestHelper {
 		throws InterruptedException {
 		Event event = new Event.Builder(
 			"Get Shared State Request",
-			TestConstants.EventType.MONITOR,
-			TestConstants.EventSource.XDM_SHARED_STATE_REQUEST
+			IdentityTestConstants.EventType.MONITOR,
+			IdentityTestConstants.EventSource.XDM_SHARED_STATE_REQUEST
 		)
 			.setEventData(
 				new HashMap<String, Object>() {
 					{
-						put(TestConstants.EventDataKey.STATE_OWNER, stateOwner);
+						put(IdentityTestConstants.EventDataKey.STATE_OWNER, stateOwner);
 					}
 				}
 			)

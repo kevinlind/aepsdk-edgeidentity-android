@@ -87,7 +87,7 @@ public class IdentityTests {
 			// verify that the callback invocation does not throw an exception
 			extensionErrorCallback.error(ExtensionError.UNEXPECTED_ERROR);
 		} catch (final Exception e) {
-			fail();
+			fail(e.getMessage());
 		}
 	}
 
@@ -139,7 +139,7 @@ public class IdentityTests {
 			adobeCallbackCaptor.getValue().call(buildIdentityResponseEvent(xdmData));
 			assertEquals(ecid.toString(), callbackReturnValues.get(0));
 		} catch (Exception e) {
-			fail();
+			fail(e.getMessage());
 		}
 	}
 
@@ -177,7 +177,7 @@ public class IdentityTests {
 				)
 			);
 		} catch (Exception e) {
-			fail();
+			fail(e.getMessage());
 		}
 
 		// set response event to null
@@ -204,6 +204,8 @@ public class IdentityTests {
 					),
 				times(0)
 			);
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 	}
 
@@ -241,7 +243,7 @@ public class IdentityTests {
 				)
 			);
 		} catch (Exception e) {
-			fail();
+			fail(e.getMessage());
 		}
 
 		// set response event to null
@@ -284,7 +286,7 @@ public class IdentityTests {
 				)
 			);
 		} catch (Exception e) {
-			fail();
+			fail(e.getMessage());
 		}
 
 		// set response event to null
@@ -330,6 +332,8 @@ public class IdentityTests {
 					adobeCallbackCaptor.capture()
 				)
 			);
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 
 		// set response event to map missing ECID
@@ -372,7 +376,7 @@ public class IdentityTests {
 				)
 			);
 		} catch (Exception e) {
-			fail();
+			fail(e.getMessage());
 		}
 
 		// verify the dispatched event details
@@ -406,6 +410,8 @@ public class IdentityTests {
 					),
 				never()
 			);
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 	}
 
@@ -442,7 +448,7 @@ public class IdentityTests {
 				)
 			);
 		} catch (Exception e) {
-			fail();
+			fail(e.getMessage());
 		}
 
 		final Event dispatchedEvent = eventCaptor.getValue();
@@ -493,7 +499,7 @@ public class IdentityTests {
 				)
 			);
 		} catch (Exception e) {
-			fail();
+			fail(e.getMessage());
 		}
 
 		// set response event data to not have urlvariables key
@@ -540,7 +546,7 @@ public class IdentityTests {
 				)
 			);
 		} catch (Exception e) {
-			fail();
+			fail(e.getMessage());
 		}
 
 		// set response event to have urlvariables map to null value
@@ -585,8 +591,9 @@ public class IdentityTests {
 				)
 			);
 		} catch (Exception e) {
-			fail();
+			fail(e.getMessage());
 		}
+
 		adobeCallbackCaptor.getValue().fail(AdobeError.UNEXPECTED_ERROR);
 
 		// verify
@@ -611,7 +618,7 @@ public class IdentityTests {
 
 			mockedStaticMobileCore.verify(() -> MobileCore.dispatchEvent(eventCaptor.capture()));
 		} catch (Exception e) {
-			fail();
+			fail(e.getMessage());
 		}
 
 		// verify the dispatched event details
@@ -631,6 +638,8 @@ public class IdentityTests {
 
 			// verify that no event is dispatched
 			mockedStaticMobileCore.verify(() -> MobileCore.dispatchEvent(any(Event.class)), never());
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 	}
 
@@ -643,6 +652,8 @@ public class IdentityTests {
 
 			// verify that no event is dispatched
 			mockedStaticMobileCore.verify(() -> MobileCore.dispatchEvent(any(Event.class)), never());
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 	}
 
@@ -661,6 +672,8 @@ public class IdentityTests {
 			Identity.removeIdentity(sampleItem, "namespace");
 
 			mockedStaticMobileCore.verify(() -> MobileCore.dispatchEvent(eventCaptor.capture()));
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 
 		final Event dispatchedEvent = eventCaptor.getValue();
@@ -686,6 +699,8 @@ public class IdentityTests {
 
 			// verify that no event is dispatched
 			mockedStaticMobileCore.verify(() -> MobileCore.dispatchEvent(any(Event.class)), never());
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 	}
 
@@ -719,6 +734,8 @@ public class IdentityTests {
 					adobeCallbackCaptor.capture()
 				)
 			);
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 
 		// verify the dispatched event details
@@ -787,6 +804,8 @@ public class IdentityTests {
 					),
 				never()
 			);
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 	}
 
@@ -822,6 +841,8 @@ public class IdentityTests {
 					adobeCallbackCaptor.capture()
 				)
 			);
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 
 		// set response event to null
@@ -864,7 +885,10 @@ public class IdentityTests {
 					adobeCallbackCaptor.capture()
 				)
 			);
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
+
 		// set response event
 		Map<String, Object> eventData = new HashMap<>();
 		eventData.put("someKey", "someValue");
@@ -907,7 +931,10 @@ public class IdentityTests {
 					adobeCallbackCaptor.capture()
 				)
 			);
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
+
 		// set response event with empty data
 		Map<String, Object> eventData = new HashMap<>();
 		adobeCallbackCaptor.getValue().call(buildIdentityResponseEvent(eventData));
@@ -949,7 +976,10 @@ public class IdentityTests {
 					adobeCallbackCaptor.capture()
 				)
 			);
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
+
 		// set response event with empty data
 		adobeCallbackCaptor.getValue().fail(AdobeError.UNEXPECTED_ERROR);
 

@@ -11,19 +11,14 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.createXDMIdentityMap;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.flattenMap;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.registerEdgeIdentityExtension;
-import static com.adobe.marketing.mobile.edge.identity.IdentityFunctionalTestUtil.setEdgeIdentityPersistence;
-import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.getDispatchedEventsWith;
-import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.getXDMSharedStateFor;
+import static com.adobe.marketing.mobile.edge.identity.util.IdentityFunctionalTestUtil.*;
+import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.*;
 import static org.junit.Assert.assertEquals;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.MobileCore;
-import com.adobe.marketing.mobile.edge.identity.util.TestHelper;
 import com.adobe.marketing.mobile.edge.identity.util.TestPersistenceHelper;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import com.adobe.marketing.mobile.util.StringUtils;
@@ -38,9 +33,7 @@ import org.junit.rules.RuleChain;
 public class IdentityAdIdTest {
 
 	@Rule
-	public RuleChain rule = RuleChain
-		.outerRule(new TestHelper.SetupCoreRule())
-		.around(new TestHelper.RegisterMonitorExtensionRule());
+	public RuleChain rule = RuleChain.outerRule(new SetupCoreRule()).around(new RegisterMonitorExtensionRule());
 
 	@Test
 	public void testGenericIdentityRequest_whenValidAdId_thenNewValidAdId() throws Exception {
@@ -49,17 +42,14 @@ public class IdentityAdIdTest {
 		String initialAdId = "fa181743-2520-4ebc-b125-626baf1e3db8";
 		String newAdId = "8d9ca5ff-7e74-44ac-bbcd-7aee7baf4f6c";
 		setEdgeIdentityPersistence(
-			createXDMIdentityMap(
-				new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"),
-				new IdentityFunctionalTestUtil.TestItem("GAID", initialAdId)
-			)
+			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("GAID", initialAdId))
 		);
 
 		registerEdgeIdentityExtension();
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		// After sending mobile core event, give a wait time to allow for processing
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 		// Verify dispatched events
 		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
 		verifyDispatchedEvents(true, null);
@@ -82,16 +72,13 @@ public class IdentityAdIdTest {
 		// Test
 		String initialAdId = "fa181743-2520-4ebc-b125-626baf1e3db8";
 		setEdgeIdentityPersistence(
-			createXDMIdentityMap(
-				new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"),
-				new IdentityFunctionalTestUtil.TestItem("GAID", initialAdId)
-			)
+			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("GAID", initialAdId))
 		);
 		registerEdgeIdentityExtension();
 
 		dispatchGenericIdentityNonAdIdEvent();
 
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 		// Verify dispatched events
 		// Edge Consent event should not be dispatched; valid -> (unchanged) valid does not signal change in consent
 		verifyDispatchedEvents(false, null);
@@ -115,15 +102,12 @@ public class IdentityAdIdTest {
 		String initialAdId = "fa181743-2520-4ebc-b125-626baf1e3db8";
 		String newAdId = "fa181743-2520-4ebc-b125-626baf1e3db8";
 		setEdgeIdentityPersistence(
-			createXDMIdentityMap(
-				new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"),
-				new IdentityFunctionalTestUtil.TestItem("GAID", initialAdId)
-			)
+			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("GAID", initialAdId))
 		);
 		registerEdgeIdentityExtension();
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 		// Verify dispatched events
 		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
 		verifyDispatchedEvents(true, null);
@@ -147,15 +131,12 @@ public class IdentityAdIdTest {
 		String initialAdId = "fa181743-2520-4ebc-b125-626baf1e3db8";
 		String newAdId = "";
 		setEdgeIdentityPersistence(
-			createXDMIdentityMap(
-				new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"),
-				new IdentityFunctionalTestUtil.TestItem("GAID", initialAdId)
-			)
+			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("GAID", initialAdId))
 		);
 		registerEdgeIdentityExtension();
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 		// Verify dispatched events
 		// Edge Consent event should be dispatched; valid -> invalid signals change in consent
 		verifyDispatchedEvents(true, "n");
@@ -179,15 +160,12 @@ public class IdentityAdIdTest {
 		String initialAdId = "fa181743-2520-4ebc-b125-626baf1e3db8";
 		String newAdId = "00000000-0000-0000-0000-000000000000";
 		setEdgeIdentityPersistence(
-			createXDMIdentityMap(
-				new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"),
-				new IdentityFunctionalTestUtil.TestItem("GAID", initialAdId)
-			)
+			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("GAID", initialAdId))
 		);
 		registerEdgeIdentityExtension();
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 		// Verify dispatched events
 		// Edge Consent event should be dispatched; valid -> invalid signals change in consent
 		verifyDispatchedEvents(true, "n");
@@ -209,13 +187,11 @@ public class IdentityAdIdTest {
 	public void testGenericIdentityRequest_whenNoAdId_thenNewValidAdId() throws Exception {
 		// Test
 		String newAdId = "8d9ca5ff-7e74-44ac-bbcd-7aee7baf4f6c";
-		setEdgeIdentityPersistence(
-			createXDMIdentityMap(new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"))
-		);
+		setEdgeIdentityPersistence(createXDMIdentityMap(new TestItem("ECID", "primaryECID")));
 		registerEdgeIdentityExtension();
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 		// Verify dispatched events
 		// Generic Identity event containing advertisingIdentifier should be dispatched
 		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
@@ -237,14 +213,12 @@ public class IdentityAdIdTest {
 	@Test
 	public void testGenericIdentityRequest_whenNoAdId_thenNonAdId() throws Exception {
 		// Test
-		setEdgeIdentityPersistence(
-			createXDMIdentityMap(new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"))
-		);
+		setEdgeIdentityPersistence(createXDMIdentityMap(new TestItem("ECID", "primaryECID")));
 		registerEdgeIdentityExtension();
 
 		dispatchGenericIdentityNonAdIdEvent();
 
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 		// Verify dispatched events
 		// Edge Consent event should not be dispatched; valid -> valid does not signal change in consent
 		verifyDispatchedEvents(false, null);
@@ -266,13 +240,11 @@ public class IdentityAdIdTest {
 	public void testGenericIdentityRequest_whenNoAdId_thenEmptyAdId() throws Exception {
 		// Test
 		String newAdId = "";
-		setEdgeIdentityPersistence(
-			createXDMIdentityMap(new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"))
-		);
+		setEdgeIdentityPersistence(createXDMIdentityMap(new TestItem("ECID", "primaryECID")));
 		registerEdgeIdentityExtension();
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 		// Verify dispatched events
 		// Edge Consent event should not be dispatched; invalid -> invalid does not signal change in consent
 		verifyDispatchedEvents(true, null);
@@ -294,13 +266,11 @@ public class IdentityAdIdTest {
 	public void testGenericIdentityRequest_whenNoAdId_thenAllZerosAdIdTwice() throws Exception {
 		// Test
 		String newAdId = "00000000-0000-0000-0000-000000000000";
-		setEdgeIdentityPersistence(
-			createXDMIdentityMap(new IdentityFunctionalTestUtil.TestItem("ECID", "primaryECID"))
-		);
+		setEdgeIdentityPersistence(createXDMIdentityMap(new TestItem("ECID", "primaryECID")));
 		registerEdgeIdentityExtension();
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 		// Verify dispatched events
 		// Edge Consent event should not be dispatched; invalid -> invalid does not signal change in consent
 		verifyDispatchedEvents(true, null);
@@ -318,10 +288,10 @@ public class IdentityAdIdTest {
 		verifyFlatIdentityMap(persistedMap, null);
 
 		// Reset wildcard listener
-		TestHelper.resetTestExpectations();
+		resetTestExpectations();
 		// Test all zeros sent again
 		MobileCore.setAdvertisingIdentifier(newAdId);
-		TestHelper.waitForThreads(2000);
+		waitForThreads(2000);
 		// Verify dispatched events
 		// Edge Consent event should not be dispatched; invalid -> invalid does not signal change in consent
 		verifyDispatchedEvents(true, null);

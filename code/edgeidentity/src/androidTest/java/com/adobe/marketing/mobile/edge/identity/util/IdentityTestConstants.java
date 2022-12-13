@@ -14,12 +14,15 @@ package com.adobe.marketing.mobile.edge.identity.util;
 public class IdentityTestConstants {
 
 	public static final String LOG_TAG = "EdgeIdentity";
+	static final String EXTENSION_NAME = "com.adobe.edge.identity";
 
-	public static final class DataStoreKey {
+	static final class DataStoreKey {
 
-		public static final String CONFIG_DATASTORE = "AdobeMobile_ConfigState";
-		public static final String IDENTITY_DATASTORE = "com.adobe.edge.identity";
+		static final String CONFIG_DATASTORE = "AdobeMobile_ConfigState";
+		static final String IDENTITY_DATASTORE = "com.adobe.edge.identity";
 		public static final String IDENTITY_DIRECT_DATASTORE = "visitorIDServiceDataStore";
+		public static final String IDENTITY_DIRECT_ECID_KEY = "ADOBEMOBILE_PERSISTED_MID";
+		public static final String IDENTITY_PROPERTIES = "identity.properties";
 
 		private DataStoreKey() {}
 	}
@@ -38,5 +41,41 @@ public class IdentityTestConstants {
 		public static final String ERROR = "getConsentError";
 
 		private GetIdentitiesHelper() {}
+	}
+
+	public static class EventType {
+
+		static final String MONITOR = "com.adobe.functional.eventType.monitor";
+
+		private EventType() {}
+	}
+
+	public static class EventSource {
+
+		// Used by Monitor Extension
+		static final String XDM_SHARED_STATE_REQUEST = "com.adobe.eventSource.xdmsharedStateRequest";
+		static final String XDM_SHARED_STATE_RESPONSE = "com.adobe.eventSource.xdmsharedStateResponse";
+		static final String SHARED_STATE_REQUEST = "com.adobe.eventSource.sharedStateRequest";
+		static final String SHARED_STATE_RESPONSE = "com.adobe.eventSource.sharedStateResponse";
+		static final String UNREGISTER = "com.adobe.eventSource.unregister";
+
+		private EventSource() {}
+	}
+
+	public static class EventDataKey {
+
+		static final String STATE_OWNER = "stateowner";
+
+		private EventDataKey() {}
+	}
+
+	static final class XDMKeys {
+
+		static final String IDENTITY_MAP = "identityMap";
+		static final String ID = "id";
+		static final String AUTHENTICATED_STATE = "authenticatedState";
+		static final String PRIMARY = "primary";
+
+		private XDMKeys() {}
 	}
 }
