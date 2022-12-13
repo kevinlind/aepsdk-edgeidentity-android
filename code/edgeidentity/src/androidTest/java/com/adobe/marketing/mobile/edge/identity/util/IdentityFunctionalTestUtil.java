@@ -190,7 +190,8 @@ public class IdentityFunctionalTestUtil {
 		return new Event.Builder(
 			"Remove Identity Event",
 			EventType.EDGE_IDENTITY,
-			"om.adobe.eventSource.updateIdentity"
+			// TODO: Use event source from Core when available.
+			"com.adobe.eventSource.removeIdentity"
 		)
 			.setEventData(map)
 			.build();
