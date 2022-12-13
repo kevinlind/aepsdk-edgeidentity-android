@@ -111,12 +111,12 @@ public class ECIDTests {
 		ECID a = new ECID();
 		ECID b = new ECID(a.toString());
 
-		Assert.assertEquals(a, b);
-		Assert.assertEquals(b, a);
-		Assert.assertEquals(a, a);
-		Assert.assertEquals(b, b);
+		assertEquals(a, b);
+		assertEquals(b, a);
+		assertEquals(a, a);
+		assertEquals(b, b);
 
-		Assert.assertNotNull(a);
+		assertNotNull(a);
 		assertNotEquals(a, new ECID());
 
 		assertNotEquals(a, new NotECID(a.toString()));
