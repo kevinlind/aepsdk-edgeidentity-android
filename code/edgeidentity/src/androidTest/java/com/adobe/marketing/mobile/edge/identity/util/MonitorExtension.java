@@ -19,8 +19,6 @@ import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.Extension;
 import com.adobe.marketing.mobile.ExtensionApi;
-import com.adobe.marketing.mobile.ExtensionError;
-import com.adobe.marketing.mobile.ExtensionErrorCallback;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.SharedStateResolution;
 import com.adobe.marketing.mobile.SharedStateResult;
@@ -59,22 +57,6 @@ public class MonitorExtension extends Extension {
 		super.onRegistered();
 
 		getApi().registerEventListener(EventType.WILDCARD, EventSource.WILDCARD, this::wildcardProcessor);
-	}
-
-	public static void registerExtension() {
-		MobileCore.registerExtension(
-			MonitorExtension.class,
-			new ExtensionErrorCallback<ExtensionError>() {
-				@Override
-				public void error(ExtensionError extensionError) {
-					Log.error(
-						LOG_TAG,
-						LOG_SOURCE,
-						"There was an error registering the Monitor extension: " + extensionError.getErrorName()
-					);
-				}
-			}
-		);
 	}
 
 	/**

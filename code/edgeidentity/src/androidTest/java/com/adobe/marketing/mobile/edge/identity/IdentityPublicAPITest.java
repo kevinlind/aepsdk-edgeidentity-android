@@ -18,22 +18,24 @@ import static org.junit.Assert.*;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants;
+import com.adobe.marketing.mobile.edge.identity.util.MonitorExtension;
 import com.adobe.marketing.mobile.edge.identity.util.TestPersistenceHelper;
 import com.adobe.marketing.mobile.util.JSONUtils;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.RuleChain;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class IdentityPublicAPITest {
 
 	@Rule
-	public RuleChain rule = RuleChain.outerRule(new SetupCoreRule()).around(new RegisterMonitorExtensionRule());
+	public TestRule rule = new SetupCoreRule();
 
 	// --------------------------------------------------------------------------------------------
 	// Setup
@@ -41,7 +43,7 @@ public class IdentityPublicAPITest {
 
 	@Before
 	public void setup() throws Exception {
-		registerEdgeIdentityExtension();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 	}
 
 	// --------------------------------------------------------------------------------------------

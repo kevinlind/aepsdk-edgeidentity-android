@@ -19,21 +19,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.edge.identity.util.MonitorExtension;
 import com.adobe.marketing.mobile.edge.identity.util.TestPersistenceHelper;
 import com.adobe.marketing.mobile.util.JSONUtils;
 import com.adobe.marketing.mobile.util.StringUtils;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.RuleChain;
+import org.junit.rules.TestRule;
 
 public class IdentityAdIdTest {
 
 	@Rule
-	public RuleChain rule = RuleChain.outerRule(new SetupCoreRule()).around(new RegisterMonitorExtensionRule());
+	public TestRule rule = new SetupCoreRule();
 
 	@Test
 	public void testGenericIdentityRequest_whenValidAdId_thenNewValidAdId() throws Exception {
@@ -45,7 +47,7 @@ public class IdentityAdIdTest {
 			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("GAID", initialAdId))
 		);
 
-		registerEdgeIdentityExtension();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		// After sending mobile core event, give a wait time to allow for processing
@@ -74,7 +76,7 @@ public class IdentityAdIdTest {
 		setEdgeIdentityPersistence(
 			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("GAID", initialAdId))
 		);
-		registerEdgeIdentityExtension();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 
 		dispatchGenericIdentityNonAdIdEvent();
 
@@ -104,7 +106,7 @@ public class IdentityAdIdTest {
 		setEdgeIdentityPersistence(
 			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("GAID", initialAdId))
 		);
-		registerEdgeIdentityExtension();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		waitForThreads(2000);
@@ -133,7 +135,7 @@ public class IdentityAdIdTest {
 		setEdgeIdentityPersistence(
 			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("GAID", initialAdId))
 		);
-		registerEdgeIdentityExtension();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		waitForThreads(2000);
@@ -162,7 +164,7 @@ public class IdentityAdIdTest {
 		setEdgeIdentityPersistence(
 			createXDMIdentityMap(new TestItem("ECID", "primaryECID"), new TestItem("GAID", initialAdId))
 		);
-		registerEdgeIdentityExtension();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		waitForThreads(2000);
@@ -188,7 +190,7 @@ public class IdentityAdIdTest {
 		// Test
 		String newAdId = "8d9ca5ff-7e74-44ac-bbcd-7aee7baf4f6c";
 		setEdgeIdentityPersistence(createXDMIdentityMap(new TestItem("ECID", "primaryECID")));
-		registerEdgeIdentityExtension();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		waitForThreads(2000);
@@ -214,7 +216,7 @@ public class IdentityAdIdTest {
 	public void testGenericIdentityRequest_whenNoAdId_thenNonAdId() throws Exception {
 		// Test
 		setEdgeIdentityPersistence(createXDMIdentityMap(new TestItem("ECID", "primaryECID")));
-		registerEdgeIdentityExtension();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 
 		dispatchGenericIdentityNonAdIdEvent();
 
@@ -241,7 +243,7 @@ public class IdentityAdIdTest {
 		// Test
 		String newAdId = "";
 		setEdgeIdentityPersistence(createXDMIdentityMap(new TestItem("ECID", "primaryECID")));
-		registerEdgeIdentityExtension();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		waitForThreads(2000);
@@ -267,7 +269,7 @@ public class IdentityAdIdTest {
 		// Test
 		String newAdId = "00000000-0000-0000-0000-000000000000";
 		setEdgeIdentityPersistence(createXDMIdentityMap(new TestItem("ECID", "primaryECID")));
-		registerEdgeIdentityExtension();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 
 		MobileCore.setAdvertisingIdentifier(newAdId);
 		waitForThreads(2000);

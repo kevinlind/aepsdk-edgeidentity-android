@@ -106,37 +106,6 @@ public class TestHelper {
 	}
 
 	/**
-	 * {@code TestRule} which registers the {@code MonitorExtension}, allowing test cases to assert
-	 * events passing through the {@code EventHub}. This {@code TestRule} must be applied after
-	 * the {@link SetupCoreRule} to ensure the {@code MobileCore} is setup for testing first.
-	 * <p>
-	 * To use, add the following to your test class:
-	 * <pre>
-	 *  @Rule
-	 *    public RuleChain rule = RuleChain.outerRule(new SetupCoreRule())
-	 * 							.around(new RegisterMonitorExtensionRule());
-	 * </pre>
-	 */
-	public static class RegisterMonitorExtensionRule implements TestRule {
-
-		@Override
-		public Statement apply(final Statement base, final Description description) {
-			return new Statement() {
-				@Override
-				public void evaluate() throws Throwable {
-					MonitorExtension.registerExtension();
-
-					try {
-						base.evaluate();
-					} finally {
-						MonitorExtension.reset();
-					}
-				}
-			};
-		}
-	}
-
-	/**
 	 * Waits for all the {@code #knownThreads} to finish or fails the test after timeoutMillis if some of them are still running
 	 * when the timer expires. If timeoutMillis is 0, a default timeout will be set = 1000ms
 	 *

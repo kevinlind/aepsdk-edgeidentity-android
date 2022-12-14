@@ -22,6 +22,7 @@ import com.adobe.marketing.mobile.AdobeError;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
+import com.adobe.marketing.mobile.Extension;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.edge.identity.AuthenticatedState;
 import com.adobe.marketing.mobile.edge.identity.Identity;
@@ -36,13 +37,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,37 +52,24 @@ public class IdentityFunctionalTestUtil {
 	private static final String LOG_SOURCE = "IdentityFunctionalTestUtil";
 
 	/**
-	 * Register's Edge Identity Extension and start the Core
+	 * Applies the configuration provided, registers the extensions and then starts
+	 * core.
+	 * @param extensions the extensions that need to be registered
+	 * @param configuration the initial configuration update that needs to be applied
+	 * @throws InterruptedException if the wait time for extension registration has elapsed
 	 */
-	public static void registerEdgeIdentityExtension() throws InterruptedException {
+	public static void registerExtensions(
+		final List<Class<? extends Extension>> extensions,
+		@Nullable final Map<String, Object> configuration
+	) throws InterruptedException {
+		if (configuration != null) {
+			MobileCore.updateConfiguration(configuration);
+		}
+
 		final ADBCountDownLatch latch = new ADBCountDownLatch(1);
-		MobileCore.registerExtensions(Arrays.asList(Identity.EXTENSION), o -> latch.countDown());
+		MobileCore.registerExtensions(extensions, o -> latch.countDown());
 
 		latch.await(1000, TimeUnit.MILLISECONDS);
-		TestHelper.waitForThreads(2000);
-		resetTestExpectations();
-	}
-
-	/**
-	 * Register's Identity Direct and Edge Identity Extension. And then starts the MobileCore
-	 */
-	public static void registerBothIdentityExtensions() throws Exception {
-		HashMap<String, Object> config = new HashMap<String, Object>() {
-			{
-				put("global.privacy", "optedin");
-				put("experienceCloud.org", "testOrg@AdobeOrg");
-				put("experienceCloud.server", "notaserver");
-			}
-		};
-		MobileCore.updateConfiguration(config);
-
-		final ADBCountDownLatch latch = new ADBCountDownLatch(1);
-		MobileCore.registerExtensions(
-			Arrays.asList(Identity.EXTENSION, com.adobe.marketing.mobile.Identity.EXTENSION),
-			o -> latch.countDown()
-		);
-
-		latch.await();
 		TestHelper.waitForThreads(2000);
 		resetTestExpectations();
 	}

@@ -17,20 +17,22 @@ import static org.junit.Assert.*;
 
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.MobileCore;
+import com.adobe.marketing.mobile.edge.identity.util.MonitorExtension;
 import com.adobe.marketing.mobile.edge.identity.util.TestPersistenceHelper;
 import com.adobe.marketing.mobile.util.JSONUtils;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.RuleChain;
+import org.junit.rules.TestRule;
 
 public class IdentityResetHandlingTest {
 
 	@Rule
-	public RuleChain rule = RuleChain.outerRule(new SetupCoreRule()).around(new RegisterMonitorExtensionRule());
+	public TestRule rule = new SetupCoreRule();
 
 	// --------------------------------------------------------------------------------------------
 	// Setup
@@ -38,7 +40,7 @@ public class IdentityResetHandlingTest {
 
 	@Before
 	public void setup() throws Exception {
-		registerEdgeIdentityExtension();
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -15,21 +15,21 @@ import static com.adobe.marketing.mobile.edge.identity.util.IdentityFunctionalTe
 import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.getXDMSharedStateFor;
 import static org.junit.Assert.assertEquals;
 
+import com.adobe.marketing.mobile.edge.identity.util.MonitorExtension;
 import com.adobe.marketing.mobile.edge.identity.util.TestHelper;
 import com.adobe.marketing.mobile.edge.identity.util.TestPersistenceHelper;
 import com.adobe.marketing.mobile.util.JSONUtils;
+import java.util.Arrays;
 import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.RuleChain;
+import org.junit.rules.TestRule;
 
 public class IdentityBootUpTest {
 
 	@Rule
-	public RuleChain rule = RuleChain
-		.outerRule(new TestHelper.SetupCoreRule())
-		.around(new TestHelper.RegisterMonitorExtensionRule());
+	public TestRule rule = new TestHelper.SetupCoreRule();
 
 	// --------------------------------------------------------------------------------------------
 	// OnBootUp
@@ -46,7 +46,8 @@ public class IdentityBootUpTest {
 				new TestItem("UserId", "JohnDoe")
 			)
 		);
-		registerEdgeIdentityExtension();
+
+		registerExtensions(Arrays.asList(MonitorExtension.EXTENSION, Identity.EXTENSION), null);
 
 		// verify xdm shared state
 		Map<String, String> xdmSharedState = flattenMap(getXDMSharedStateFor(IdentityConstants.EXTENSION_NAME, 1000));
