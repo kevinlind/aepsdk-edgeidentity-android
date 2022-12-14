@@ -16,6 +16,7 @@ import static com.adobe.marketing.mobile.edge.identity.util.TestHelper.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import androidx.annotation.Nullable;
 import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.AdobeCallbackWithError;
 import com.adobe.marketing.mobile.AdobeError;
@@ -43,13 +44,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class IdentityFunctionalTestUtil {
 
 	private static final String LOG_SOURCE = "IdentityFunctionalTestUtil";
+	private static final long REGISTRATION_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(2);
 
 	/**
 	 * Applies the configuration provided, registers the extensions and then starts
@@ -69,7 +70,7 @@ public class IdentityFunctionalTestUtil {
 		final ADBCountDownLatch latch = new ADBCountDownLatch(1);
 		MobileCore.registerExtensions(extensions, o -> latch.countDown());
 
-		latch.await(1000, TimeUnit.MILLISECONDS);
+		latch.await(REGISTRATION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
 		TestHelper.waitForThreads(2000);
 		resetTestExpectations();
 	}
