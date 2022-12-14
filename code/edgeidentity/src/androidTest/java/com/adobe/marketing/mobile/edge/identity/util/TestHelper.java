@@ -12,9 +12,7 @@
 package com.adobe.marketing.mobile.edge.identity.util;
 
 import static com.adobe.marketing.mobile.edge.identity.util.IdentityTestConstants.LOG_TAG;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import android.app.Application;
 import android.app.Instrumentation;
@@ -227,145 +225,9 @@ public class TestHelper {
 	// ---------------------------------------------------------------------------------------------
 	// Event Test Helpers
 	// ---------------------------------------------------------------------------------------------
-
-	/**
-	 * Sets an expectation for a specific event type and source and how many times the event should be dispatched.
-	 *
-	 * @param type   the event type
-	 * @param source the event source
-	 * @param count  the expected number of times the event is dispatched
-	 * @throws IllegalArgumentException if {@code count} is less than 1
-	 */
-	public static void setExpectationEvent(final String type, final String source, final int count) {
-		if (count < 1) {
-			throw new IllegalArgumentException("Cannot set expectation event count less than 1!");
-		}
-
-		MonitorExtension.setExpectedEvent(type, source, count);
-	}
-
-	/**
-	 * Asserts if all the expected events were received and fails if an unexpected event was seen.
-	 *
-	 * @param ignoreUnexpectedEvents if set on false, an assertion is made on unexpected events, otherwise the unexpected events are ignored
-	 * @throws InterruptedException
-	 * @see #setExpectationEvent(String, String, int)
-	 * @see #assertUnexpectedEvents()
-	 */
-	public static void assertExpectedEvents(final boolean ignoreUnexpectedEvents) throws InterruptedException {
-		Map<EventSpec, ADBCountDownLatch> expectedEvents = MonitorExtension.getExpectedEvents();
-
-		if (expectedEvents.isEmpty()) {
-			fail("There are no event expectations set, use this API after calling setExpectationEvent");
-			return;
-		}
-
-		for (Map.Entry<EventSpec, ADBCountDownLatch> expected : expectedEvents.entrySet()) {
-			boolean awaitResult = expected.getValue().await(WAIT_EVENT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-			String failMessage = String.format(
-				"Timed out waiting for event type %s and source %s.",
-				expected.getKey().type,
-				expected.getKey().source
-			);
-			assertTrue(failMessage, awaitResult);
-			int expectedCount = expected.getValue().getInitialCount();
-			int receivedCount = expected.getValue().getCurrentCount();
-			failMessage =
-				String.format(
-					"Expected %d events for '%s', but received %d",
-					expectedCount,
-					expected.getKey(),
-					receivedCount
-				);
-			assertEquals(failMessage, expectedCount, receivedCount);
-		}
-
-		if (!ignoreUnexpectedEvents) {
-			assertUnexpectedEvents(false);
-		}
-	}
-
-	/**
-	 * Asserts if any unexpected event was received. Use this method to verify the received events
-	 * are correct when setting event expectations. Waits a short time before evaluating received
-	 * events to allow all events to come in.
-	 *
-	 * @see #setExpectationEvent
-	 */
-	public static void assertUnexpectedEvents() throws InterruptedException {
-		assertUnexpectedEvents(true);
-	}
-
-	/**
-	 * Asserts if any unexpected event was received. Use this method to verify the received events
-	 * are correct when setting event expectations.
-	 *
-	 * @param shouldWait waits a short time to allow events to be received when true
-	 * @see #setExpectationEvent
-	 */
-	public static void assertUnexpectedEvents(final boolean shouldWait) throws InterruptedException {
-		// Short wait to allow events to come in
-		if (shouldWait) {
-			sleep(WAIT_TIMEOUT_MS);
-		}
-
-		int unexpectedEventsReceivedCount = 0;
-		StringBuilder unexpectedEventsErrorString = new StringBuilder();
-
-		Map<EventSpec, List<Event>> receivedEvents = MonitorExtension.getReceivedEvents();
-		Map<EventSpec, ADBCountDownLatch> expectedEvents = MonitorExtension.getExpectedEvents();
-
-		for (Map.Entry<EventSpec, List<Event>> receivedEvent : receivedEvents.entrySet()) {
-			ADBCountDownLatch expectedEventLatch = expectedEvents.get(receivedEvent.getKey());
-
-			if (expectedEventLatch != null) {
-				expectedEventLatch.await(WAIT_EVENT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-				int expectedCount = expectedEventLatch.getInitialCount();
-				int receivedCount = receivedEvent.getValue().size();
-				String failMessage = String.format(
-					"Expected %d events for '%s', but received %d",
-					expectedCount,
-					receivedEvent.getKey(),
-					receivedCount
-				);
-				assertEquals(failMessage, expectedCount, receivedCount);
-			} else {
-				unexpectedEventsReceivedCount += receivedEvent.getValue().size();
-				unexpectedEventsErrorString.append(
-					String.format(
-						"(%s,%s,%d)",
-						receivedEvent.getKey().type,
-						receivedEvent.getKey().source,
-						receivedEvent.getValue().size()
-					)
-				);
-				Log.debug(
-					LOG_TAG,
-					LOG_SOURCE,
-					String.format(
-						"Received unexpected event with type: %s source: %s",
-						receivedEvent.getKey().type,
-						receivedEvent.getKey().source
-					)
-				);
-			}
-		}
-
-		assertEquals(
-			String.format(
-				"Received %d unexpected event(s): %s",
-				unexpectedEventsReceivedCount,
-				unexpectedEventsErrorString.toString()
-			),
-			0,
-			unexpectedEventsReceivedCount
-		);
-	}
-
 	/**
 	 * Returns the {@code Event}(s) dispatched through the Event Hub, or empty if none was found.
-	 * Use this API after calling {@link #setExpectationEvent(String, String, int)} to wait for
-	 * the expected events. The wait time for each event is {@link #WAIT_EVENT_TIMEOUT_MS}ms.
+	 * The wait time for each event is {@link #WAIT_EVENT_TIMEOUT_MS}ms.
 	 *
 	 * @param type   the event type as in the expectation
 	 * @param source the event source as in the expectation
@@ -380,7 +242,6 @@ public class TestHelper {
 
 	/**
 	 * Returns the {@code Event}(s) dispatched through the Event Hub, or empty if none was found.
-	 * Use this API after calling {@link #setExpectationEvent(String, String, int)} to wait for the right amount of time
 	 *
 	 * @param type    the event type as in the expectation
 	 * @param source  the event source as in the expectation

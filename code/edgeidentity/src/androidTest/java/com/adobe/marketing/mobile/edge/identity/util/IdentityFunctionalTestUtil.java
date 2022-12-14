@@ -20,9 +20,6 @@ import androidx.annotation.Nullable;
 import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.AdobeCallbackWithError;
 import com.adobe.marketing.mobile.AdobeError;
-import com.adobe.marketing.mobile.Event;
-import com.adobe.marketing.mobile.EventSource;
-import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.Extension;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.edge.identity.AuthenticatedState;
@@ -44,7 +41,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class IdentityFunctionalTestUtil {
@@ -161,60 +157,6 @@ public class IdentityFunctionalTestUtil {
 		final Map<String, Object> identityMapDict = new HashMap<>();
 		identityMapDict.put(IdentityTestConstants.XDMKeys.IDENTITY_MAP, allItems);
 		return identityMapDict;
-	}
-
-	/**
-	 * Helper method to build remove identity request event with XDM formatted Identity jsonString
-	 */
-	public static Event buildRemoveIdentityRequestWithJSONString(final String jsonStr) throws Exception {
-		final JSONObject jsonObject = new JSONObject(jsonStr);
-		final Map<String, Object> xdmData = JSONUtils.toMap(jsonObject);
-		return buildRemoveIdentityRequest(xdmData);
-	}
-
-	/**
-	 * Helper method to build remove identity request event with XDM formatted Identity map
-	 */
-	public static Event buildRemoveIdentityRequest(final Map<String, Object> map) {
-		return new Event.Builder(
-			"Remove Identity Event",
-			EventType.EDGE_IDENTITY,
-			// TODO: Use event source from Core when available.
-			"com.adobe.eventSource.removeIdentity"
-		)
-			.setEventData(map)
-			.build();
-	}
-
-	/**
-	 * Helper method to build update identity request event with XDM formatted Identity jsonString
-	 */
-	public static Event buildUpdateIdentityRequestJSONString(final String jsonStr) throws Exception {
-		final JSONObject jsonObject = new JSONObject(jsonStr);
-		final Map<String, Object> xdmData = JSONUtils.toMap(jsonObject);
-		return buildUpdateIdentityRequest(xdmData);
-	}
-
-	/**
-	 * Helper method to build update identity request event with XDM formatted Identity map
-	 */
-	public static Event buildUpdateIdentityRequest(final Map<String, Object> map) {
-		return new Event.Builder("Update Identity Event", EventType.EDGE_IDENTITY, EventSource.UPDATE_IDENTITY)
-			.setEventData(map)
-			.build();
-	}
-
-	/**
-	 * Serialize the given {@code jsonString} to a JSON Object, then flattens to {@code Map<String, String>}.
-	 * If the provided string is not in JSON structure an {@link JSONException} is thrown.
-	 *
-	 * @param jsonString the string in JSON structure to flatten
-	 * @return new map with flattened structure
-	 */
-	public static Map<String, String> flattenJSONString(final String jsonString) throws JSONException {
-		JSONObject jsonObject = new JSONObject(jsonString);
-		Map<String, Object> persistenceValueMap = JSONUtils.toMap(jsonObject);
-		return flattenMap(persistenceValueMap);
 	}
 
 	/**

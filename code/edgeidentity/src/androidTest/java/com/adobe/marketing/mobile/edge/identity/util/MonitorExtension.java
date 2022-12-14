@@ -72,17 +72,6 @@ public class MonitorExtension extends Extension {
 		MobileCore.dispatchEvent(event);
 	}
 
-	/**
-	 * Add an event to the list of expected events.
-	 * @param type the type of the event.
-	 * @param source the source of the event.
-	 * @param count the number of events expected to be received.
-	 */
-	public static void setExpectedEvent(final String type, final String source, final int count) {
-		EventSpec eventSpec = new EventSpec(source, type);
-		expectedEvents.put(eventSpec, new ADBCountDownLatch(count));
-	}
-
 	public static Map<EventSpec, ADBCountDownLatch> getExpectedEvents() {
 		return expectedEvents;
 	}
