@@ -26,7 +26,6 @@ final class IdentityConstants {
 
 	static final class EventSource {
 
-		static final String BOOTED = "com.adobe.eventSource.booted";
 		static final String REMOVE_IDENTITY = "com.adobe.eventSource.removeIdentity";
 		static final String REQUEST_CONTENT = "com.adobe.eventSource.requestContent";
 		static final String REQUEST_IDENTITY = "com.adobe.eventSource.requestIdentity";
