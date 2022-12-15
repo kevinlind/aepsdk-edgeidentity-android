@@ -13,12 +13,12 @@ package com.adobe.marketing.mobile.edge.identity;
 
 import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import com.adobe.marketing.mobile.Event;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.SharedStateResult;
 import com.adobe.marketing.mobile.SharedStateStatus;
-import com.adobe.marketing.mobile.services.DataStoring;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.DataReader;
@@ -52,16 +52,9 @@ class IdentityState {
 	}
 
 	/**
-	 * @return the current bootup status
-	 */
-	@VisibleForTesting
-	boolean hasBooted() {
-		return hasBooted;
-	}
-
-	/**
 	 * @return The current {@link IdentityProperties} for this identity state
 	 */
+	@NonNull
 	IdentityProperties getIdentityProperties() {
 		return identityProperties;
 	}

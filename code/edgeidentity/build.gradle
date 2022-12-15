@@ -64,18 +64,6 @@ android {
         sourceCompatibility rootProject.ext.sourceCompatibility
         targetCompatibility rootProject.ext.targetCompatibility
     }
-
-    sourceSets {
-        String sharedTestUtilJavaDir = 'src/sharedTestUtils/java'
-
-        test {
-            java.srcDirs += [sharedTestUtilJavaDir]
-        }
-
-        androidTest {
-            java.srcDirs += [sharedTestUtilJavaDir]
-        }
-    }
 }
 
 afterEvaluate {
@@ -227,20 +215,19 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.3.0'
 
     testImplementation "androidx.test.ext:junit:${rootProject.ext.junitVersion}"
-    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoCoreVersion}"
+    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoVersion}"
     testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
-    testImplementation 'org.powermock:powermock-api-mockito2:2.0.0'
-    testImplementation 'org.powermock:powermock-module-junit4:2.0.0'
     testImplementation 'org.json:json:20180813'
 
     androidTestImplementation "androidx.test.ext:junit:${rootProject.ext.junitVersion}"
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    // Using older version of PowerMock as it supports minimum Android API < 26
-    // the root issue appears to be a dependency with Objenesis in Mockito-Core
-    // where Objenesis 2 requires minimum Android API 26
-    androidTestImplementation 'org.powermock:powermock-module-junit4:1+'
     androidTestImplementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
-    androidTestImplementation "com.adobe.marketing.mobile:identity:1.+"
+
+    // TODO: Uncomment next line when Identity 2.0 artifacts are published to maven
+    // implementation "com.adobe.marketing.mobile:identity:2.+"
+    androidTestImplementation ("com.github.adobe.aepsdk-core-android:identity:dev-v2.0.0-SNAPSHOT") {
+        transitive = false
+    }
 }
 
 tasks.withType(Test) {

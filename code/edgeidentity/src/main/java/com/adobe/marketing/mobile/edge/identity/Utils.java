@@ -1,5 +1,5 @@
 /*
-  Copyright 2021 Adobe. All rights reserved.
+  Copyright 2022 Adobe. All rights reserved.
   This file is licensed to you under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License. You may obtain a copy
   of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -11,89 +11,30 @@
 
 package com.adobe.marketing.mobile.edge.identity;
 
-import static com.adobe.marketing.mobile.edge.identity.IdentityConstants.LOG_TAG;
-
-import com.adobe.marketing.mobile.services.Log;
-import com.adobe.marketing.mobile.util.JSONUtils;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 class Utils {
 
-	private static final String LOG_SOURCE = "Utils";
-
 	private Utils() {}
 
+	/**
+	 * Checks if the {@code Map<String, Object>} provided is null or empty.
+	 *
+	 * @param map the {@code Map<String, Object>} to verify
+	 * @return true if the {@code Map<String, Object>} provided is null or empty; false otherwise
+	 */
 	static boolean isNullOrEmpty(final Map<String, Object> map) {
 		return map == null || map.isEmpty();
 	}
 
+	/**
+	 * Checks if the {@code List} provided is null or empty.
+	 *
+	 * @param list the {@code List} to verify
+	 * @return true if the {@code List} provided is null or empty; false otherwise
+	 */
 	static boolean isNullOrEmpty(final List<?> list) {
 		return list == null || list.isEmpty();
-	}
-
-	/**
-	 * Adds {@code key}/{@code value} to {@code map} if {@code value} is not null or an
-	 * empty collection.
-	 *
-	 * @param map   collection to put {@code value} mapped to {@code key} if {@code value} is
-	 *              non-null and contains at least one entry
-	 * @param key   key used to map {@code value} in {@code map}
-	 * @param value a Object to add to {@code map} if not null
-	 */
-	static void putIfNotNull(final Map<String, Object> map, final String key, final Object value) {
-		boolean addValues = map != null && key != null && value != null;
-
-		if (addValues) {
-			map.put(key, value);
-		}
-	}
-
-	/**
-	 * Creates a deep copy of the provided {@link Map}.
-	 *
-	 * @param map to be copied
-	 * @return {@link Map} containing a deep copy of all the elements in {@code map}
-	 */
-	static Map<String, Object> deepCopy(final Map<String, Object> map) {
-		if (map == null) {
-			return null;
-		}
-
-		try {
-			// Core's JSONUtils retains null in resulting Map but, EdgeIdentity 1.0 implementaion
-			// filtered out the null value keys. One issue this may cause is sending empty objects to
-			// Edge Network.
-			// TODO: Add/verify tests to check side effects of retaining nulls in the resulting Map
-			return JSONUtils.toMap(new JSONObject(map));
-		} catch (final JSONException | NullPointerException e) {
-			Log.debug(LOG_TAG, LOG_SOURCE, "Unable to deep copy map, json string is invalid.");
-		}
-
-		return null;
-	}
-
-	/**
-	 * Creates a deep copy of the provided {@code listOfMaps}.
-	 *
-	 * @param listOfMaps to be copied
-	 * @return {@link List} containing a deep copy of all the elements in {@code listOfMaps}
-	 * @see #deepCopy(Map)
-	 */
-	static List<Map<String, Object>> deepCopy(final List<Map<String, Object>> listOfMaps) {
-		if (listOfMaps == null) {
-			return null;
-		}
-
-		List<Map<String, Object>> deepCopy = new ArrayList<>();
-
-		for (Map<String, Object> map : listOfMaps) {
-			deepCopy.add(deepCopy(map));
-		}
-
-		return deepCopy;
 	}
 }
