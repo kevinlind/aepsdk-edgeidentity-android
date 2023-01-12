@@ -74,11 +74,13 @@ class IdentityExtension extends Extension {
 		return IdentityConstants.EXTENSION_NAME;
 	}
 
+	@NonNull
 	@Override
 	protected String getFriendlyName() {
 		return IdentityConstants.EXTENSION_FRIENDLY_NAME;
 	}
 
+	@NonNull
 	@Override
 	protected String getVersion() {
 		return IdentityConstants.EXTENSION_VERSION;
@@ -91,11 +93,10 @@ class IdentityExtension extends Extension {
 	 * The following listeners are registered during this extension's registration.
 	 * <ul>
 	 *     <li> EventType {@link EventType#GENERIC_IDENTITY} and EventSource {@link EventSource#REQUEST_CONTENT}</li>
+	 *     <li> EventType {@link EventType#GENERIC_IDENTITY} and EventSource {@link EventSource#REQUEST_RESET}</li>
 	 *     <li> EventType {@link EventType#EDGE_IDENTITY} and EventSource {@link EventSource#REQUEST_IDENTITY}</li>
 	 *     <li> EventType {@link EventType#EDGE_IDENTITY} and EventSource {@link EventSource#UPDATE_IDENTITY}</li>
 	 *     <li> EventType {@link EventType#EDGE_IDENTITY} and EventSource {@link EventSource#REMOVE_IDENTITY}</li>
-	 *     <li> EventType {@link EventType#EDGE_IDENTITY} and EventSource {@link EventSource#REQUEST_CONTENT}</li>
-	 *     <li> EventType {@link EventType#GENERIC_IDENTITY} and EventSource {@link EventSource#REQUEST_RESET}</li>
 	 *     <li> EventType {@link EventType#HUB} and EventSource {@link EventSource#SHARED_STATE}</li>
 	 * </ul>
 	 * </p>
