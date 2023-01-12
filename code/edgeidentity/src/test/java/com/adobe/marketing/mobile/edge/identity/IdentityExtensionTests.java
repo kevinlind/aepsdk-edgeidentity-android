@@ -31,6 +31,7 @@ import com.adobe.marketing.mobile.EventSource;
 import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.ExtensionApi;
 import com.adobe.marketing.mobile.SharedStateResolution;
+import com.adobe.marketing.mobile.SharedStateResolver;
 import com.adobe.marketing.mobile.SharedStateResult;
 import com.adobe.marketing.mobile.SharedStateStatus;
 import java.util.Collections;
@@ -50,6 +51,9 @@ public class IdentityExtensionTests {
 
 	@Mock
 	ExtensionApi mockExtensionApi;
+
+	@Mock
+	SharedStateResolver mockSharedStateResolver;
 
 	@Mock
 	IdentityState mockIdentityState;
@@ -660,6 +664,7 @@ public class IdentityExtensionTests {
 			})
 			.when(mockIdentityState)
 			.updateCustomerIdentifiers(any());
+		when(mockExtensionApi.createPendingXDMSharedState(any())).thenReturn(mockSharedStateResolver);
 
 		extension = new IdentityExtension(mockExtensionApi, mockIdentityState);
 
@@ -682,7 +687,10 @@ public class IdentityExtensionTests {
 		verify(mockIdentityState).updateCustomerIdentifiers(identityMapCaptor.capture());
 		assertEquals(identityXDM, identityMapCaptor.getValue().asXDMMap());
 
-		verify(mockExtensionApi).createXDMSharedState(properties.toXDMData(false), updateIdentityEvent);
+		// verify pending state is created and resolved
+		verify(mockExtensionApi).createPendingXDMSharedState(eq(updateIdentityEvent));
+		verify(mockSharedStateResolver).resolve(eq(properties.toXDMData(false)));
+
 		verify(mockExtensionApi, never()).dispatch(any());
 	}
 
@@ -691,6 +699,7 @@ public class IdentityExtensionTests {
 		// setup
 		final IdentityProperties properties = new IdentityProperties();
 		when(mockIdentityState.getIdentityProperties()).thenReturn(properties);
+		when(mockExtensionApi.createPendingXDMSharedState(any())).thenReturn(mockSharedStateResolver);
 
 		extension = new IdentityExtension(mockExtensionApi, mockIdentityState);
 
@@ -705,10 +714,12 @@ public class IdentityExtensionTests {
 
 		// verify that identifiers are not updated
 		verify(mockIdentityState, never()).updateCustomerIdentifiers(any());
-		// verify that no shared state is created
-		verify(mockExtensionApi, never()).createXDMSharedState(any(), any());
 		// verify that no event is dispatched
 		verify(mockExtensionApi, never()).dispatch(any());
+
+		// verify pending state is created and resolved
+		verify(mockExtensionApi).createPendingXDMSharedState(eq(updateIdentityEvent));
+		verify(mockSharedStateResolver).resolve(eq(properties.toXDMData(false)));
 	}
 
 	@Test
@@ -716,6 +727,7 @@ public class IdentityExtensionTests {
 		// setup
 		final IdentityProperties properties = new IdentityProperties();
 		when(mockIdentityState.getIdentityProperties()).thenReturn(properties);
+		when(mockExtensionApi.createPendingXDMSharedState(any())).thenReturn(mockSharedStateResolver);
 		extension = new IdentityExtension(mockExtensionApi, mockIdentityState);
 
 		// test
@@ -730,10 +742,12 @@ public class IdentityExtensionTests {
 
 		// verify that identifiers are not updated
 		verify(mockIdentityState, never()).updateCustomerIdentifiers(any());
-		// verify that no shared state is created
-		verify(mockExtensionApi, never()).createXDMSharedState(any(), any());
 		// verify that no event is dispatched
 		verify(mockExtensionApi, never()).dispatch(any());
+
+		// verify pending state is created and resolved
+		verify(mockExtensionApi).createPendingXDMSharedState(eq(updateIdentityEvent));
+		verify(mockSharedStateResolver).resolve(eq(properties.toXDMData(false)));
 	}
 
 	// ========================================================================================
@@ -761,6 +775,8 @@ public class IdentityExtensionTests {
 			.when(mockIdentityState)
 			.removeCustomerIdentifiers(any());
 
+		when(mockExtensionApi.createPendingXDMSharedState(any())).thenReturn(mockSharedStateResolver);
+
 		extension = new IdentityExtension(mockExtensionApi, mockIdentityState);
 
 		// test
@@ -776,11 +792,9 @@ public class IdentityExtensionTests {
 			removedIdentityMapCaptor.getValue().toString()
 		);
 
-		// verify shared state
-		final Map<String, Object> expectedState = properties.toXDMData(false);
-		final ArgumentCaptor<Map<String, Object>> stateCaptor = ArgumentCaptor.forClass(Map.class);
-		verify(mockExtensionApi).createXDMSharedState(stateCaptor.capture(), eq(removeIdentityEvent));
-		assertEquals(expectedState, stateCaptor.getValue());
+		// verify pending state is created and resolved
+		verify(mockExtensionApi).createPendingXDMSharedState(eq(removeIdentityEvent));
+		verify(mockSharedStateResolver).resolve(eq(properties.toXDMData(false)));
 	}
 
 	@Test
@@ -792,6 +806,7 @@ public class IdentityExtensionTests {
 		);
 		final IdentityProperties properties = new IdentityProperties(identityXDM);
 		when(mockIdentityState.getIdentityProperties()).thenReturn(properties);
+		when(mockExtensionApi.createPendingXDMSharedState(any())).thenReturn(mockSharedStateResolver);
 		extension = new IdentityExtension(mockExtensionApi, mockIdentityState);
 
 		// test
@@ -801,13 +816,17 @@ public class IdentityExtensionTests {
 		// verify identifiers not removed
 		verify(mockIdentityState, never()).removeCustomerIdentifiers(any());
 
-		// verify shared state is never created
-		verify(mockExtensionApi, never()).createXDMSharedState(any(), any());
+		// verify pending state is created and resolved
+		verify(mockExtensionApi).createPendingXDMSharedState(eq(removeIdentityEvent));
+		verify(mockSharedStateResolver).resolve(eq(properties.toXDMData(false)));
 	}
 
 	@Test
 	public void test_handleRemoveIdentity_eventWithEmptyData_returns() {
 		// setup
+		final IdentityProperties properties = new IdentityProperties();
+		when(mockIdentityState.getIdentityProperties()).thenReturn(properties);
+		when(mockExtensionApi.createPendingXDMSharedState(any())).thenReturn(mockSharedStateResolver);
 		extension = new IdentityExtension(mockExtensionApi, mockIdentityState);
 
 		// test
@@ -817,8 +836,9 @@ public class IdentityExtensionTests {
 		// verify identifiers not removed
 		verify(mockIdentityState, never()).removeCustomerIdentifiers(any());
 
-		// verify shared state is never created
-		verify(mockExtensionApi, never()).createXDMSharedState(any(), any());
+		// verify pending state is created and resolved
+		verify(mockExtensionApi).createPendingXDMSharedState(eq(notARemoveIdentityEvent));
+		verify(mockSharedStateResolver).resolve(eq(properties.toXDMData(false)));
 	}
 
 	// ========================================================================================
@@ -883,6 +903,7 @@ public class IdentityExtensionTests {
 	public void test_handleRequestReset() {
 		final IdentityProperties properties = new IdentityProperties();
 		when(mockIdentityState.getIdentityProperties()).thenReturn(properties);
+		when(mockExtensionApi.createPendingXDMSharedState(any())).thenReturn(mockSharedStateResolver);
 
 		extension = new IdentityExtension(mockExtensionApi, mockIdentityState);
 
@@ -892,6 +913,9 @@ public class IdentityExtensionTests {
 		extension.handleRequestReset(resetEvent);
 
 		verify(mockIdentityState).resetIdentifiers();
-		verify(mockExtensionApi).createXDMSharedState(properties.toXDMData(false), resetEvent); // will fail because of new ecid
+
+		// verify pending state is created and resolved
+		verify(mockExtensionApi).createPendingXDMSharedState(eq(resetEvent));
+		verify(mockSharedStateResolver).resolve(eq(properties.toXDMData(false)));
 	}
 }

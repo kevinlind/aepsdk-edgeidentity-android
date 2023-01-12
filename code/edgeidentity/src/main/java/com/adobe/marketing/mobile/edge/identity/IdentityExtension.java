@@ -21,6 +21,7 @@ import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.Extension;
 import com.adobe.marketing.mobile.ExtensionApi;
 import com.adobe.marketing.mobile.SharedStateResolution;
+import com.adobe.marketing.mobile.SharedStateResolver;
 import com.adobe.marketing.mobile.SharedStateResult;
 import com.adobe.marketing.mobile.SharedStateStatus;
 import com.adobe.marketing.mobile.services.Log;
@@ -250,10 +251,14 @@ class IdentityExtension extends Extension {
 	 * @param event the edge update identity {@link Event}
 	 */
 	void handleUpdateIdentities(@NonNull final Event event) {
+		// Add pending shared state to avoid race condition between updating and reading identity map
+		final SharedStateResolver resolver = getApi().createPendingXDMSharedState(event);
+
 		final Map<String, Object> eventData = event.getEventData();
 
 		if (eventData == null) {
 			Log.trace(LOG_TAG, LOG_SOURCE, "Cannot update identifiers, event data is null.");
+			resolver.resolve(state.getIdentityProperties().toXDMData(false));
 			return;
 		}
 
@@ -265,11 +270,12 @@ class IdentityExtension extends Extension {
 				LOG_SOURCE,
 				"Failed to update identifiers as no identifiers were found in the event data."
 			);
+			resolver.resolve(state.getIdentityProperties().toXDMData(false));
 			return;
 		}
 
 		state.updateCustomerIdentifiers(map);
-		shareIdentityXDMSharedState(event);
+		resolver.resolve(state.getIdentityProperties().toXDMData(false));
 	}
 
 	/**
@@ -278,10 +284,14 @@ class IdentityExtension extends Extension {
 	 * @param event the edge remove identity request {@link Event}
 	 */
 	void handleRemoveIdentity(@NonNull final Event event) {
+		// Add pending shared state to avoid race condition between updating and reading identity map
+		final SharedStateResolver resolver = getApi().createPendingXDMSharedState(event);
+
 		final Map<String, Object> eventData = event.getEventData();
 
 		if (eventData == null) {
 			Log.trace(LOG_TAG, LOG_SOURCE, "Cannot remove identifiers, event data is null.");
+			resolver.resolve(state.getIdentityProperties().toXDMData(false));
 			return;
 		}
 
@@ -293,11 +303,12 @@ class IdentityExtension extends Extension {
 				LOG_SOURCE,
 				"Failed to remove identifiers as no identifiers were found in the event data."
 			);
+			resolver.resolve(state.getIdentityProperties().toXDMData(false));
 			return;
 		}
 
 		state.removeCustomerIdentifiers(map);
-		shareIdentityXDMSharedState(event);
+		resolver.resolve(state.getIdentityProperties().toXDMData(false));
 	}
 
 	/**
@@ -325,8 +336,10 @@ class IdentityExtension extends Extension {
 	 * @param event the identity request reset {@link Event}
 	 */
 	void handleRequestReset(@NonNull final Event event) {
+		// Add pending shared state to avoid race condition between updating and reading identity map
+		final SharedStateResolver resolver = getApi().createPendingXDMSharedState(event);
 		state.resetIdentifiers();
-		shareIdentityXDMSharedState(event);
+		resolver.resolve(state.getIdentityProperties().toXDMData(false));
 
 		// dispatch reset complete event
 		final Event responseEvent = new Event.Builder(
